@@ -1,0 +1,241 @@
+#version 450
+
+layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+
+// Output image
+layout(rgba8, binding = 0) uniform writeonly image2D outputImage;
+
+// 3D voxel texture
+layout(binding = 1) uniform sampler3D voxelTexture;
+
+// NEW: 2D texture atlas for voxel surfaces
+layout(binding = 3) uniform sampler2D textureAtlas;
+
+// Camera and scene uniforms
+layout(std140, binding = 2) uniform Camera {
+    mat4 viewMatrix;
+    mat4 projectionMatrix;
+    mat4 invViewProjection;
+    vec3 cameraPos;
+    float time;
+    vec2 resolution;
+    vec2 padding;
+};
+
+uniform int voxelGridSize;
+
+struct Ray {
+    vec3 origin;
+    vec3 direction;
+    vec3 inverted;
+};
+
+// Generate a ray from screen coordinates
+Ray getRay(vec2 uv) {
+    vec4 nearPoint = vec4(uv * 2.0 - 1.0, -1.0, 1.0);
+    vec4 farPoint = vec4(uv * 2.0 - 1.0, 1.0, 1.0);
+    
+    vec4 nearWorld = invViewProjection * nearPoint;
+    vec4 farWorld = invViewProjection * farPoint;
+    
+    nearWorld /= nearWorld.w;
+    farWorld /= farWorld.w;
+    
+    Ray ray;
+    ray.origin = cameraPos;
+    ray.direction = normalize(farWorld.xyz - nearWorld.xyz);
+    ray.inverted = 1.0 / ray.direction;
+    
+    return ray;
+}
+
+// NEW: Calculate UV coordinates based on hit position and normal
+vec2 calculateUV(vec3 hitPos, vec3 normal) {
+    vec2 uv;
+    
+    // Get fractional position within the voxel (0 to 1)
+    vec3 frac = fract(hitPos);
+    
+    // Determine which face was hit based on the normal
+    if (abs(normal.x) > 0.5) {
+        // Hit X face (left or right)
+        uv = vec2(frac.z, frac.y);
+    } else if (abs(normal.y) > 0.5) {
+        // Hit Y face (top or bottom)
+        uv = vec2(frac.x, frac.z);
+    } else {
+        // Hit Z face (front or back)
+        uv = vec2(frac.x, frac.y);
+    }
+    
+    return uv;
+}
+
+// Calculate ambient occlusion by sampling nearby voxels
+float calculateAmbientOcclusion(ivec3 voxel, vec3 normal, vec3 gridSize, int samples) {
+    float occlusion = 0.0;
+    float radius = 3.0;
+    
+    vec3 surfacePos = vec3(voxel) + 0.5 + normal * 0.5;
+    
+    for (int i = 0; i < samples; i++) {
+        float phi = float(i) * 2.399963;
+        float cosTheta = 1.0 - (float(i) + 0.5) / float(samples);
+        float sinTheta = sqrt(1.0 - cosTheta * cosTheta);
+        
+        vec3 sampleDir = vec3(
+            cos(phi) * sinTheta,
+            cosTheta,
+            sin(phi) * sinTheta
+        );
+        
+        vec3 up = abs(normal.y) < 0.999 ? vec3(0, 1, 0) : vec3(1, 0, 0);
+        vec3 tangent = normalize(cross(up, normal));
+        vec3 bitangent = cross(normal, tangent);
+        
+        sampleDir = normalize(
+            tangent * sampleDir.x +
+            normal * sampleDir.y +
+            bitangent * sampleDir.z
+        );
+        
+        for (float dist = 0.6; dist <= radius; dist += 0.8) {
+            vec3 samplePos = surfacePos + sampleDir * dist;
+            ivec3 sampleVoxel = ivec3(floor(samplePos));
+            
+            if (all(greaterThanEqual(sampleVoxel, ivec3(0))) && 
+                all(lessThan(sampleVoxel, ivec3(gridSize)))) {
+                
+                vec3 texCoord = (vec3(sampleVoxel) + 0.5) / gridSize;
+                vec4 voxelData = texture(voxelTexture, texCoord);
+                
+                if (voxelData.a > 0.5) {
+                    float weight = 1.0 - (dist / radius);
+                    occlusion += weight;
+                    break;
+                }
+            }
+        }
+    }
+    
+    occlusion = occlusion / float(samples);
+    return 1.0 - clamp(occlusion, 0.0, 1.0);
+}
+
+// DDA voxel traversal algorithm
+vec4 traceVoxelRay(Ray ray, vec3 gridSize) {
+    vec3 rayOrigin = ray.origin;
+    vec3 rayDir = ray.direction;
+    vec3 rayInv = ray.inverted;
+    
+    vec3 minBound = vec3(0.0);
+    vec3 maxBound = gridSize;
+    
+    vec3 t0 = (minBound - rayOrigin) * rayInv;
+    vec3 t1 = (maxBound - rayOrigin) * rayInv;
+    
+    vec3 tmin = min(t0, t1);
+    vec3 tmax = max(t0, t1);
+    
+    float tEnter = max(max(tmin.x, tmin.y), tmin.z);
+    float tExit = min(min(tmax.x, tmax.y), tmax.z);
+    
+    if (tEnter > tExit || tExit < 0.0) {
+        return vec4(0.0, 0.0, 0.0, 0.0);
+    }
+    
+    tEnter = max(tEnter, 0.0);
+    vec3 pos = rayOrigin + rayDir * (tEnter + 0.001);
+    
+    ivec3 voxel = ivec3(floor(pos));
+    ivec3 step = ivec3(sign(rayDir));
+    vec3 tDelta = abs(rayInv);
+    
+    vec3 voxelBoundary = vec3(voxel) + max(vec3(step), vec3(0.0));
+    vec3 tMax = (voxelBoundary - rayOrigin) * rayInv;
+    
+    int maxSteps = int(gridSize.x + gridSize.y + gridSize.z);
+    vec3 normal = vec3(0.0);
+    
+    for (int i = 0; i < maxSteps; i++) {
+        if (all(greaterThanEqual(voxel, ivec3(0))) && all(lessThan(voxel, ivec3(gridSize)))) {
+            vec3 texCoord = (vec3(voxel) + 0.5) / gridSize;
+            vec4 voxelData = texture(voxelTexture, texCoord);
+            
+            if (voxelData.a > 0.5) {
+                // Calculate the exact hit position for UV mapping
+                vec3 hitPos = rayOrigin + rayDir * (tEnter + 0.001);
+                
+                // NEW: Calculate UV coordinates based on hit position and normal
+                vec2 uv = calculateUV(hitPos, normal);
+                
+                // NEW: Sample the texture atlas
+                vec4 textureColor = texture(textureAtlas, uv);
+                
+                // Calculate ambient occlusion
+                float ao = calculateAmbientOcclusion(voxel, normal, gridSize, 16);
+                
+                // Simple lighting based on normal
+                vec3 lightDir = normalize(vec3(1.0, 1.0, 1.0));
+                float diffuse = max(dot(normal, lightDir), 0.0) * 0.7 + 0.3;
+                
+                // Apply AO to lighting
+                float finalLight = diffuse * (0.3 + 0.7 * ao);
+                
+                // NEW: Blend voxel color with texture
+                // You can adjust the blend: 
+                // - Pure texture: textureColor.rgb
+                // - Tinted texture: voxelData.rgb * textureColor.rgb
+                // - Mixed: mix(voxelData.rgb, textureColor.rgb, 0.5)
+                vec3 finalColor = textureColor.rgb; // Tinted texture
+                
+                return vec4(finalColor * finalLight, 1.0);
+            }
+        }
+        
+        // Step to next voxel
+        if (tMax.x < tMax.y) {
+            if (tMax.x < tMax.z) {
+                voxel.x += step.x;
+                tEnter = tMax.x;  // Track the t value for hit position
+                tMax.x += tDelta.x;
+                normal = vec3(-step.x, 0.0, 0.0);
+            } else {
+                voxel.z += step.z;
+                tEnter = tMax.z;
+                tMax.z += tDelta.z;
+                normal = vec3(0.0, 0.0, -step.z);
+            }
+        } else {
+            if (tMax.y < tMax.z) {
+                voxel.y += step.y;
+                tEnter = tMax.y;
+                tMax.y += tDelta.y;
+                normal = vec3(0.0, -step.y, 0.0);
+            } else {
+                voxel.z += step.z;
+                tEnter = tMax.z;
+                tMax.z += tDelta.z;
+                normal = vec3(0.0, 0.0, -step.z);
+            }
+        }
+        
+        if (any(lessThan(voxel, ivec3(0))) || any(greaterThanEqual(voxel, ivec3(gridSize)))) {
+            break;
+        }
+    }
+    
+    return vec4(0.5, 0.7, 1.0, 1.0);
+}
+
+void main() {
+    ivec2 pixelCoord = ivec2(gl_GlobalInvocationID.xy);
+    vec2 uv = vec2(pixelCoord) / resolution;
+    
+    Ray ray = getRay(uv);
+    vec3 gridSize = vec3(voxelGridSize, voxelGridSize, voxelGridSize);
+    
+    vec4 color = traceVoxelRay(ray, gridSize);
+    
+    imageStore(outputImage, pixelCoord, color);
+}
