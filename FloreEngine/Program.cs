@@ -3,7 +3,6 @@ using FloreEngine.Rendering;
 using FloreEngine.UI;
 using FloreEngine.UI.Overlays;
 using FloreEngine.World;
-using FloreEngine.Temp;
 using Silk.NET.Input;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
@@ -21,19 +20,19 @@ public static class Program
     private static readonly string appName = $"{NAME}@{VERSION}";
 
     internal static bool IsWireframe = false;
-    public static readonly bool isFarProjection = false;
-    public static readonly bool isLattice = false;
+    public static bool IsFarProjection = true;
 
     public static float AspectRatio => (float)WindowResolution.X / WindowResolution.Y;
-    public static GL Graphics { get; private set; }
-    public static IWindow EngineWindow { get; private set; }
-    public static IInputContext InputContext { get; private set; }
-    public static IKeyboard Keyboard { get; private set; }
-    public static ImGuiController ImGuiController { get; private set; }
-    public static WindowManager WindowManager { get; private set; }
-    public static OverlayManager OverlayManager { get; private set; }
 
-    internal static MainMenuBar MainMenuBar;
+    public static GL Graphics { get; private set; } = null!;
+    public static IWindow EngineWindow { get; private set; } = null!;
+    public static IInputContext InputContext { get; private set; } = null!;
+    public static IKeyboard Keyboard { get; private set; } = null!;
+    public static ImGuiController ImGuiController { get; private set; } = null!;
+    public static WindowManager WindowManager { get; private set; } = null!;
+    public static OverlayManager OverlayManager { get; private set; } = null!;  
+
+    internal static MainMenuBar MainMenuBar { get; private set; } = null!;
 
     public static void Main()
     {
@@ -47,7 +46,6 @@ public static class Program
         options.Size = WindowResolution;
         options.Title = appName;
         options.Samples = 4; // Multisampling (less sharp image)
-        if(isLattice) options.API = new GraphicsAPI(ContextAPI.OpenGL, new APIVersion(4, 5));
         EngineWindow = Window.Create(options);
         EngineWindow.VSync = false;
         /* Fixed framerate:
@@ -107,24 +105,22 @@ public static class Program
         Graphics.CullFace(GLEnum.Back); // Face to show when culling
         Graphics.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
 
-        if (!isLattice)
+        Graphics.Enable(EnableCap.DepthTest);
+
+        if (IsFarProjection)
         {
-            Graphics.Enable(EnableCap.DepthTest);
-
-            if (isFarProjection)
-            {
-                Graphics.ClearDepth(0.0f); // Distance 
-                Graphics.DepthFunc(DepthFunction.Greater);
-                Graphics.ClipControl(ClipControlOrigin.LowerLeft, ClipControlDepth.ZeroToOne);
-            }
-            else
-            {
-                Graphics.ClearDepth(1.0f); // Distance
-                Graphics.DepthFunc(DepthFunction.Less);
-            }
-
-            Graphics.DepthMask(true);
+            Graphics.ClearDepth(0.0f); // Distance 
+            Graphics.DepthFunc(DepthFunction.Greater);
+            Graphics.ClipControl(ClipControlOrigin.LowerLeft, ClipControlDepth.ZeroToOne);
         }
+        else
+        {
+            Graphics.ClearDepth(1.0f); // Distance
+            Graphics.DepthFunc(DepthFunction.Less);
+        }
+
+        Graphics.DepthMask(true);
+        
 
         Graphics.ColorMask(true, true, true, true);
 
@@ -137,16 +133,13 @@ public static class Program
 
         ImGuiController.Update((float)deltaTime);
         Controller.Instance.Update(deltaTime);
-
-        if (!isLattice)
-            WorldManager.Instance.Update();
+        WorldManager.Instance.Update();
     }
 
     public static void Render(double deltaTime)
     {
-        Graphics.Clear(ClearBufferMask.ColorBufferBit);
-        if (isLattice) RayRenderer.Instance.Draw();
-        else MainRenderer.Instance.Draw();
+        Graphics.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+        MainRenderer.Instance.Draw();
 
 
         MainMenuBar.DrawBar(deltaTime);
@@ -169,7 +162,6 @@ public static class Program
     {
         Graphics.Viewport(newSize);
         WindowResolution = newSize;
-        if (isLattice) RayRenderer.Instance.OnResize();
     }
 
 
@@ -191,14 +183,10 @@ public static class Program
     {
         Logger.Print("Closing...");
 
-        if(isLattice) RayRenderer.Instance.Dispose();
-        else
-        {
-            MainRenderer.Instance.Dispose();
-            WorldManager.Instance.Dispose();
-        }
+        MainRenderer.Instance.Dispose();
+        WorldManager.Instance.Dispose();
 
-            Logger.Print("See ya!");
+        Logger.Print("See ya!");
         Logger.SaveLogFile();
     }
 }

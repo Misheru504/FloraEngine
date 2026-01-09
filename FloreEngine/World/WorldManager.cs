@@ -23,8 +23,8 @@ internal class WorldManager : IDisposable
     {
         Random r = new Random();
         Noise = FastNoise.FromEncodedNodeTree(FastNoise.TREE_METADATA);
-        //Noise.Seed = r.Next(int.MinValue, int.MaxValue);
-        Noise.Seed = -863112003;
+        Noise.Seed = r.Next(int.MinValue, int.MaxValue);
+        //Noise.Seed = -863112003;
         Logger.Print($"Seed: {Noise.Seed}");
 
         Chunks = new Dictionary<(Vector3, int), Chunk>();

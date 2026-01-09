@@ -64,12 +64,11 @@ internal unsafe class MainRenderer : IDisposable
 
     internal void Draw()
     {
-        Graphics.Clear(ClearBufferMask.DepthBufferBit);
         shader.UseProgram();
         texture.Bind();
 
         shader.SetUniform("uView", Camera.Instance.RelativeViewMatrix);
-        shader.SetUniform("uProjection", Program.isFarProjection ? Camera.Instance.FarProjectionMatrix : Camera.Instance.ProjectionMatrix);
+        shader.SetUniform("uProjection", Program.IsFarProjection ? Camera.Instance.FarProjectionMatrix : Camera.Instance.ProjectionMatrix);
         shader.SetUniform("fTexture", 0);
 
         VertexCount = 0;
