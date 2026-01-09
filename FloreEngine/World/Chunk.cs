@@ -55,45 +55,7 @@ internal class Chunk : IDisposable
         if (Level != 0) Voxels = null;
     }
 
-    public static byte[] FillVoxels(Vector3 position)
-    {
-        byte[] voxels = new byte[Size * Size * Size * 4];
-        float[] noiseMap = new float[Size * Size];
-        Noise.GenUniformGrid2D(noiseMap, (int)position.X, (int)position.Z, Size, Size, FastNoise.FREQUENCY, Noise.Seed);
-
-        for (int z = 0; z < Size; z++)
-        {
-            for (int y = 0; y < Size; y++)
-            {
-                for (int x = 0; x < Size; x++)
-                {
-                    float height = noiseMap[z * Size + x];
-                    float worldY = y + position.Y + 64;
-                    int index = OtherIndex(x, y, z) * 4;
-
-                    if (worldY <= height)
-                    {
-                        voxels[index + 0] = 36;
-                        voxels[index + 1] = 181;
-                        voxels[index + 2] = 102;
-                        voxels[index + 3] = 255;
-                    }
-                    else
-                    {
-                        voxels[index + 0] = 0;
-                        voxels[index + 1] = 0;
-                        voxels[index + 2] = 0;
-                        voxels[index + 3] = 0;
-                    }
-                }
-            }
-        }
-
-        return voxels;
-    }
-
     public static int Index(int x, int y, int z) => x + z * Size + y * Size * Size;
-    public static int OtherIndex(int x, int y, int z) => z * Size * Size + y * Size + x;
 
     public void CreateRendering()
     {

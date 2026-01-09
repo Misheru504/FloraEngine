@@ -1,7 +1,12 @@
-﻿using System.Text;
+﻿using FloreEngine.Utils;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace FloreEngine.Diagnostics;
 
+/// <summary>
+/// Wrapper used to catch exceptions and prints them in the console and a separate file
+/// </summary>
 public static class Reporter
 {
 #if DEBUG
@@ -20,34 +25,18 @@ public static class Reporter
         bool isTerminating = args.IsTerminating;
 
         StringBuilder crashReport = new StringBuilder();
-        crashReport.AppendLine("=== CRASH REPORT ===");
-        crashReport.AppendLine($"Time: {DateTime.Now:dd-MM-yyyy HH:mm:ss}");
-        crashReport.AppendLine($"Is Fatal: {isTerminating}");
-        crashReport.AppendLine($"Version: {Program.VERSION}");
-        crashReport.AppendLine($"Debug build: {isDebug}");
-        crashReport.AppendLine();
+        PrintHeader(crashReport, isTerminating);
 
         if (args.ExceptionObject is Exception e)
         {
-            crashReport.AppendLine($"Exception type: {e.GetType().FullName}");
-            crashReport.AppendLine($"Message: {e.Message}");
-            crashReport.AppendLine($"Source: {e.Source}");
-            crashReport.AppendLine($"Target site: {e.TargetSite}");
-            crashReport.AppendLine();
+            PrintExceptionType(crashReport, e);
 
-
-            crashReport.AppendLine("Stack trace:");
-            crashReport.AppendLine(e.StackTrace);
-
-            var inner = e.InnerException;
+            Exception? inner = e.InnerException;
             int depth = 1;
+
             while (inner != null)
             {
-                crashReport.AppendLine();
-                crashReport.AppendLine($"-- Inner Exception ({depth}) --");
-                crashReport.AppendLine($"Type: {inner.GetType().FullName}");
-                crashReport.AppendLine($"Message: {inner.Message}");
-                crashReport.AppendLine($"Stack Trace: {inner.StackTrace}");
+                PrintInnerException(crashReport, inner, depth);
 
                 inner = inner.InnerException;
                 depth++;
@@ -56,12 +45,7 @@ public static class Reporter
             // If it's an AggregateException (common with async), log all
             if (e is AggregateException aggEx)
             {
-                crashReport.AppendLine();
-                crashReport.AppendLine("Aggregate Inner Exceptions:");
-                foreach (var innerEx in aggEx.Flatten().InnerExceptions)
-                {
-                    crashReport.AppendLine($"  - {innerEx.GetType().Name}: {innerEx.Message}");
-                }
+                PrintAggregateException(crashReport, aggEx);
             }
         }
         else
@@ -70,25 +54,12 @@ public static class Reporter
             crashReport.AppendLine($"Non-Exception object thrown: {args.ExceptionObject}");
         }
 
-        crashReport.AppendLine();
-        crashReport.AppendLine("-- Environment --");
-        crashReport.AppendLine($"OS: {Environment.OSVersion}");
-        crashReport.AppendLine($"64-bit: {Environment.Is64BitOperatingSystem && Environment.Is64BitProcess}");
-        crashReport.AppendLine($"CLR Version: {Environment.Version}");
-        crashReport.AppendLine($"Working Set: {Environment.WorkingSet / 1024 / 1024} MB");
+        PrintEnvironment(crashReport);
 
         crashReport.AppendLine("====================");
 
-        try
-        {
-            if (!Directory.Exists(Logger.LOG_FOLDER)) Directory.CreateDirectory(Logger.LOG_FOLDER);
-            string crashFile = Path.Combine(Logger.LOG_FOLDER, $"{DateTime.Now:dd-MM-yyyy_HH-mm-ss}.crash");
-            File.WriteAllText(crashFile, crashReport.ToString());
-        }
-        catch (Exception ex)
-        {
-            Logger.Print($"Couldn't save crash log: {ex}", Logger.LogLevel.ERROR);
-        }
+        string crashFile = Path.Combine(Logger.LOG_FOLDER, $"{DateTime.Now:dd-MM-yyyy_HH-mm-ss}.crash");
+        TextParser.WriteFile(crashFile, crashReport.ToString());
 
         if (isTerminating)
         {
@@ -100,5 +71,56 @@ public static class Reporter
         {
             Logger.Print(crashReport.ToString(), Logger.LogLevel.ERROR, true, "");
         }
+    }
+
+    private static void PrintHeader(StringBuilder builder, bool isTerminating)
+    {
+        builder.AppendLine("=== CRASH REPORT ===");
+        builder.AppendLine($"Time: {DateTime.Now:dd-MM-yyyy HH:mm:ss}");
+        builder.AppendLine($"Is Fatal: {isTerminating}");
+        builder.AppendLine($"Version: {Program.VERSION}");
+        builder.AppendLine($"Debug build: {isDebug}");
+        builder.AppendLine();
+    }
+
+    private static void PrintExceptionType(StringBuilder builder, Exception exception)
+    {
+        builder.AppendLine($"Exception type: {exception.GetType().FullName}");
+        builder.AppendLine($"Message: {exception.Message}");
+        builder.AppendLine($"Source: {exception.Source}");
+        builder.AppendLine($"Target site: {exception.TargetSite}");
+        builder.AppendLine();
+
+        builder.AppendLine("Stack trace:");
+        builder.AppendLine(exception.StackTrace);
+    }
+
+    private static void PrintInnerException(StringBuilder builder, Exception inner, int depth)
+    {
+        builder.AppendLine();
+        builder.AppendLine($"-- Inner Exception ({depth}) --");
+        builder.AppendLine($"Type: {inner.GetType().FullName}");
+        builder.AppendLine($"Message: {inner.Message}");
+        builder.AppendLine($"Stack Trace: {inner.StackTrace}");
+    }
+
+    private static void PrintAggregateException(StringBuilder builder, AggregateException aggregateException)
+    {
+        builder.AppendLine();
+        builder.AppendLine("Aggregate Inner Exceptions:");
+        foreach (var innerEx in aggregateException.Flatten().InnerExceptions)
+        {
+            builder.AppendLine($"  - {innerEx.GetType().Name}: {innerEx.Message}");
+        }
+    }
+
+    private static void PrintEnvironment(StringBuilder builder)
+    {
+        builder.AppendLine();
+        builder.AppendLine("-- Environment --");
+        builder.AppendLine($"OS: {Environment.OSVersion}");
+        builder.AppendLine($"64-bit: {Environment.Is64BitOperatingSystem && Environment.Is64BitProcess}");
+        builder.AppendLine($"CLR Version: {Environment.Version}");
+        builder.AppendLine($"Working Set: {Environment.WorkingSet / 1024 / 1024} MB");
     }
 }

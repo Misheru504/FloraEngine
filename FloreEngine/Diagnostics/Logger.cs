@@ -1,9 +1,10 @@
-﻿using System.Runtime.CompilerServices;
+﻿using FloreEngine.Utils;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace FloreEngine.Diagnostics;
 
-// Apparently, using a static class is wrong because we are using dependencies. A singleton is what we need.
+// Apparently, using a static class is wrong for logging because we are using dependencies. A singleton is what we need.
 // I will have a look into this later.
 
 /// <summary>
@@ -42,10 +43,9 @@ public static class Logger
     public static void SaveLogFile()
     {
         Print($"Saving log file (at {logFilePath})...");
-
         logs.AppendLine();
-        if (!Directory.Exists(LOG_FOLDER)) Directory.CreateDirectory(LOG_FOLDER);
-        File.AppendAllText(logFilePath, logs.ToString());
+
+        TextParser.AppendFile(logFilePath, logs.ToString());
     }
 
     /// <summary>
@@ -88,10 +88,6 @@ public static class Logger
     /// <param name="filename">Name of the file printing it (default: the class)</param>
     public static void Render(object message, [CallerFilePath] string filename = "") => Print(message, LogLevel.RENDER, true, filename);
 
-    /// <summary>
-    /// Split words and write them in the correct color (in the console)
-    /// </summary>
-    /// <param name="log"></param>
     private static void LogColors(string log)
     {
         string[] words = log.Split(' ');
@@ -129,11 +125,6 @@ public static class Logger
         Console.WriteLine();
     }
 
-    /// <summary>
-    /// Write a message with the specified color
-    /// </summary>
-    /// <param name="messsage">Message to write in the console</param>
-    /// <param name="color">The color of the message</param>
     private static void WriteColor(string messsage, ConsoleColor color)
     {
         Console.ForegroundColor = color;

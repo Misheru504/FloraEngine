@@ -1,5 +1,4 @@
-﻿using Microsoft.VisualBasic;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
 namespace FloreEngine.Utils;
 
@@ -8,8 +7,6 @@ class FastNoise
     private const string FASTNOISE_PATH = "Assets/lib/FastNoise";
     public const float FREQUENCY = 0.0005f;
     public const string TREE_METADATA = "GwAkAAIAAAANAAkAAAAAAABACwABAAAAAAAAAAEAAAAAAAAAAAAAgD8AAAAAPwAAAAAAAAAA+kQ=";
-
-
     public int Seed;
 
     public struct OutputMinMax

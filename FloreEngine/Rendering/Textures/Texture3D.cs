@@ -1,5 +1,4 @@
 ﻿using Silk.NET.OpenGL;
-using StbImageSharp;
 
 namespace FloreEngine.Rendering.Textures;
 

@@ -1,10 +1,9 @@
 ﻿using Silk.NET.OpenGL;
-using System.Numerics;
 
 namespace FloreEngine.Rendering.Shaders;
 
 /// <summary>
-/// Shaders are programs that runs on the GPU
+/// Shader to process vertices and indices to show them on screen
 /// </summary>
 internal class FragVertShader : Shader, IDisposable 
 {

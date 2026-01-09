@@ -2,6 +2,9 @@
 
 namespace FloreEngine.Rendering.Shaders;
 
+/// <summary>
+/// Shader computing inputs and returns output. Code is executed on the GPU
+/// </summary>
 internal class ComputeShader : Shader, IDisposable
 {
     public ComputeShader(string computeShaderCode)

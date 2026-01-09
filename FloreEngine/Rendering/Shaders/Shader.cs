@@ -3,20 +3,14 @@ using System.Numerics;
 
 namespace FloreEngine.Rendering.Shaders;
 
+/// <summary>
+/// Shaders are programs used in the GPU
+/// </summary>
 internal abstract class Shader : IDisposable
 {
     protected static GL Graphics => Program.Graphics;
+    protected Dictionary<string, int> uniformLocations = new Dictionary<string, int>();
     protected uint handle;
-
-    internal static string LoadShaderFromFile(string path)
-    {
-        if (!File.Exists(path))
-            throw new Exception($"Shader not found at {path}!");
-
-        // Gets text and converts it into a shader
-        string fileContent = File.ReadAllText(path);
-        return fileContent;
-    }
 
     internal static uint LoadShader(ShaderType type, string content)
     {
@@ -34,93 +28,97 @@ internal abstract class Shader : IDisposable
         return shader;
     }
 
-    public void SetUniform(string name, int value)
+    private int GetUniformLocation(string name)
     {
-        int location = Graphics.GetUniformLocation(handle, name);
+        if(uniformLocations.TryGetValue(name, out int location)) return location; // Caching locations
+
+        location = Graphics.GetUniformLocation(handle, name);
         if (location == -1)
             throw new Exception($"{name} uniform was not found on shader.");
 
-        Graphics.Uniform1(location, value);
+        uniformLocations[name] = location;
+
+        return location;
     }
 
-    public void SetUniform(string name, float value)
-    {
-        int location = Graphics.GetUniformLocation(handle, name);
-        if (location == -1)
-            throw new Exception($"{name} uniform was not found on shader.");
+    /// <summary>
+    /// Changes the value of a uniform in this shader
+    /// </summary>
+    /// <param name="name">Name of the uniform</param>
+    /// <param name="value">Value to set the uniform to</param>
+    public void SetUniform(string name, int value) => Graphics.Uniform1(GetUniformLocation(name), value);
 
-        Graphics.Uniform1(location, value);
-    }
+    /// <summary>
+    /// Changes the value of a uniform in this shader
+    /// </summary>
+    /// <param name="name">Name of the uniform</param>
+    /// <param name="value">Value to set the uniform to</param>
+    public void SetUniform(string name, float value) => Graphics.Uniform1(GetUniformLocation(name), value);
 
-    public unsafe void SetUniform(string name, Matrix4x4 value)
-    {
-        int location = Graphics.GetUniformLocation(handle, name);
-        if (location == -1)
-            throw new Exception($"{name} uniform was not found on shader.");
+    /// <summary>
+    /// Changes the value of a uniform in this shader
+    /// </summary>
+    /// <param name="name">Name of the uniform</param>
+    /// <param name="value">Value to set the uniform to</param>
+    public unsafe void SetUniform(string name, Matrix4x4 value) => Graphics.UniformMatrix4(GetUniformLocation(name), 1, false, (float*)&value);
 
-        Graphics.UniformMatrix4(location, 1, false, (float*)&value);
-    }
+    /// <summary>
+    /// Changes the value of a uniform in this shader
+    /// </summary>
+    /// <param name="name">Name of the uniform</param>
+    /// <param name="vector">Value to set the uniform to</param>
+    public void SetUniform(string name, Vector2 vector) => Graphics.Uniform2(GetUniformLocation(name), vector);
 
-    public void SetUniform(string name, Vector2 vector)
-    {
-        int location = Graphics.GetUniformLocation(handle, name);
-        if (location == -1)
-            throw new Exception($"{name} uniform was not found on shader.");
-
-        Graphics.Uniform2(location, vector);
-    }
-
+    /// <summary>
+    /// Changes the value of a uniform in this shader
+    /// </summary>
+    /// <param name="name">Name of the uniform</param>
+    /// <param name="array">Value to set the uniform to</param>
     public unsafe void SetUniform(string name, Vector2[] array)
     {
-        int location = Graphics.GetUniformLocation(handle, name);
-        if (location == -1)
-            throw new Exception($"{name} uniform was not found on shader.");
-
         fixed (Vector2* ptr = array)
         {
-            Graphics.Uniform2(location, (uint)array.Length, (float*)ptr);
+            Graphics.Uniform2(GetUniformLocation(name), (uint)array.Length, (float*)ptr);
         }
     }
 
-    public void SetUniform(string name, Vector3 vector)
-    {
-        int location = Graphics.GetUniformLocation(handle, name);
-        if (location == -1)
-            throw new Exception($"{name} uniform was not found on shader.");
+    /// <summary>
+    /// Changes the value of a uniform in this shader
+    /// </summary>
+    /// <param name="name">Name of the uniform</param>
+    /// <param name="vector">Value to set the uniform to</param>
+    public void SetUniform(string name, Vector3 vector) => Graphics.Uniform3(GetUniformLocation(name), vector);
 
-        Graphics.Uniform3(location, vector);
-    }
-
+    /// <summary>
+    /// Changes the value of a uniform in this shader
+    /// </summary>
+    /// <param name="name">Name of the uniform</param>
+    /// <param name="array">Value to set the uniform to</param>
     public unsafe void SetUniform(string name, Vector3[] array)
     {
-        int location = Graphics.GetUniformLocation(handle, name);
-        if (location == -1)
-            throw new Exception($"{name} uniform was not found on shader.");
-
         fixed (Vector3* ptr = array)
         {
-            Graphics.Uniform3(location, (uint)array.Length, (float*)ptr);
+            Graphics.Uniform3(GetUniformLocation(name), (uint)array.Length, (float*)ptr);
         }
     }
 
-    public void SetUniform(string name, Vector4 vector)
-    {
-        int location = Graphics.GetUniformLocation(handle, name);
-        if (location == -1)
-            throw new Exception($"{name} uniform was not found on shader.");
+    /// <summary>
+    /// Changes the value of a uniform in this shader
+    /// </summary>
+    /// <param name="name">Name of the uniform</param>
+    /// <param name="vector">Value to set the uniform to</param>
+    public void SetUniform(string name, Vector4 vector) => Graphics.Uniform4(GetUniformLocation(name), vector);
 
-        Graphics.Uniform4(location, vector);
-    }
-
+    /// <summary>
+    /// Changes the value of a uniform in this shader
+    /// </summary>
+    /// <param name="name">Name of the uniform</param>
+    /// <param name="array">Value to set the uniform to</param>
     public unsafe void SetUniform(string name, Vector4[] array)
     {
-        int location = Graphics.GetUniformLocation(handle, name);
-        if (location == -1)
-            throw new Exception($"{name} uniform was not found on shader.");
-
         fixed (Vector4* ptr = array)
         {
-            Graphics.Uniform4(location, (uint)array.Length, (float*)ptr);
+            Graphics.Uniform4(GetUniformLocation(name), (uint)array.Length, (float*)ptr);
         }
     }
 

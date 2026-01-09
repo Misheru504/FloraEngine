@@ -1,5 +1,4 @@
 ﻿using Silk.NET.OpenGL;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace FloreEngine.Rendering;
 
