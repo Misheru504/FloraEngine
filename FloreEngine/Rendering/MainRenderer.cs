@@ -89,7 +89,7 @@ internal unsafe class MainRenderer : IDisposable
         shader.SetUniform("fTexture", 0);
 
         VertexCount = 0;
-        foreach(Chunk chunk in WorldManager.Instance.Chunks.Values)
+        foreach(Chunk chunk in WorldManager.Instance.ChunkMap.Values)
             DrawChunk(chunk);
     }
 

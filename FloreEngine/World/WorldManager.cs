@@ -10,8 +10,7 @@ internal class WorldManager : IDisposable
     private static readonly Lazy<WorldManager> _instance = new Lazy<WorldManager>(() => new WorldManager());
     public static WorldManager Instance => _instance.Value;
 
-    public readonly Dictionary<(Vector3, int), Chunk> Chunks;
-    public readonly Dictionary<Vector3, Chunk> temp;
+    public readonly Dictionary<Vector3, Chunk> ChunkMap;
 
     public int MaxLOD = 4;
     public int RenderDistance = 4;
@@ -27,8 +26,7 @@ internal class WorldManager : IDisposable
         //Noise.Seed = -863112003;
         Logger.Print($"Seed: {Noise.Seed}");
 
-        Chunks = new Dictionary<(Vector3, int), Chunk>();
-        temp = [];
+        ChunkMap = new Dictionary<Vector3, Chunk>();
     }
 
     public void Update()
@@ -50,21 +48,19 @@ internal class WorldManager : IDisposable
                         Vector3 position = new Vector3(worldX, worldY, worldZ);
 
                         (Vector3, int) key = (position, lod);
-                        if (!temp.ContainsKey(key.Item1))
+                        if (!ChunkMap.ContainsKey(key.Item1))
                         {
-                            //Console.WriteLine($"Level{lod}:Position{position}");
                             Chunk c = new Chunk(position, lod);
-                            Chunks[key] = c;
-                            temp[key.Item1] = c;
+                            ChunkMap[key.Item1] = c;
                         }
                     }
         }
 
-        Parallel.ForEach(Chunks.Values, chunk => {
+        Parallel.ForEach(ChunkMap.Values, chunk => {
             if (chunk.Renderer == null) chunk.FillVoxels();   
         });
 
-        foreach(Chunk chunk in Chunks.Values)
+        foreach(Chunk chunk in ChunkMap.Values)
         {
             if (chunk.Renderer == null) chunk.CreateRendering();
         }
@@ -72,7 +68,7 @@ internal class WorldManager : IDisposable
 
     public void Dispose()
     {
-        foreach (Chunk chunk in Chunks.Values)
+        foreach (Chunk chunk in ChunkMap.Values)
             chunk.Dispose();
 
         GC.SuppressFinalize(this);
