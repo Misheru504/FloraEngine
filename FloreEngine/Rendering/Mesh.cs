@@ -1,6 +1,7 @@
 ﻿using FloreEngine.Utils;
 using FloreEngine.World;
 using Silk.NET.OpenGL;
+using System.Numerics;
 
 namespace FloreEngine.Rendering;
 
@@ -20,12 +21,12 @@ internal class Mesh : IDisposable
         internal List<uint> Indices;
     }
 
-    public void CreateMesh(ushort[] voxels)
+    public void CreateMesh(Chunk currentChunk)
     {
         List<float> vertices = new List<float>();
         List<uint> indices = new List<uint>();
 
-        CulledMesher.CreateCulledMesh(voxels, Chunk.Size, vertices, indices);
+        CulledMesher.CreateCulledMesh(currentChunk, vertices, indices);
         //BinaryGreedyMesher.GenerateMesh(voxels, Chunk.Size, vertices, indices);
 
         VertexCount = vertices.Count / MainRenderer.VertexStride;
@@ -55,6 +56,8 @@ internal class Mesh : IDisposable
         vbo.Unbind();
         ebo.Unbind();
 
+        meshData?.Vertices.Clear();
+        meshData?.Indices.Clear();
         meshData = null;
     }
 

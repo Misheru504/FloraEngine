@@ -1,12 +1,17 @@
 ﻿using FloreEngine.World;
+using System.Diagnostics;
+using System.Numerics;
 
 namespace FloreEngine.Utils;
 
 public static class CulledMesher
 {
-    public static void CreateCulledMesh(ushort[] voxels, int sideSize, List<float> vertices, List<uint> indices)
+    internal static void CreateCulledMesh(Chunk currentChunk, List<float> vertices, List<uint> indices)
     {
         uint vertexOffset = 0;
+        int sideSize = Chunk.Size;
+
+        if (currentChunk.Voxels == null) return;
 
         for (int x = 0; x < sideSize; x++)
         {
@@ -14,9 +19,9 @@ public static class CulledMesher
             {
                 for (int z = 0; z < sideSize; z++)
                 {
-                    if (voxels[Chunk.Index(x, y, z)] == 0) continue;
+                    if (currentChunk.Voxels[Chunk.Index(x, y, z)] == 0) continue;
 
-                    if (IsFaceVisible(ref voxels, sideSize, x, y - 1, z))
+                    if (IsFaceVisible(currentChunk, sideSize, x, y - 1, z))
                     {
                         float[] bottomVertices = [
                             x+1, y,   z+1,  0.0f, -1.0f,  0.0f, 1.0f, 1.0f,
@@ -28,7 +33,7 @@ public static class CulledMesher
 
                         AddIndices(indices, ref vertexOffset);
                     }
-                    if (IsFaceVisible(ref voxels, sideSize, x, y + 1, z))
+                    if (IsFaceVisible(currentChunk, sideSize, x, y + 1, z))
                     {
                         float[] topVertices = [
                             x,   y+1, z+1,  0.0f,  1.0f,  0.0f, 1.0f, 1.0f,
@@ -40,7 +45,7 @@ public static class CulledMesher
 
                         AddIndices(indices, ref vertexOffset);
                     }
-                    if (IsFaceVisible(ref voxels, sideSize, x - 1, y, z))
+                    if (IsFaceVisible(currentChunk, sideSize, x - 1, y, z))
                     {
                         float[] leftVertices = [
                             x,   y,   z+1, -1.0f,  0.0f,  0.0f, 1.0f, 1.0f,
@@ -52,7 +57,7 @@ public static class CulledMesher
 
                         AddIndices(indices, ref vertexOffset);
                     }
-                    if (IsFaceVisible(ref voxels, sideSize, x + 1, y, z))
+                    if (IsFaceVisible(currentChunk, sideSize, x + 1, y, z))
                     {
                         float[] rightVertices = [
                             x+1, y,   z,    1.0f,  0.0f,  0.0f, 1.0f, 1.0f,
@@ -64,7 +69,7 @@ public static class CulledMesher
 
                         AddIndices(indices, ref vertexOffset);
                     }
-                    if (IsFaceVisible(ref voxels, sideSize, x, y, z + 1))
+                    if (IsFaceVisible(currentChunk, sideSize, x, y, z + 1))
                     {
                         float[] rightVertices = [
                             x+1, y,   z+1,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f,
@@ -76,7 +81,7 @@ public static class CulledMesher
 
                         AddIndices(indices, ref vertexOffset);
                     }
-                    if (IsFaceVisible(ref voxels, sideSize, x, y, z - 1))
+                    if (IsFaceVisible(currentChunk, sideSize, x, y, z - 1))
                     {
                         float[] frontVertices = [
                             x,   y,   z,    0.0f,  0.0f, -1.0f, 1.0f, 1.0f,
@@ -109,12 +114,64 @@ public static class CulledMesher
         indices.AddRange(bottomIndices);
     }
 
-    private static bool IsFaceVisible(ref ushort[] voxels, int sideSize, int x, int y, int z)
+    private static bool IsFaceVisible(Chunk currentChunk, int sideSize, int voxelX, int voxelY, int voxelZ)
     {
-        if (x < 0 || x >= sideSize) return true;
-        if (y < 0 || y >= sideSize) return true;
-        if (z < 0 || z >= sideSize) return true;
+        if (voxelY < 0 || voxelY >= Chunk.Size)
+        {
+            Vector3 offset = new Vector3(0, Math.Clamp(voxelY, -1, 1), 0) * currentChunk.WorldSize;
+            Vector3 chunkToLookToo = currentChunk.Position + offset;
+            bool isChunk = WorldManager.Instance.ChunkMap.TryGetValue(chunkToLookToo, out Chunk? c);
 
-        return voxels[Chunk.Index(x, y, z)] == 0;
+            if (isChunk && c != null)
+            {
+                if (c.Voxels == null || c.Level != currentChunk.Level) return true;
+
+                return c.Voxels[Chunk.Index(voxelX, Mod(voxelY, Chunk.Size), voxelZ)] == 0;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        if (voxelX < 0 || voxelX >= Chunk.Size)
+        {
+            Vector3 chunkToLookToo = currentChunk.Position + (new Vector3(Math.Clamp(voxelX, -1, 1), 0, 0) * currentChunk.WorldSize);
+
+            if (WorldManager.Instance.ChunkMap.TryGetValue(chunkToLookToo, out Chunk? c))
+            {
+                if (c.Voxels == null || c.Level != currentChunk.Level) return true;
+
+                return c.Voxels[Chunk.Index(Mod(voxelX, Chunk.Size), voxelY, voxelZ)] == 0;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        if (voxelZ < 0 || voxelZ >= Chunk.Size)
+        {
+            Vector3 chunkToLookToo = currentChunk.Position + (new Vector3(0, 0, Math.Clamp(voxelZ, -1, 1)) * currentChunk.WorldSize);
+
+            if (WorldManager.Instance.ChunkMap.TryGetValue(chunkToLookToo, out Chunk? c))
+            {
+                if (c.Voxels == null || c.Level != currentChunk.Level) return true;
+
+                return c.Voxels[Chunk.Index(voxelX, voxelY, Mod(voxelZ, Chunk.Size))] == 0;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        return currentChunk.Voxels?[Chunk.Index(voxelX, voxelY, voxelZ)] == 0;
     }
+
+    static int Mod(int a, int m)
+    {
+        return (a % m + m) % m;
+    }
+
 }

@@ -56,6 +56,12 @@ internal class WorldManager : IDisposable
                 if (chunk.Mesh == null)
                 {
                     chunk.FillVoxels();
+                }
+            });
+
+            Parallel.ForEach(ChunkMap.Values, chunk => {
+                if (chunk.Mesh == null)
+                {
                     chunk.CreateMesh();
                 }
             });

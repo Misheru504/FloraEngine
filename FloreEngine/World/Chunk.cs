@@ -59,13 +59,13 @@ internal class Chunk : IDisposable
         if (Voxels == null) return;
 
         Mesh = new Mesh();
-        Mesh.CreateMesh(Voxels);
-        if (Level != 0) Voxels = null;
+        Mesh.CreateMesh(this);
     }
 
     public void CreateRendering()
     {
         if (Mesh == null || Mesh.vao != null) return;
+        if (Level != 0) Voxels = null;
 
         Mesh.CreateBuffers();
     }
