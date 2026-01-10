@@ -32,7 +32,7 @@ public sealed class Camera
     internal Matrix4x4 RelativeViewMatrix => Matrix4x4.CreateLookAt(Vector3.Zero, Forward, Up);
     internal Matrix4x4 ProjectionMatrix => Matrix4x4.CreatePerspectiveFieldOfView(MathUtils.DegreesToRadians(FoV), Program.AspectRatio, 0.1f, 1000f);
 
-    internal Matrix4x4 FarProjectionMatrix => CreateReversedZPerspective(MathUtils.DegreesToRadians(FoV), Program.AspectRatio, 0.1f);   
+    // internal Matrix4x4 FarProjectionMatrix => CreateReversedZPerspective(MathUtils.DegreesToRadians(FoV), Program.AspectRatio, 0.1f);   
 
     private Camera()
     {
@@ -48,7 +48,7 @@ public sealed class Camera
 
     public Vector3 RelativePosition(Vector3 absolutePosition) => absolutePosition - Position;
 
-    public static Matrix4x4 CreateReversedZPerspective(float fov, float aspect, float nearPlane)
+    /*public static Matrix4x4 CreateReversedZPerspective(float fov, float aspect, float nearPlane)
     {
         float f = 1.0f / MathF.Tan(fov * 0.5f);
 
@@ -58,5 +58,5 @@ public sealed class Camera
             0, 0, 0, -1,
             0, 0, nearPlane, 0
         );
-    }
+    }*/
 }

@@ -20,7 +20,7 @@ public static class Program
     private static readonly string appName = $"{NAME}@{VERSION}";
 
     internal static bool IsWireframe = false;
-    public static bool IsFarProjection = true;
+    public static bool IsFarProjection = false;
 
     public static float AspectRatio => (float)WindowResolution.X / WindowResolution.Y;
 
