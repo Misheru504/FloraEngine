@@ -40,12 +40,9 @@ internal class WorldManager : IDisposable
                 for (int z = -RenderDistance; z <= RenderDistance + 1; z++)
                     for (int x = -RenderDistance; x <= RenderDistance + 1; x++)
                     {
-                        int worldX = x * chunkSize;
-                        int worldY = y * chunkSize; // TODO: Y-axis
-                        int worldZ = z * chunkSize; // TODO: Z-axis
-                        Vector3 playerPos = Vector3.Zero; // TODO: Player pos
+                        Vector3 playerPos = Vector3.Zero; // TODO: Player pos & unloading
 
-                        Vector3 position = new Vector3(worldX, worldY, worldZ);
+                        Vector3 position = new Vector3(x, y, z) * chunkSize;
 
                         (Vector3, int) key = (position, lod);
                         if (!ChunkMap.ContainsKey(key.Item1))

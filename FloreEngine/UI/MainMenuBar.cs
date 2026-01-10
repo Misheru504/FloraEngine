@@ -22,7 +22,7 @@ internal class MainMenuBar : IMainMenuBar
             if (ImGui.MenuItem("Delete logs folder")) Logger.ClearLogFolder();
             if (ImGui.MenuItem("Wireframe view", null, ref Program.IsWireframe)) Program.Graphics.PolygonMode(GLEnum.FrontAndBack, Program.IsWireframe ? GLEnum.Line : GLEnum.Fill);
             if (ImGui.MenuItem("Test console colors")) Logger.TestColors();
-            ImGui.MenuItem("Far projection", null, ref Program.IsFarProjection);
+            if (ImGui.MenuItem("Far projection", null, ref Program.IsFarProjection)) Program.SetGraphicsProjection();
             ImGui.Separator();
             if (ImGui.MenuItem("/!\\ Crash game /!\\")) { throw new Exception("You crashed the game on purpose!"); }
             if (ImGui.MenuItem("Quit", "ALT+F4")) { Program.EngineWindow.Close(); }

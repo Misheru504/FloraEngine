@@ -107,17 +107,7 @@ public static class Program
 
         Graphics.Enable(EnableCap.DepthTest);
 
-        if (IsFarProjection)
-        {
-            Graphics.ClearDepth(0.0f); // Distance 
-            Graphics.DepthFunc(DepthFunction.Greater);
-            Graphics.ClipControl(ClipControlOrigin.LowerLeft, ClipControlDepth.ZeroToOne);
-        }
-        else
-        {
-            Graphics.ClearDepth(1.0f); // Distance
-            Graphics.DepthFunc(DepthFunction.Less);
-        }
+        SetGraphicsProjection();
 
         Graphics.DepthMask(true);
         
@@ -177,6 +167,21 @@ public static class Program
             DeltaFPS = deltaTime;
         }
         totalTime += deltaTime;
+    }
+
+    internal static void SetGraphicsProjection()
+    {
+        if (IsFarProjection)
+        {
+            Graphics.ClearDepth(0.0f); // Distance 
+            Graphics.DepthFunc(DepthFunction.Greater);
+            Graphics.ClipControl(ClipControlOrigin.LowerLeft, ClipControlDepth.ZeroToOne);
+        }
+        else
+        {
+            Graphics.ClearDepth(1.0f); // Distance
+            Graphics.DepthFunc(DepthFunction.Less);
+        }
     }
 
     public static void Closing()

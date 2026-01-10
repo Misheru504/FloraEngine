@@ -82,6 +82,7 @@ internal class Controller
 
     internal void MouseWheel(IMouse mouse, ScrollWheel scrollWheel)
     {
-        Speed *= Math.Abs(Math.Clamp(scrollWheel.Y, -1, 1) + 0.05f);
+        float y = scrollWheel.Y < 0 ? -1 : 1;
+        Speed *= Math.Abs(y + 0.05f);
     }
 }
