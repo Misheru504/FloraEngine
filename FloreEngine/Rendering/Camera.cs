@@ -16,6 +16,9 @@ public sealed class Camera
     public Vector3 Forward;
     public Vector3 Direction;
 
+    public float NearPlane;
+    public float FarPlane;
+
     public float Yaw, Pitch, FoV;
 
     /// <summary>
@@ -30,7 +33,8 @@ public sealed class Camera
     /// (every rendered objects position needs to be sustracted with Camera.Position)
     /// </remarks>
     internal Matrix4x4 RelativeViewMatrix => Matrix4x4.CreateLookAt(Vector3.Zero, Forward, Up);
-    internal Matrix4x4 ProjectionMatrix => Matrix4x4.CreatePerspectiveFieldOfView(MathUtils.DegreesToRadians(FoV), Program.AspectRatio, 0.1f, 1000f);
+    internal Matrix4x4 ProjectionMatrix => Matrix4x4.CreatePerspectiveFieldOfView(MathUtils.DegreesToRadians(FoV), Program.AspectRatio, NearPlane, FarPlane);
+    internal Frustum Frustum => new Frustum(ViewMatrix * ProjectionMatrix);
 
     // internal Matrix4x4 FarProjectionMatrix => CreateReversedZPerspective(MathUtils.DegreesToRadians(FoV), Program.AspectRatio, 0.1f);   
 
@@ -44,6 +48,9 @@ public sealed class Camera
         Yaw = 0;
         Pitch = 0;
         FoV = 70;
+
+        NearPlane = 0.1f;
+        FarPlane = 5000.0f;
     }
 
     public Vector3 RelativePosition(Vector3 absolutePosition) => absolutePosition - Position;

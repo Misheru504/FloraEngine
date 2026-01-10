@@ -137,7 +137,7 @@ internal unsafe class MainRenderer : IDisposable
     private void DrawChunk(Chunk chunk)
     {
         if (chunk.Mesh == null || chunk.Mesh.vao == null) return;
-
+        if (!IsInFrustum(chunk, Camera.Instance.Frustum)) return;
         VertexCount += chunk.Mesh.VertexCount;
         chunk.Mesh.vao.Bind();
         shader.SetUniform("uModel", Matrix4x4.CreateScale(chunk.Scale) * Matrix4x4.CreateTranslation(Camera.Instance.RelativePosition(chunk.Position)));
@@ -147,5 +147,17 @@ internal unsafe class MainRenderer : IDisposable
     public void Dispose()
     {
         shader?.Dispose();
+    }
+
+    public static bool IsInFrustum(Chunk c, Frustum frustum)
+    {
+        foreach (var plane in frustum.Planes)
+        {
+            Vector3 chunkCenter = c.Position + (new Vector3(c.WorldSize) / 2);
+            float distance = Plane.DotCoordinate(plane, chunkCenter);
+            if (distance < -c.WorldSize)
+                return false;
+        }
+        return true;
     }
 }
