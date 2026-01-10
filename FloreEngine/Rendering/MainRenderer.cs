@@ -13,6 +13,8 @@ internal unsafe class MainRenderer : IDisposable
     public static MainRenderer Instance => _instance.Value;
     private static GL Graphics => Program.Graphics;
 
+    // Vertex stride: 3 (position) + 3 (normal) + 2 (uv) = 8 floats
+    public const int VertexStride = 8;
     private readonly FragVertShader shader;
     private readonly Texture2D texture;
 
@@ -22,32 +24,47 @@ internal unsafe class MainRenderer : IDisposable
     private const string VERTEX_SHADER = @"
         #version 330 core
         layout (location = 0) in vec3 vPos;
-        layout (location = 1) in vec2 vUV;
+        layout (location = 1) in vec3 vNormal;
+        layout (location = 2) in vec2 vUV;
 
         uniform mat4 uModel; 
         uniform mat4 uView;
         uniform mat4 uProjection;
 
         out vec2 fUV;
+        out vec3 fNormal;
 
         void main()
         {
             //Multiplying our uniform with the vertex position, the multiplication order here does matter.
             gl_Position = uProjection * uView * uModel * vec4(vPos, 1.0);
             fUV = vUV;
+            fNormal = vNormal;
         }
     ";
 
     private const string FRAGMENT_SHADER = @"
         #version 330 core
         in vec2 fUV;
+        in vec3 fNormal;
+        vec3 lightPos = vec3(0.3, 1.0, 0.7);
         uniform sampler2D fTexture;
-        out vec4 out_color;
+        out vec4 fragColor;
+
 
         void main()
         {
-            vec4 uvColor = vec4(fUV.x, fUV.y, 0, 1);
-            out_color = texture(fTexture, fUV);
+            // vec4 uvColor = vec4(fUV.x, fUV.y, 0, 1);
+            vec4 texColor = texture(fTexture, fUV);
+
+            vec3 normal = normalize(fNormal);
+            vec3 light = normalize(lightPos);
+            float diff = max(dot(normal, light), 0.0);
+
+            float ambient = 0.3;
+            float lighting = ambient + (1.0 - ambient) * diff;
+
+            fragColor = vec4(texColor.xyz * lighting, texColor.w);
         }
     ";
 

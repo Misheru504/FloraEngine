@@ -14,7 +14,7 @@ public static class Logger
 {
     private static readonly StringBuilder logs;
     public static readonly string logFilePath;
-    public const string LOG_FOLDER = ".\\logs";
+    public const string LOG_FOLDER = @".\logs";
     
     private const string INFO_PREFIX     = "INFO";
     private const string WARN_PREFIX     = "WARN";

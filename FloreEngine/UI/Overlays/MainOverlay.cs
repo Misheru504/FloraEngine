@@ -27,6 +27,7 @@ internal class MainOverlay : IImGuiOverlay
             ImGui.Spacing();
             ImGui.Text($"Seed: {WorldManager.Instance.Noise.Seed}");
             ImGui.Text($"Chunk pos: {Controller.ChunkPos:0}");
+            ImGui.Text($"Vertex count: {MainRenderer.Instance.VertexCount}");
             ImGui.End();
         }
     }

@@ -16,14 +16,15 @@ internal class ChunkRenderer : IDisposable
         if (mesh.Vertices == null || mesh.Indices == null) return;
 
         vao = new VertexArrayObject();
-        IndexCount = (uint)mesh.Indices.Length;
-        VertexCount = mesh.Vertices.Length;
+        IndexCount = mesh.IndexCount;
+        VertexCount = mesh.VertexCount;
 
         vbo = new BufferObject<float>(mesh.Vertices, BufferTargetARB.ArrayBuffer, BufferUsageARB.StaticDraw);
         ebo = new BufferObject<uint>(mesh.Indices, BufferTargetARB.ElementArrayBuffer, BufferUsageARB.StaticDraw);
 
-        VertexArrayObject.VertexAttributePointer<float>(0, 3, VertexAttribPointerType.Float, 5, 0);
-        VertexArrayObject.VertexAttributePointer<float>(1, 2, VertexAttribPointerType.Float, 5, 3);
+        VertexArrayObject.VertexAttributePointer<float>(0, 3, VertexAttribPointerType.Float, 8, 0);
+        VertexArrayObject.VertexAttributePointer<float>(1, 3, VertexAttribPointerType.Float, 8, 3);
+        VertexArrayObject.VertexAttributePointer<float>(2, 2, VertexAttribPointerType.Float, 8, 6);
 
         VertexArrayObject.Unbind();
         vbo.Unbind();

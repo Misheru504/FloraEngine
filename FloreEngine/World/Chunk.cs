@@ -50,8 +50,7 @@ internal class Chunk : IDisposable
             }
         }
 
-        Mesh = new Mesh();
-        Mesh.CreateMesh(ref Voxels, Size);
+        Mesh = new Mesh(Voxels, Size);
         if (Level != 0) Voxels = null;
     }
 
