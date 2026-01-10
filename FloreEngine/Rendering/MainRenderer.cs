@@ -136,11 +136,12 @@ internal unsafe class MainRenderer : IDisposable
 
     private void DrawChunk(Chunk chunk)
     {
-        if (chunk.Renderer == null || chunk.Renderer.vao == null) return;
-        VertexCount += chunk.Renderer.VertexCount;
-        chunk.Renderer.vao.Bind();
+        if (chunk.Mesh == null || chunk.Mesh.vao == null) return;
+
+        VertexCount += chunk.Mesh.VertexCount;
+        chunk.Mesh.vao.Bind();
         shader.SetUniform("uModel", Matrix4x4.CreateScale(chunk.Scale) * Matrix4x4.CreateTranslation(Camera.Instance.RelativePosition(chunk.Position)));
-        Graphics.DrawElements(PrimitiveType.Triangles, chunk.Renderer.IndexCount, DrawElementsType.UnsignedInt, (void*)0);
+        Graphics.DrawElements(PrimitiveType.Triangles, chunk.Mesh.IndexCount, DrawElementsType.UnsignedInt, (void*)0);
     }
 
     public void Dispose()

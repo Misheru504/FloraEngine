@@ -1,28 +1,61 @@
 ﻿using FloreEngine.Utils;
 using FloreEngine.World;
+using Silk.NET.OpenGL;
 
 namespace FloreEngine.Rendering;
 
-public class Mesh : IDisposable
+internal class Mesh : IDisposable
 {
-    public float[] Vertices;
-    public uint[] Indices;
+    public VertexArrayObject? vao;
+    private BufferObject<float>? vbo;
+    private BufferObject<uint>? ebo;
+    private MeshData? meshData;
+
     public uint IndexCount;
     public int VertexCount;
 
-    public Mesh(ushort[] voxels, int sideSize)
+    internal struct MeshData
+    {
+        internal List<float> Vertices;
+        internal List<uint> Indices;
+    }
+
+    public void CreateMesh(ushort[] voxels)
     {
         List<float> vertices = new List<float>();
-        List< uint> indices = new List<uint>();
+        List<uint> indices = new List<uint>();
 
-        CulledMesher.CreateCulledMesh(voxels, sideSize, vertices, indices);
-        //BinaryGreedyMesher.GenerateMesh(voxels, sideSize, vertices, indices);
+        CulledMesher.CreateCulledMesh(voxels, Chunk.Size, vertices, indices);
+        //BinaryGreedyMesher.GenerateMesh(voxels, Chunk.Size, vertices, indices);
 
         VertexCount = vertices.Count / MainRenderer.VertexStride;
         IndexCount = (uint)indices.Count;
 
-        Vertices = [..vertices];
-        Indices = [..indices];
+        meshData = new MeshData()
+        { 
+            Vertices = vertices, 
+            Indices = indices 
+        };
+    }
+
+    public void CreateBuffers()
+    {
+        if (meshData == null) return;
+
+        vao = new VertexArrayObject();
+
+        vbo = new BufferObject<float>(meshData?.Vertices.ToArray(), BufferTargetARB.ArrayBuffer, BufferUsageARB.StaticDraw);
+        ebo = new BufferObject<uint>(meshData?.Indices.ToArray(), BufferTargetARB.ElementArrayBuffer, BufferUsageARB.StaticDraw);
+
+        VertexArrayObject.VertexAttributePointer<float>(0, 3, VertexAttribPointerType.Float, 8, 0);
+        VertexArrayObject.VertexAttributePointer<float>(1, 3, VertexAttribPointerType.Float, 8, 3);
+        VertexArrayObject.VertexAttributePointer<float>(2, 2, VertexAttribPointerType.Float, 8, 6);
+
+        VertexArrayObject.Unbind();
+        vbo.Unbind();
+        ebo.Unbind();
+
+        meshData = null;
     }
 
     public void Dispose()

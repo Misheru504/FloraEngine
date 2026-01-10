@@ -20,7 +20,6 @@ public static class Program
     private static readonly string appName = $"{NAME}@{VERSION}";
 
     internal static bool IsWireframe = false;
-    public static bool IsFarProjection = false;
 
     public static float AspectRatio => (float)WindowResolution.X / WindowResolution.Y;
 
@@ -99,7 +98,7 @@ public static class Program
         }
 
         // Graphics settings
-        Graphics.ClearColor(Color.Black); // Background color of the window
+        Graphics.ClearColor(Color.CornflowerBlue); // Background color of the window
         Graphics.Enable(EnableCap.Blend); // Transparency
         Graphics.Enable(EnableCap.CullFace); // Only renders one face of a vertex
         Graphics.CullFace(GLEnum.Back); // Face to show when culling
@@ -107,7 +106,8 @@ public static class Program
 
         Graphics.Enable(EnableCap.DepthTest);
 
-        SetGraphicsProjection();
+        Graphics.ClearDepth(1.0f); // Distance
+        Graphics.DepthFunc(DepthFunction.Less);
 
         Graphics.DepthMask(true);
         
@@ -167,21 +167,6 @@ public static class Program
             DeltaFPS = deltaTime;
         }
         totalTime += deltaTime;
-    }
-
-    internal static void SetGraphicsProjection()
-    {
-        if (IsFarProjection)
-        {
-            Graphics.ClearDepth(0.0f); // Distance 
-            Graphics.DepthFunc(DepthFunction.Greater);
-            Graphics.ClipControl(ClipControlOrigin.LowerLeft, ClipControlDepth.ZeroToOne);
-        }
-        else
-        {
-            Graphics.ClearDepth(1.0f); // Distance
-            Graphics.DepthFunc(DepthFunction.Less);
-        }
     }
 
     public static void Closing()

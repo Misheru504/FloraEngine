@@ -38,7 +38,6 @@ internal class MainMenuBar : IMainMenuBar
         if (ImGui.MenuItem("Delete logs folder")) Logger.ClearLogFolder();
         if (ImGui.MenuItem("Wireframe view", null, ref Program.IsWireframe)) Program.Graphics.PolygonMode(GLEnum.FrontAndBack, Program.IsWireframe ? GLEnum.Line : GLEnum.Fill);
         if (ImGui.MenuItem("Test console colors")) Logger.TestColors();
-        if (ImGui.MenuItem("Far projection", null, ref Program.IsFarProjection)) Program.SetGraphicsProjection();
         if (ImGui.BeginMenu("Rendering mode"))
         {
             if (ImGui.MenuItem("Default")) MainRenderer.Instance.RenderingMode = MainRenderer.RenderMode.Default;

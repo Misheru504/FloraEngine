@@ -1,5 +1,4 @@
 ﻿using FloreEngine.Diagnostics;
-using FloreEngine.Rendering;
 using FloreEngine.Utils;
 using System.Numerics;
 
@@ -29,9 +28,9 @@ internal class WorldManager : IDisposable
         ChunkMap = new Dictionary<Vector3, Chunk>();
     }
 
-    public void Update()
+    public unsafe void Update()
     {
-
+        int oldLength = ChunkMap.Count;
         for(int lod = 0; lod <= MaxLOD; lod++)
         {
             int chunkSize = CHUNK_RESOLUTION << lod;
@@ -41,25 +40,30 @@ internal class WorldManager : IDisposable
                     for (int x = -RenderDistance; x <= RenderDistance + 1; x++)
                     {
                         Vector3 playerPos = Vector3.Zero; // TODO: Player pos & unloading
-
                         Vector3 position = new Vector3(x, y, z) * chunkSize;
 
-                        (Vector3, int) key = (position, lod);
-                        if (!ChunkMap.ContainsKey(key.Item1))
+                        if (!ChunkMap.ContainsKey(position))
                         {
                             Chunk c = new Chunk(position, lod);
-                            ChunkMap[key.Item1] = c;
+                            ChunkMap[position] = c;
                         }
                     }
         }
 
-        Parallel.ForEach(ChunkMap.Values, chunk => {
-            if (chunk.Renderer == null) chunk.FillVoxels();   
-        });
-
-        foreach(Chunk chunk in ChunkMap.Values)
+        if(ChunkMap.Count != oldLength)
         {
-            if (chunk.Renderer == null) chunk.CreateRendering();
+            Parallel.ForEach(ChunkMap.Values, chunk => {
+                if (chunk.Mesh == null)
+                {
+                    chunk.FillVoxels();
+                    chunk.CreateMesh();
+                }
+            });
+
+            foreach (Chunk chunk in ChunkMap.Values)
+            {
+                chunk.CreateRendering();
+            }
         }
     }
 
@@ -67,6 +71,8 @@ internal class WorldManager : IDisposable
     {
         foreach (Chunk chunk in ChunkMap.Values)
             chunk.Dispose();
+
+        ChunkMap.Clear();
 
         GC.SuppressFinalize(this);
     }

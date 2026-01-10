@@ -11,9 +11,10 @@ internal class Chunk : IDisposable
 
     public Vector3 Position;
     public int Level;
+    public bool IsProto; // A proto chunk filled with the base terrain, without features and mesh
+
     public ushort[]? Voxels;
     public Mesh? Mesh;
-    public ChunkRenderer? Renderer;
 
     public int Scale => 1 << Level;
     public int WorldSize => Size * Scale;
@@ -49,26 +50,28 @@ internal class Chunk : IDisposable
                 }
             }
         }
-
-        Mesh = new Mesh(Voxels, Size);
-        if (Level != 0) Voxels = null;
     }
 
     public static int Index(int x, int y, int z) => x + z * Size + y * Size * Size;
 
+    public void CreateMesh()
+    {
+        if (Voxels == null) return;
+
+        Mesh = new Mesh();
+        Mesh.CreateMesh(Voxels);
+        if (Level != 0) Voxels = null;
+    }
+
     public void CreateRendering()
     {
-        if (Mesh == null) return;
-        Renderer?.Dispose();
-        Renderer = new ChunkRenderer();
-        Renderer.CreateBuffers(Mesh);
-        Mesh.Dispose();
-        Mesh = null;
+        if (Mesh == null || Mesh.vao != null) return;
+
+        Mesh.CreateBuffers();
     }
 
     public void Dispose()
     {
-        Renderer?.Dispose();
         Mesh?.Dispose();
         GC.SuppressFinalize(this);
     }
