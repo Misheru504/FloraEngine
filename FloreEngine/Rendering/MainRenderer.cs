@@ -123,8 +123,6 @@ internal unsafe class MainRenderer : IDisposable
         texture.Bind();
 
         shader.SetUniform("uView", Camera.Instance.RelativeViewMatrix);
-        // shader.SetUniform("uProjection", Program.IsFarProjection ? Camera.Instance.FarProjectionMatrix : Camera.Instance.ProjectionMatrix);
-
         shader.SetUniform("uProjection", Camera.Instance.ProjectionMatrix);
         shader.SetUniform("fRenderMode", (int) RenderingMode);
         shader.SetUniform("fTexture", 0);
@@ -138,10 +136,11 @@ internal unsafe class MainRenderer : IDisposable
     {
         if (chunk.Mesh == null || chunk.Mesh.vao == null) return;
         if (!IsInFrustum(chunk, Camera.Instance.Frustum)) return;
+
         VertexCount += chunk.Mesh.VertexCount;
         chunk.Mesh.vao.Bind();
         shader.SetUniform("uModel", Matrix4x4.CreateScale(chunk.Scale) * Matrix4x4.CreateTranslation(Camera.Instance.RelativePosition(chunk.Position)));
-        Graphics.DrawElements(PrimitiveType.Triangles, chunk.Mesh.IndexCount, DrawElementsType.UnsignedInt, (void*)0);
+        Graphics.DrawElements(PrimitiveType.Triangles, chunk.Mesh.IndexCount, DrawElementsType.UnsignedInt, (void*) 0);
     }
 
     public void Dispose()

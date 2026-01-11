@@ -1,4 +1,5 @@
 ﻿using FloreEngine.Rendering;
+using FloreEngine.Utils;
 using FloreEngine.World;
 using ImGuiNET;
 using System.Numerics;
@@ -16,6 +17,10 @@ internal class MainOverlay : IImGuiOverlay
         if (ImGui.Begin("Overlay", ImGuiWindowFlags.NoBringToFrontOnFocus | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoMove))
         {
             Camera camera = Camera.Instance;
+            Vector3 voxelPos = MathUtils.WorldToTilePosition(camera.Position);
+
+            Vector3 reconstructedPos = Controller.ChunkPos + voxelPos;
+            ushort voxel = WorldManager.Instance.GetVoxelAtWorldPos((int) reconstructedPos.X, (int) reconstructedPos.Y, (int) reconstructedPos.Z, 16, 1);
 
             ImGui.Text($"Version: {Program.VERSION}");
             ImGui.Text($"FPS: {Program.FPS:0} ({Program.DeltaFPS*1000:F2}ms/frame)");
@@ -27,6 +32,9 @@ internal class MainOverlay : IImGuiOverlay
             ImGui.Spacing();
             ImGui.Text($"Seed: {WorldManager.Instance.Noise.Seed}");
             ImGui.Text($"Chunk pos: {Controller.ChunkPos:0}");
+            ImGui.Text($"Voxel pos: {voxelPos:0}");
+            ImGui.Text($"Reconstruced pos: {reconstructedPos:0}");
+            ImGui.Text($"voxel type: {voxel}");
             ImGui.Text($"Vertex count: {MainRenderer.Instance.VertexCount}");
             ImGui.End();
         }

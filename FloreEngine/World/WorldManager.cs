@@ -15,7 +15,6 @@ internal class WorldManager : IDisposable
     public int RenderDistance = 4;
 
     public FastNoise Noise;
-    public const int CHUNK_RESOLUTION = 16;
 
     public WorldManager()
     {
@@ -33,7 +32,7 @@ internal class WorldManager : IDisposable
         int oldLength = ChunkMap.Count;
         for(int lod = 0; lod <= MaxLOD; lod++)
         {
-            int chunkSize = CHUNK_RESOLUTION << lod;
+            int chunkSize = Chunk.Size << lod;
 
             for (int y = -RenderDistance; y <= RenderDistance + 1; y++)
                 for (int z = -RenderDistance; z <= RenderDistance + 1; z++)
@@ -71,6 +70,22 @@ internal class WorldManager : IDisposable
                 chunk.CreateRendering();
             }
         }
+    }
+
+    public ushort GetVoxelAtWorldPos(int x, int y, int z, int chunkSize, int scale)
+    {
+        Vector3 worldTilePos = new Vector3(x, y, z);
+        Vector3 chunk = MathUtils.WorldToChunkCoord(worldTilePos, chunkSize); 
+
+        if (ChunkMap.TryGetValue(chunk, out Chunk? c))
+        {
+            if (c == null || c.WorldSize != chunkSize || c.Voxels == null) return 0;
+
+            Vector3 localTilePos = MathUtils.WorldToTilePosition(worldTilePos / scale);
+            return c.Voxels[Chunk.Index((int) localTilePos.X, (int) localTilePos.Y, (int) localTilePos.Z)];
+        }
+
+        return 0;
     }
 
     public void Dispose()

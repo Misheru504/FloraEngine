@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using FloreEngine.World;
+using System.Numerics;
 
 namespace FloreEngine.Utils;
 
@@ -16,7 +17,20 @@ public static class MathUtils
             MathF.Floor(worldCoord.X / chunkSize),
             MathF.Floor(worldCoord.Y / chunkSize),
             MathF.Floor(worldCoord.Z / chunkSize)
-        );
+        ) * chunkSize;
+    }
+
+    public static Vector3 WorldToTilePosition(Vector3 worldPostion)
+    {
+        int localX = (int)Math.Floor(worldPostion.X) % Chunk.Size;
+        int localY = (int)Math.Floor(worldPostion.Y) % Chunk.Size;
+        int localZ = (int)Math.Floor(worldPostion.Z) % Chunk.Size;
+
+        if (localX < 0) localX += Chunk.Size;
+        if (localY < 0) localY += Chunk.Size;
+        if (localZ < 0) localZ += Chunk.Size;
+
+        return new Vector3(localX, localY, localZ);
     }
 
     public static bool IsOutsideBox(Vector3 point, Vector3 min, Vector3 max)

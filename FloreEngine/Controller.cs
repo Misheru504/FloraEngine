@@ -16,7 +16,7 @@ internal class Controller
     public static Controller Instance => _instance.Value;
     private static Camera Camera => Camera.Instance;
     private static IKeyboard Keyboard => Program.Keyboard;
-    public static Vector3 ChunkPos => MathUtils.WorldToChunkCoord(Camera.Position, WorldManager.CHUNK_RESOLUTION);
+    public static Vector3 ChunkPos => MathUtils.WorldToChunkCoord(Camera.Position, Chunk.Size);
 
     private static ICursor Cursor => Program.InputContext.Mice[0].Cursor;
 

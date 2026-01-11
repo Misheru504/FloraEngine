@@ -1,9 +1,9 @@
 ﻿using FloreEngine.World;
+using System.Numerics;
 
 namespace FloreEngine.Utils;
 
-
-public static class BinaryGreedyMesher
+public static class GreedyMesher
 {
     enum Face
     {
@@ -86,11 +86,17 @@ public static class BinaryGreedyMesher
                             ushort current;
                             ushort compare;
 
+                            // Voxel out of bounds
+                            Vector3 voxelPos = new Vector3(pos[0], pos[1], pos[2]);
+                            Vector3 comparePos = new Vector3(pos[0] + q[0], pos[1] + q[1], pos[2] + q[2]);
+                            Vector3 worldVoxelPos = currentChunk.Position + (voxelPos * currentChunk.Scale);
+                            Vector3 worldComparePos = currentChunk.Position + (comparePos * currentChunk.Scale);
+
                             if (pos[d] >= 0) current = currentChunk.Voxels[Chunk.Index(pos[0], pos[1], pos[2])];
-                            else current = 0;
+                            else current = WorldManager.Instance.GetVoxelAtWorldPos((int)worldVoxelPos.X, (int)worldVoxelPos.Y, (int)worldVoxelPos.Z, currentChunk.WorldSize, currentChunk.Scale);
 
                             if (pos[d] < Chunk.Size - 1) compare = currentChunk.Voxels[Chunk.Index(pos[0] + q[0], pos[1] + q[1], pos[2] + q[2])];
-                            else compare = 0;
+                            else compare = WorldManager.Instance.GetVoxelAtWorldPos((int)worldComparePos.X, (int)worldComparePos.Y, (int)worldComparePos.Z, currentChunk.WorldSize, currentChunk.Scale); ;
 
                             if (b == 0)
                             {

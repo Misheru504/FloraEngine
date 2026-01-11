@@ -27,7 +27,7 @@ internal class Mesh : IDisposable
         List<uint> indices = new List<uint>();
 
         //CulledMesher.CreateCulledMesh(currentChunk, vertices, indices);
-        BinaryGreedyMesher.CreateGreedyMesh(currentChunk, vertices, indices);
+        GreedyMesher.CreateGreedyMesh(currentChunk, vertices, indices);
 
         VertexCount = vertices.Count / MainRenderer.VertexStride;
         IndexCount = (uint)indices.Count;

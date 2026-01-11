@@ -116,64 +116,15 @@ public static class CulledMesher
 
     private static bool IsFaceVisible(Chunk currentChunk, int sideSize, int voxelX, int voxelY, int voxelZ)
     {
-        // TODO: get world voxel instead
-
-        if (voxelY < 0 || voxelY >= Chunk.Size)
+        if (voxelX < 0 || voxelX >= Chunk.Size || voxelY < 0 || voxelY >= Chunk.Size || voxelZ < 0 || voxelZ >= Chunk.Size)
         {
-            Vector3 offset = new Vector3(0, Math.Clamp(voxelY, -1, 1), 0) * currentChunk.WorldSize;
-            Vector3 chunkToLookToo = currentChunk.Position + offset;
-            bool isChunk = WorldManager.Instance.ChunkMap.TryGetValue(chunkToLookToo, out Chunk? c);
-
-            if (isChunk && c != null)
-            {
-                if (c.Voxels == null || c.Level != currentChunk.Level) return true;
-
-                return c.Voxels[Chunk.Index(voxelX, Mod(voxelY, Chunk.Size), voxelZ)] == 0;
-            }
-            else
-            {
-                return true;
-            }
-        }
-
-        if (voxelX < 0 || voxelX >= Chunk.Size)
-        {
-            Vector3 chunkToLookToo = currentChunk.Position + (new Vector3(Math.Clamp(voxelX, -1, 1), 0, 0) * currentChunk.WorldSize);
-
-            if (WorldManager.Instance.ChunkMap.TryGetValue(chunkToLookToo, out Chunk? c))
-            {
-                if (c.Voxels == null || c.Level != currentChunk.Level) return true;
-
-                return c.Voxels[Chunk.Index(Mod(voxelX, Chunk.Size), voxelY, voxelZ)] == 0;
-            }
-            else
-            {
-                return true;
-            }
-        }
-
-        if (voxelZ < 0 || voxelZ >= Chunk.Size)
-        {
-            Vector3 chunkToLookToo = currentChunk.Position + (new Vector3(0, 0, Math.Clamp(voxelZ, -1, 1)) * currentChunk.WorldSize);
-
-            if (WorldManager.Instance.ChunkMap.TryGetValue(chunkToLookToo, out Chunk? c))
-            {
-                if (c.Voxels == null || c.Level != currentChunk.Level) return true;
-
-                return c.Voxels[Chunk.Index(voxelX, voxelY, Mod(voxelZ, Chunk.Size))] == 0;
-            }
-            else
-            {
-                return true;
-            }
+            // Voxel out of bounds
+            Vector3 voxelPos = new Vector3(voxelX, voxelY, voxelZ);
+            Vector3 worldTilePos = currentChunk.Position + (voxelPos * currentChunk.Scale);
+            return WorldManager.Instance.GetVoxelAtWorldPos((int)worldTilePos.X, (int)worldTilePos.Y, (int)worldTilePos.Z, currentChunk.WorldSize, currentChunk.Scale) == 0;
         }
 
         return currentChunk.Voxels?[Chunk.Index(voxelX, voxelY, voxelZ)] == 0;
-    }
-
-    static int Mod(int a, int m)
-    {
-        return (a % m + m) % m;
     }
 
 }

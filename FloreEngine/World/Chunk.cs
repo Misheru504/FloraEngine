@@ -6,7 +6,7 @@ namespace FloreEngine.World;
 
 internal class Chunk : IDisposable
 {
-    public static int Size => WorldManager.CHUNK_RESOLUTION;
+    public const int Size = 16;
     public static FastNoise Noise => WorldManager.Instance.Noise;
 
     public Vector3 Position;
