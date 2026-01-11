@@ -2,9 +2,10 @@
 
 namespace FloreEngine.Utils;
 
+
 public static class BinaryGreedyMesher
 {
-    enum FaceType
+    enum Face
     {
         Left, 
         Right, 
@@ -14,17 +15,34 @@ public static class BinaryGreedyMesher
         Front
     }
 
-    private static float[] GetNormals(FaceType type)
+    private static float[] GetNormals(Face type)
     {
         return type switch
         {
-            FaceType.Left => [-1.0f, 0.0f, 0.0f],
-            FaceType.Right => [1.0f, 0.0f, 0.0f],
-            FaceType.Bottom => [0.0f, -1.0f, 0.0f],
-            FaceType.Top => [0.0f, 1.0f, 0.0f],
-            FaceType.Back => [0.0f, 0.0f, -1.0f],
-            FaceType.Front => [0.0f, 0.0f, 1.0f],
+            Face.Left => [-1.0f, 0.0f, 0.0f],
+            Face.Right => [1.0f, 0.0f, 0.0f],
+            Face.Bottom => [0.0f, -1.0f, 0.0f],
+            Face.Top => [0.0f, 1.0f, 0.0f],
+            Face.Back => [0.0f, 0.0f, -1.0f],
+            Face.Front => [0.0f, 0.0f, 1.0f],
             _ => [0.0f, 0.0f, 0.0f]
+        };
+    }
+
+    private static float[] GetUVs(Face type, int width, int height)
+    {
+        return type switch
+        {
+            Face.Left => [height, 0, 0, 0, 0, width, height, width],
+            Face.Right => [height, 0, 0, 0, 0, width, height, width],
+
+            Face.Front => [0, 0, 0, height, width, height, width, 0],
+            Face.Back => [0, 0, 0, height, width, height, width, 0],
+
+            Face.Top => [width, height, width, 0, 0, 0, 0, height],
+            Face.Bottom => [width, height, width, 0, 0, 0, 0, height],
+
+            _ => [0, 0, 0, 0, 0, 0, 0, 0]
         };
     }
 
@@ -49,10 +67,10 @@ public static class BinaryGreedyMesher
                 ushort[] mask = new ushort[Chunk.Size * Chunk.Size];
                 q[d] = 1;
 
-                FaceType face = FaceType.Front;
-                if (d == 0) face = b == 0 ? FaceType.Left : FaceType.Right;
-                else if (d == 1) face = b == 0 ? FaceType.Bottom : FaceType.Top;
-                else if (d == 2) face = b == 0 ? FaceType.Back : FaceType.Front;
+                Face face = Face.Front;
+                if (d == 0) face = b == 0 ? Face.Left : Face.Right;
+                else if (d == 1) face = b == 0 ? Face.Bottom : Face.Top;
+                else if (d == 2) face = b == 0 ? Face.Back : Face.Front;
 
                 pos[d] = -1;
 
@@ -157,17 +175,18 @@ public static class BinaryGreedyMesher
         }
     }
 
-    private static void AddFace(int[] pos, int[] deltaU, int[] deltaV, int width, int height, FaceType face, List<float> vertices, List<uint> indices, ref uint vertexOffset, bool flip)
+    private static void AddFace(int[] pos, int[] deltaU, int[] deltaV, int width, int height, Face face, List<float> vertices, List<uint> indices, ref uint vertexOffset, bool flip)
     {
         int x = pos[0], y = pos[1], z = pos[2];
         float[] normals = GetNormals(face);
+        float[] UVs = GetUVs(face, width, height);
+        float u0 = UVs[0], v0 = UVs[1], u1 = UVs[2], v1 = UVs[3], u2 = UVs[4], v2 = UVs[5], u3 = UVs[6], v3 = UVs[7];
 
-        // Fix UV coordinates
         float[] quadVertices = [
-            x + deltaU[0] + deltaV[0], y + deltaU[1] + deltaV[1], z + deltaU[2] + deltaV[2], normals[0], normals[1], normals[2], width, height,
-            x + deltaU[0],             y + deltaU[1],             z + deltaU[2],             normals[0], normals[1], normals[2], width, 0.0f,
-            x,                         y,                         z,                         normals[0], normals[1], normals[2], 0.0f, 0.0f,
-            x + deltaV[0],             y + deltaV[1],             z + deltaV[2],             normals[0], normals[1], normals[2], 0.0f, height,
+            x + deltaU[0] + deltaV[0], y + deltaU[1] + deltaV[1], z + deltaU[2] + deltaV[2], normals[0], normals[1], normals[2], u0, v0,
+            x + deltaU[0],             y + deltaU[1],             z + deltaU[2],             normals[0], normals[1], normals[2], u1, v1,
+            x,                         y,                         z,                         normals[0], normals[1], normals[2], u2, v2,
+            x + deltaV[0],             y + deltaV[1],             z + deltaV[2],             normals[0], normals[1], normals[2], u3, v3,
         ];
         vertices.AddRange(quadVertices);
 
