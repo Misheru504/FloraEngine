@@ -71,25 +71,25 @@ public static class CulledMesher
                     }
                     if (IsFaceVisible(currentChunk, sideSize, x, y, z + 1))
                     {
-                        float[] rightVertices = [
+                        float[] frontVertices = [
                             x+1, y,   z+1,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f,
                             x,   y,   z+1,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f,
                             x,   y+1, z+1,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f,
                             x+1, y+1, z+1,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f,
                         ];
-                        vertices.AddRange(rightVertices);
+                        vertices.AddRange(frontVertices);
 
                         AddIndices(indices, ref vertexOffset);
                     }
                     if (IsFaceVisible(currentChunk, sideSize, x, y, z - 1))
                     {
-                        float[] frontVertices = [
+                        float[] backVertices = [
                             x,   y,   z,    0.0f,  0.0f, -1.0f, 1.0f, 1.0f,
                             x+1, y,   z,    0.0f,  0.0f, -1.0f, 0.0f, 1.0f,
                             x+1, y+1, z,    0.0f,  0.0f, -1.0f, 0.0f, 0.0f,
                             x,   y+1, z,    0.0f,  0.0f, -1.0f, 1.0f, 0.0f,
                         ];
-                        vertices.AddRange(frontVertices);
+                        vertices.AddRange(backVertices);
 
                         AddIndices(indices, ref vertexOffset);
                     }
@@ -100,7 +100,7 @@ public static class CulledMesher
 
     private static void AddIndices(List<uint> indices, ref uint vertexOffset)
     {
-        uint[] bottomIndices = [
+        uint[] indicesToAdd = [
             vertexOffset + 0u,
             vertexOffset + 3u,
             vertexOffset + 1u,
@@ -111,11 +111,13 @@ public static class CulledMesher
         ];
 
         vertexOffset += 4;
-        indices.AddRange(bottomIndices);
+        indices.AddRange(indicesToAdd);
     }
 
     private static bool IsFaceVisible(Chunk currentChunk, int sideSize, int voxelX, int voxelY, int voxelZ)
     {
+        // TODO: get world voxel instead
+
         if (voxelY < 0 || voxelY >= Chunk.Size)
         {
             Vector3 offset = new Vector3(0, Math.Clamp(voxelY, -1, 1), 0) * currentChunk.WorldSize;
