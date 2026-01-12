@@ -1,5 +1,4 @@
-﻿using FloreEngine.Diagnostics;
-using FloreEngine.Rendering;
+﻿using FloreEngine.Rendering;
 using FloreEngine.Utils;
 using FloreEngine.World;
 using Silk.NET.Input;
@@ -27,10 +26,10 @@ internal class Controller
     internal void Update(double deltaTime)
     {
         this.deltaTime = deltaTime;
-        var moveSpeed = Speed * (float)deltaTime;
-        var camFrontAndBack = moveSpeed * Camera.Forward;
-        var camSides = Vector3.Normalize(Vector3.Cross(Camera.Forward, Camera.Up)) * moveSpeed;
-        var camUpAndDown = moveSpeed * Camera.Up;
+        float moveSpeed = Speed * (float)deltaTime;
+        Vector3 camFrontAndBack = moveSpeed * Camera.Forward;
+        Vector3 camSides = Vector3.Normalize(Vector3.Cross(Camera.Forward, Camera.Up)) * moveSpeed;
+        Vector3 camUpAndDown = moveSpeed * Camera.Up;
 
         if (Keyboard.IsKeyPressed(Key.AltLeft))
             Cursor.CursorMode = CursorMode.Normal;
@@ -63,8 +62,8 @@ internal class Controller
         if(mousePosition == default) mousePosition = position;
         else
         {
-            var xOffset = (position.X - mousePosition.X) * lookSensitivity;
-            var yOffset = (position.Y - mousePosition.Y) * lookSensitivity;
+            float xOffset = (position.X - mousePosition.X) * lookSensitivity;
+            float yOffset = (position.Y - mousePosition.Y) * lookSensitivity;
             mousePosition = position;
 
             Camera.Yaw += xOffset;

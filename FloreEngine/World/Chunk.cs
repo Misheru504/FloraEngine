@@ -41,7 +41,7 @@ internal class Chunk : IDisposable
 
                 for (int y = 0; y < Size; y++)
                 {
-                    float worldY = (y*Scale) + Position.Y + 64;
+                    float worldY = (y * Scale) + Position.Y + 64;
 
                     if (worldY <= height)
                     {

@@ -54,16 +54,4 @@ public sealed class Camera
     }
 
     public Vector3 RelativePosition(Vector3 absolutePosition) => absolutePosition - Position;
-
-    /*public static Matrix4x4 CreateReversedZPerspective(float fov, float aspect, float nearPlane)
-    {
-        float f = 1.0f / MathF.Tan(fov * 0.5f);
-
-        return new Matrix4x4(
-            f / aspect, 0, 0, 0,
-            0, f, 0, 0,
-            0, 0, 0, -1,
-            0, 0, nearPlane, 0
-        );
-    }*/
 }
