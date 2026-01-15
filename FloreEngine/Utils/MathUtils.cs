@@ -11,6 +11,11 @@ public static class MathUtils
         return (int) (Math.Abs(pointB.X - pointA.X) + Math.Abs(pointB.Y - pointA.Y) + Math.Abs(pointB.Z - pointA.Z));
     }
 
+    public static int ChebyshevDistance(Vector3 pointA, Vector3 pointB)
+    {
+        return Math.Max((int)Math.Abs(pointB.X - pointA.X), Math.Max((int)Math.Abs(pointB.Y - pointA.Y), (int)Math.Abs(pointB.Z - pointA.Z)));
+    }
+
     public static Vector3 WorldToChunkCoord(Vector3 worldCoord, int chunkSize)
     {
         return new Vector3(

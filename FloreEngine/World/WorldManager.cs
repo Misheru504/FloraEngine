@@ -1,4 +1,5 @@
 ﻿using FloreEngine.Diagnostics;
+using FloreEngine.Rendering;
 using FloreEngine.Utils;
 using System.Numerics;
 
@@ -11,7 +12,7 @@ internal class WorldManager : IDisposable
 
     public readonly Dictionary<Vector3, Chunk> ChunkMap;
 
-    public int MaxLOD = 4;
+    public int MaxLOD = 0;
     public int RenderDistance = 4;
 
     public FastNoise Noise;
@@ -29,6 +30,8 @@ internal class WorldManager : IDisposable
 
     public unsafe void Update()
     {
+        // UnloadChunks();
+
         int oldLength = ChunkMap.Count;
         for(int lod = 0; lod <= MaxLOD; lod++)
         {
@@ -69,6 +72,16 @@ internal class WorldManager : IDisposable
             {
                 chunk.CreateRendering();
             }
+        }
+    }
+
+    private void UnloadChunks()
+    {
+        Vector3 playerPos = Controller.ChunkPos;
+
+        foreach(Vector3 pos in ChunkMap.Keys)
+        {
+            if(pos.X == pos.Y && pos.Y == pos.Z) Console.WriteLine(MathUtils.ChebyshevDistance(pos, playerPos));
         }
     }
 
