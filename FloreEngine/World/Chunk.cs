@@ -11,7 +11,7 @@ internal class Chunk : IDisposable
 
     public Vector3 Position;
     public int Level;
-    public bool IsProto; // A proto chunk filled with the base terrain, without features and mesh
+    public bool hasFeatures; // A proto chunk filled with the base terrain, without features and mesh
 
     public ushort[]? Voxels;
     public Mesh? Mesh;
@@ -19,13 +19,14 @@ internal class Chunk : IDisposable
     public int Scale => 1 << Level;
     public int WorldSize => Size * Scale;
 
-    public Chunk(Vector3 position, int level)
+    public Chunk(Vector3 position, int level, bool hasFeatures)
     {
+        this.hasFeatures = hasFeatures;
         Position = position;
         Level = level;
     }
 
-    public void FillVoxels()
+    public void CreateBaseTerrain()
     {
         Voxels = new ushort[Size * Size * Size];
         float[] noiseMap = new float[WorldSize * WorldSize]; 
@@ -52,9 +53,14 @@ internal class Chunk : IDisposable
         }
     }
 
+    public void CreateFeatures()
+    {
+        // TODO: TERRAIN FEATURES (TREES, ORES...)
+    }
+
     public static int Index(int x, int y, int z) => x + z * Size + y * Size * Size;
 
-    public void CreateMesh()
+    public void MeshChunk()
     {
         if (Voxels == null) return;
 

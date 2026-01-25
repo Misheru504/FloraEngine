@@ -44,4 +44,13 @@ public static class MathUtils
             point.Y < min.Y || point.Y > max.Y ||
             point.Z < min.Z || point.Z > max.Z;
     }
+
+    public static bool OutOfDistance(Vector3 vecA, Vector3 vecB, int distance)
+    {
+        float dX = Math.Abs(vecB.X - vecA.X);
+        float dY = Math.Abs(vecB.Y - vecA.Y);
+        float dZ = Math.Abs(vecB.Z - vecA.Z);
+
+        return dX > distance || dY > distance || dZ > distance;
+    }
 }

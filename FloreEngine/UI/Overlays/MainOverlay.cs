@@ -20,7 +20,7 @@ internal class MainOverlay : IImGuiOverlay
             Vector3 voxelPos = MathUtils.WorldToTilePosition(camera.Position);
 
             Vector3 reconstructedPos = Controller.ChunkPos + voxelPos;
-            ushort voxel = WorldManager.Instance.GetVoxelAtWorldPos((int) reconstructedPos.X, (int) reconstructedPos.Y, (int) reconstructedPos.Z, 16, 1);
+            ushort voxel = WorldManager.Instance.GetVoxelAtWorldPos((int) reconstructedPos.X, (int) reconstructedPos.Y, (int) reconstructedPos.Z, 0);
 
             ImGui.Text($"Version: {Program.VERSION}");
             ImGui.Text($"FPS: {Program.FPS:0} ({Program.DeltaFPS*1000:F2}ms/frame)");
@@ -30,6 +30,8 @@ internal class MainOverlay : IImGuiOverlay
             ImGui.Text($"Camera rot: <{camera.Yaw:F2}, {camera.Pitch:F2}>");
             ImGui.Text($"Camera speed: {Controller.Instance.Speed:F2}");
             ImGui.Spacing();
+            ImGui.Text($"Chunks count (rendered): {WorldManager.Instance.RenderedChunks.Count}");
+            ImGui.Text($"Chunks count (loaded): {WorldManager.Instance.LoadedChunks.Count}");
             ImGui.Text($"Seed: {WorldManager.Instance.Noise.Seed}");
             ImGui.Text($"Chunk pos: {Controller.ChunkPos:0}");
             ImGui.Text($"Voxel pos: {voxelPos:0}");

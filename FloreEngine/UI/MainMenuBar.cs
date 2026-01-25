@@ -1,5 +1,6 @@
 ﻿using FloreEngine.Diagnostics;
 using FloreEngine.Rendering;
+using FloreEngine.World;
 using ImGuiNET;
 using Silk.NET.OpenGL;
 
@@ -38,6 +39,7 @@ internal class MainMenuBar : IMainMenuBar
         if (ImGui.MenuItem("Delete logs folder")) Logger.ClearLogFolder();
         if (ImGui.MenuItem("Wireframe view", null, ref Program.IsWireframe)) Program.Graphics.PolygonMode(GLEnum.FrontAndBack, Program.IsWireframe ? GLEnum.Line : GLEnum.Fill);
         if (ImGui.MenuItem("Test console colors")) Logger.TestColors();
+        ImGui.MenuItem("Center world generation", null, ref WorldManager.centerWorldGen);
         if (ImGui.BeginMenu("Rendering mode"))
         {
             if (ImGui.MenuItem("Default")) MainRenderer.Instance.RenderingMode = MainRenderer.RenderMode.Default;

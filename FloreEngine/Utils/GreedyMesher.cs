@@ -93,10 +93,10 @@ public static class GreedyMesher
                             Vector3 worldComparePos = currentChunk.Position + (comparePos * currentChunk.Scale);
 
                             if (pos[d] >= 0) current = currentChunk.Voxels[Chunk.Index(pos[0], pos[1], pos[2])];
-                            else current = WorldManager.Instance.GetVoxelAtWorldPos((int)worldVoxelPos.X, (int)worldVoxelPos.Y, (int)worldVoxelPos.Z, currentChunk.WorldSize, currentChunk.Scale);
+                            else current = WorldManager.Instance.GetVoxelAtWorldPos((int)worldVoxelPos.X, (int)worldVoxelPos.Y, (int)worldVoxelPos.Z, currentChunk.Level);
 
                             if (pos[d] < Chunk.Size - 1) compare = currentChunk.Voxels[Chunk.Index(pos[0] + q[0], pos[1] + q[1], pos[2] + q[2])];
-                            else compare = WorldManager.Instance.GetVoxelAtWorldPos((int)worldComparePos.X, (int)worldComparePos.Y, (int)worldComparePos.Z, currentChunk.WorldSize, currentChunk.Scale); ;
+                            else compare = WorldManager.Instance.GetVoxelAtWorldPos((int)worldComparePos.X, (int)worldComparePos.Y, (int)worldComparePos.Z, currentChunk.Level);
 
                             if (b == 0)
                             {

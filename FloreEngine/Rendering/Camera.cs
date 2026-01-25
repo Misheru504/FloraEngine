@@ -47,7 +47,7 @@ public sealed class Camera
 
         Yaw = 0;
         Pitch = 0;
-        FoV = 70;
+        FoV = 100;
 
         NearPlane = 0.1f;
         FarPlane = 5000.0f;

@@ -121,7 +121,7 @@ public static class CulledMesher
             // Voxel out of bounds
             Vector3 voxelPos = new Vector3(voxelX, voxelY, voxelZ);
             Vector3 worldTilePos = currentChunk.Position + (voxelPos * currentChunk.Scale);
-            return WorldManager.Instance.GetVoxelAtWorldPos((int)worldTilePos.X, (int)worldTilePos.Y, (int)worldTilePos.Z, currentChunk.WorldSize, currentChunk.Scale) == 0;
+            return WorldManager.Instance.GetVoxelAtWorldPos((int)worldTilePos.X, (int)worldTilePos.Y, (int)worldTilePos.Z, currentChunk.Level) == 0;
         }
 
         return currentChunk.Voxels?[Chunk.Index(voxelX, voxelY, voxelZ)] == 0;
