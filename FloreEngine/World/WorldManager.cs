@@ -116,14 +116,18 @@ internal class WorldManager : IDisposable
     {
         foreach (var v in RenderedChunks)
         {
-            if (MathUtils.OutOfDistance(v.Key, centerPos, RenderDistance * v.Value.WorldSize)) 
+            if (MathUtils.OutOfDistance(v.Key, centerPos, RenderDistance * v.Value.WorldSize))
+            {
                 RenderedChunks.Remove(v.Key);
+            }
         }
 
         foreach (var v in LoadedChunks)
         {
             if (MathUtils.OutOfDistance(v.Key.Item1, centerPos, (RenderDistance+1) * v.Value.WorldSize))
+            {
                 LoadedChunks.Remove(v.Key, out _);
+            }
         }
     }
 
@@ -136,25 +140,22 @@ internal class WorldManager : IDisposable
         Vector3 localTilePos = MathUtils.WorldToTilePosition(worldTilePos / scale);
         Vector3 chunkPos = MathUtils.WorldToChunkCoord(worldTilePos, chunkSize);
 
-        if (LoadedChunks.TryGetValue((chunkPos, level), out Chunk? c))
-        {
-            if (c == null || c.WorldSize != chunkSize || c.Voxels == null) return 0;
-        }
-        else
+        LoadedChunks.TryGetValue((chunkPos, level), out Chunk? c);
+
+        if (c == null || c.Voxels == null)
         {
             c = new Chunk(chunkPos, level, false);
             c.CreateBaseTerrain();
             LoadedChunks[(chunkPos, level)] = c;
         }
 
-        return c != null ? c.Voxels[Chunk.Index((int)localTilePos.X, (int)localTilePos.Y, (int)localTilePos.Z)] : (ushort) 0;
-
-        // return 0;
+        // if (level != 0) return 0;
+        return c.Voxels![Chunk.Index((int)localTilePos.X, (int)localTilePos.Y, (int)localTilePos.Z)];
     }
 
     public void Dispose()
     {
-        foreach (Chunk chunk in RenderedChunks.Values)
+        foreach (Chunk chunk in LoadedChunks.Values)
             chunk.Dispose();
 
         RenderedChunks.Clear();

@@ -36,8 +36,6 @@ public sealed class Camera
     internal Matrix4x4 ProjectionMatrix => Matrix4x4.CreatePerspectiveFieldOfView(MathUtils.DegreesToRadians(FoV), Program.AspectRatio, NearPlane, FarPlane);
     internal Frustum Frustum => new Frustum(ViewMatrix * ProjectionMatrix);
 
-    // internal Matrix4x4 FarProjectionMatrix => CreateReversedZPerspective(MathUtils.DegreesToRadians(FoV), Program.AspectRatio, 0.1f);   
-
     private Camera()
     {
         Position = Vector3.Zero;

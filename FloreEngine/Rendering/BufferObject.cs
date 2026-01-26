@@ -13,25 +13,6 @@ internal unsafe class BufferObject<DataType> : IDisposable
     private readonly BufferTargetARB target;
     private readonly uint handle;
 
-    public BufferObject(nuint size, nuint data, BufferTargetARB target, BufferUsageARB usage)
-    {
-        this.target = target;
-
-        handle = Graphics.GenBuffer();
-        Bind();
-        Graphics.BufferData(target, size, (void*) data, usage);
-    }
-
-    public BufferObject(nuint size, BufferTargetARB target, BufferUsageARB usage)
-    {
-
-        this.target = target;
-
-        handle = Graphics.GenBuffer();
-        Bind();
-        Graphics.BufferData(target, size, null, usage);
-    }
-
     public BufferObject(Span<DataType> data, BufferTargetARB target, BufferUsageARB usage)
     {
         this.target = target;
@@ -44,10 +25,18 @@ internal unsafe class BufferObject<DataType> : IDisposable
         }
     }
 
-    public void BindBase(uint index) => Graphics.BindBufferBase(target, index, handle);
+    /// <summary>
+    /// Binds this buffer in the GPU
+    /// </summary>
     public void Bind() => Graphics.BindBuffer(target, handle);
-    public void Unbind() => Graphics.BindBuffer(target, 0);
-    public void SubData(nint offset, nuint size, void* data) => Graphics.BufferSubData(target, offset, size, data);
 
+    /// <summary>
+    /// Unbinds this buffer
+    /// </summary>
+    public void Unbind() => Graphics.BindBuffer(target, 0);
+
+    /// <summary>
+    /// Delete this buffer
+    /// </summary>
     public void Dispose() => Graphics.DeleteBuffer(handle);
 }

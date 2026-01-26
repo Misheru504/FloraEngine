@@ -63,6 +63,10 @@ internal class Mesh : IDisposable
 
     public void Dispose()
     {
+        vao?.Dispose();
+        vbo?.Dispose();
+        ebo?.Dispose();
+
         GC.SuppressFinalize(this);
     }
 }

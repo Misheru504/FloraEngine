@@ -8,10 +8,17 @@ namespace FloreEngine.Rendering.Shaders;
 /// </summary>
 internal abstract class Shader : IDisposable
 {
-    protected static GL Graphics => Program.Graphics;
-    protected Dictionary<string, int> uniformLocations = new Dictionary<string, int>();
-    protected uint handle;
+    protected private static GL Graphics => Program.Graphics;
+    protected private Dictionary<string, int> uniformLocations = new Dictionary<string, int>();
+    protected private uint handle;
 
+    /// <summary>
+    /// Load a shader into the GPU
+    /// </summary>
+    /// <param name="type">The type of the shader</param>
+    /// <param name="content">The shader code</param>
+    /// <returns>The shader handle</returns>
+    /// <exception cref="Exception"></exception>
     internal static uint LoadShader(ShaderType type, string content)
     {
         uint shader = Graphics.CreateShader(type);
@@ -28,6 +35,12 @@ internal abstract class Shader : IDisposable
         return shader;
     }
 
+    /// <summary>
+    /// Returns the handle of a uniform
+    /// </summary>
+    /// <param name="name">Name of the uniform</param>
+    /// <returns>The location of the uniform</returns>
+    /// <exception cref="Exception"></exception>
     private int GetUniformLocation(string name)
     {
         if(uniformLocations.TryGetValue(name, out int location)) return location; // Caching locations
@@ -122,7 +135,13 @@ internal abstract class Shader : IDisposable
         }
     }
 
-
+    /// <summary>
+    /// Sets this shader as active
+    /// </summary>
     public void UseProgram() => Graphics.UseProgram(handle);
+
+    /// <summary>
+    /// Delete the shader in the GPU
+    /// </summary>
     public void Dispose() => Graphics.DeleteProgram(handle);
 }
