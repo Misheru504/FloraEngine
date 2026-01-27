@@ -123,13 +123,13 @@ public static class Program
 
         ImGuiController.Update((float)deltaTime);
         Controller.Instance.Update(deltaTime);
-        WorldManager.Instance.Update();
+        WorldManager.Instance.Update(deltaTime);
     }
 
     public static void Render(double deltaTime)
     {
         Graphics.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-        MainRenderer.Instance.Draw();
+        Renderer.Instance.Draw();
 
 
         MainMenuBar.DrawBar(deltaTime);
@@ -173,7 +173,8 @@ public static class Program
     {
         Logger.Print("Closing...");
 
-        MainRenderer.Instance.Dispose();
+        Renderer.Instance.Dispose();
+
         WorldManager.Instance.Dispose();
 
         Logger.Print("See ya!");

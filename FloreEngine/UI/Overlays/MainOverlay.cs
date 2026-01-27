@@ -20,7 +20,8 @@ internal class MainOverlay : IImGuiOverlay
             Vector3 voxelPos = MathUtils.WorldToTilePosition(camera.Position);
 
             Vector3 reconstructedPos = Controller.ChunkPos + voxelPos;
-            ushort voxel = WorldManager.Instance.GetVoxelAtWorldPos((int) reconstructedPos.X, (int) reconstructedPos.Y, (int) reconstructedPos.Z, 0);
+            //ushort voxel = WorldManager.Instance.GetVoxelAtWorldPos((int) reconstructedPos.X, (int) reconstructedPos.Y, (int) reconstructedPos.Z, 0);
+            ushort voxel = 0;
 
             ImGui.Text($"Version: {Program.VERSION}");
             ImGui.Text($"FPS: {Program.FPS:0} ({Program.DeltaFPS*1000:F2}ms/frame)");
@@ -37,7 +38,7 @@ internal class MainOverlay : IImGuiOverlay
             ImGui.Text($"Voxel pos: {voxelPos:0}");
             ImGui.Text($"Reconstruced pos: {reconstructedPos:0}");
             ImGui.Text($"voxel type: {voxel}");
-            ImGui.Text($"Vertex count: {MainRenderer.Instance.VertexCount}");
+            ImGui.Text($"Vertex count: {Renderer.Instance.VertexCount}");
             ImGui.End();
         }
     }

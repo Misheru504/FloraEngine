@@ -27,13 +27,13 @@ public static class MathUtils
 
     public static Vector3 WorldToTilePosition(Vector3 worldPostion)
     {
-        int localX = (int)Math.Floor(worldPostion.X) % Chunk.Size;
-        int localY = (int)Math.Floor(worldPostion.Y) % Chunk.Size;
-        int localZ = (int)Math.Floor(worldPostion.Z) % Chunk.Size;
+        int localX = (int)Math.Floor(worldPostion.X) % Chunk.SIZE;
+        int localY = (int)Math.Floor(worldPostion.Y) % Chunk.SIZE;
+        int localZ = (int)Math.Floor(worldPostion.Z) % Chunk.SIZE;
 
-        if (localX < 0) localX += Chunk.Size;
-        if (localY < 0) localY += Chunk.Size;
-        if (localZ < 0) localZ += Chunk.Size;
+        if (localX < 0) localX += Chunk.SIZE;
+        if (localY < 0) localY += Chunk.SIZE;
+        if (localZ < 0) localZ += Chunk.SIZE;
 
         return new Vector3(localX, localY, localZ);
     }

@@ -1,80 +1,84 @@
 ﻿using FloreEngine.Rendering;
 using FloreEngine.Utils;
+using System.Drawing;
 using System.Numerics;
 
 namespace FloreEngine.World;
 
 internal class Chunk : IDisposable
 {
-    public const int Size = 16;
-    public static FastNoise Noise => WorldManager.Instance.Noise;
+    public const int SIZE = 16;
+    public const int VOLUME = SIZE * SIZE * SIZE;
 
-    public Vector3 Position;
-    public int Level;
-    public bool hasFeatures; // A proto chunk filled with the base terrain, without features and mesh
+    private static FastNoise Noise => WorldManager.Instance.Noise;
 
-    public ushort[]? Voxels;
-    public Mesh? Mesh;
+    public Vector3 Position { get; }
+    public int LodLevel { get; }
+    public bool HasFeatures { get; set; }
+    public int Scale { get; }
+    public int WorldSize { get; }
+    public Mesh? Mesh { get; private set; }
 
-    public int Scale => 1 << Level;
-    public int WorldSize => Size * Scale;
+    private readonly ushort[] voxels;
 
     public Chunk(Vector3 position, int level, bool hasFeatures)
     {
-        this.hasFeatures = hasFeatures;
         Position = position;
-        Level = level;
+        LodLevel = level;
+        HasFeatures = hasFeatures;
+        Scale = 1 << LodLevel;
+        WorldSize = Scale * SIZE;
+
+        voxels = new ushort[VOLUME];
+
+        CreateBaseTerrain();
+        if (HasFeatures)
+        {
+            CreateFeatures();
+            UpdateMesh();
+        }
     }
 
-    public void CreateBaseTerrain()
+    private void CreateBaseTerrain()
     {
-        Voxels = new ushort[Size * Size * Size];
-        float[] noiseMap = new float[WorldSize * WorldSize]; 
+        float[] noiseMap = new float[WorldSize * WorldSize];
         Noise.GenUniformGrid2D(noiseMap, (int)Position.X, (int)Position.Z, WorldSize, WorldSize, FastNoise.FREQUENCY, Noise.Seed);
 
-        for (int x = 0; x < Size; x++)
+        for (int x = 0; x < SIZE; x++)
         {
             int worldX = x * Scale;
-            for (int z = 0; z < Size; z++)
+            for (int z = 0; z < SIZE; z++)
             {
                 int worldZ = z * Scale;
                 float height = noiseMap[worldZ * WorldSize + worldX];
 
-                for (int y = 0; y < Size; y++)
+                for (int y = 0; y < SIZE; y++)
                 {
                     float worldY = (y * Scale) + Position.Y + 64;
 
                     if (worldY <= height)
                     {
-                        Voxels[Index(x, y, z)] = 1;
+                        SetVoxelAt(x, y, z, 1);
                     }
                 }
             }
         }
     }
-
     public void CreateFeatures()
     {
-        // TODO: TERRAIN FEATURES (TREES, ORES...)
+        HasFeatures = true;
+
+        // TODO: TERRAIN FEATURES
     }
-
-    public static int Index(int x, int y, int z) => x + z * Size + y * Size * Size;
-
-    public void MeshChunk()
+    public void UpdateMesh()
     {
-        if (Voxels == null) return;
-
-        Mesh = new Mesh();
-        Mesh.CreateMesh(this);
+        Mesh?.Dispose();
+        Mesh = new Mesh(this);
     }
 
-    public void CreateRendering()
-    {
-        if (Mesh == null || Mesh.vao != null) return;
-        if (Level != 0) Voxels = null;
-
-        Mesh.CreateBuffers();
-    }
+    public static int GetIndex(int x, int y, int z) => x + z * SIZE + y * SIZE * SIZE;
+    public ushort GetVoxelAt(int x, int y, int z) => voxels[GetIndex(x, y, z)];
+    public void SetVoxelAt(int x, int y, int z, ushort voxel) => voxels[GetIndex(x, y, z)] = voxel;
 
     public void Dispose()
     {

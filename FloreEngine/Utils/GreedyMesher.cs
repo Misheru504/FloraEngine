@@ -48,10 +48,6 @@ public static class GreedyMesher
 
     internal static void CreateGreedyMesh(Chunk currentChunk, List<float> vertices, List<uint> indices)
     {
-        if(currentChunk.Voxels == null) return;
-
-        // TODO: Chunk culling
-
         uint vertexOffset = 0;
 
         for (int b = 0; b < 2; b++)
@@ -64,7 +60,7 @@ public static class GreedyMesher
                 int[] pos = [0, 0, 0];
                 int[] q = [0, 0, 0];
 
-                ushort[] mask = new ushort[Chunk.Size * Chunk.Size];
+                ushort[] mask = new ushort[Chunk.SIZE * Chunk.SIZE];
                 q[d] = 1;
 
                 Face face = Face.Front;
@@ -74,14 +70,14 @@ public static class GreedyMesher
 
                 pos[d] = -1;
 
-                while (pos[d] < Chunk.Size)
+                while (pos[d] < Chunk.SIZE)
                 {
                     int maskIndex = 0;
                     pos[v] = 0;
-                    while (pos[v] < Chunk.Size)
+                    while (pos[v] < Chunk.SIZE)
                     {
                         pos[u] = 0;
-                        while (pos[u] < Chunk.Size)
+                        while (pos[u] < Chunk.SIZE)
                         {
                             ushort current;
                             ushort compare;
@@ -92,11 +88,11 @@ public static class GreedyMesher
                             Vector3 worldVoxelPos = currentChunk.Position + (voxelPos * currentChunk.Scale);
                             Vector3 worldComparePos = currentChunk.Position + (comparePos * currentChunk.Scale);
 
-                            if (pos[d] >= 0) current = currentChunk.Voxels[Chunk.Index(pos[0], pos[1], pos[2])];
-                            else current = WorldManager.Instance.GetVoxelAtWorldPos((int)worldVoxelPos.X, (int)worldVoxelPos.Y, (int)worldVoxelPos.Z, currentChunk.Level);
+                            if (pos[d] >= 0) current = currentChunk.GetVoxelAt(pos[0], pos[1], pos[2]);
+                            else current = WorldManager.Instance.GetVoxelAtWorldPos((int)worldVoxelPos.X, (int)worldVoxelPos.Y, (int)worldVoxelPos.Z, currentChunk.LodLevel);
 
-                            if (pos[d] < Chunk.Size - 1) compare = currentChunk.Voxels[Chunk.Index(pos[0] + q[0], pos[1] + q[1], pos[2] + q[2])];
-                            else compare = WorldManager.Instance.GetVoxelAtWorldPos((int)worldComparePos.X, (int)worldComparePos.Y, (int)worldComparePos.Z, currentChunk.Level);
+                            if (pos[d] < Chunk.SIZE - 1) compare = currentChunk.GetVoxelAt(pos[0] + q[0], pos[1] + q[1], pos[2] + q[2]);
+                            else compare = WorldManager.Instance.GetVoxelAtWorldPos((int)worldComparePos.X, (int)worldComparePos.Y, (int)worldComparePos.Z, currentChunk.LodLevel);
 
                             if (b == 0)
                             {
@@ -117,10 +113,10 @@ public static class GreedyMesher
                     pos[d]++;
                     maskIndex = 0;
 
-                    for (int j = 0; j < Chunk.Size; j++)
+                    for (int j = 0; j < Chunk.SIZE; j++)
                     {
                         int i = 0;
-                        while (i < Chunk.Size)
+                        while (i < Chunk.SIZE)
                         {
                             ushort voxel = mask[maskIndex];
 
@@ -132,7 +128,7 @@ public static class GreedyMesher
                             }
 
                             width = 1;
-                            while (i + width < Chunk.Size && voxel == mask[maskIndex + width])
+                            while (i + width < Chunk.SIZE && voxel == mask[maskIndex + width])
                             {
                                 width++;
                             }
@@ -140,11 +136,11 @@ public static class GreedyMesher
                             bool done = false;
                             height = 1;
 
-                            while (height + j < Chunk.Size)
+                            while (height + j < Chunk.SIZE)
                             {
                                 for(int k = 0; k < width; k++)
                                 {
-                                    if (voxel != mask[maskIndex + k + height * Chunk.Size])
+                                    if (voxel != mask[maskIndex + k + height * Chunk.SIZE])
                                     {
                                         done = true;
                                         break;
@@ -169,7 +165,7 @@ public static class GreedyMesher
                             for (int l = 0; l < height; l++)
                                 for (int k = 0; k < width; k++)
                                 {
-                                    mask[maskIndex + k + l * Chunk.Size] = 0;
+                                    mask[maskIndex + k + l * Chunk.SIZE] = 0;
                                 }
 
                             i += width;

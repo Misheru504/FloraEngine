@@ -61,7 +61,7 @@ public static class Logger
         filename = Path.GetFileNameWithoutExtension(filename);
 
         // Example of a log message:
-        // [ INFO ] MainRenderer: Loading...
+        // [ INFO ] Renderer: Loading...
         string formattedLog = $"[ {levels[(int) level]} ] " + // Show the level of the error
             $"{filename}" + // File that called it
             $"{(filename != "" ? ": " : "")}" + // Add ": " if the file isn't empty, else add nothing

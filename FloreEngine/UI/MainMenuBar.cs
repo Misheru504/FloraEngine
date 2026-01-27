@@ -42,10 +42,10 @@ internal class MainMenuBar : IMainMenuBar
         ImGui.MenuItem("Center world generation", null, ref WorldManager.centerWorldGen);
         if (ImGui.BeginMenu("Rendering mode"))
         {
-            if (ImGui.MenuItem("Default")) MainRenderer.Instance.RenderingMode = MainRenderer.RenderMode.Default;
-            if (ImGui.MenuItem("Depth")) MainRenderer.Instance.RenderingMode = MainRenderer.RenderMode.Depth;
-            if (ImGui.MenuItem("Normals")) MainRenderer.Instance.RenderingMode = MainRenderer.RenderMode.Normals;
-            if (ImGui.MenuItem("UVs")) MainRenderer.Instance.RenderingMode = MainRenderer.RenderMode.UV;
+            if (ImGui.MenuItem("Default")) Renderer.Instance.RenderingMode = Renderer.RenderMode.Default;
+            if (ImGui.MenuItem("Depth")) Renderer.Instance.RenderingMode = Renderer.RenderMode.Depth;
+            if (ImGui.MenuItem("Normals")) Renderer.Instance.RenderingMode = Renderer.RenderMode.Normals;
+            if (ImGui.MenuItem("UVs")) Renderer.Instance.RenderingMode = Renderer.RenderMode.UV;
             ImGui.EndMenu();
         }
         ImGui.Separator();

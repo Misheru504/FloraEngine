@@ -1,7 +1,6 @@
 ﻿using FloreEngine.Utils;
 using FloreEngine.World;
 using Silk.NET.OpenGL;
-using System.Numerics;
 
 namespace FloreEngine.Rendering;
 
@@ -15,13 +14,23 @@ internal class Mesh : IDisposable
     public uint IndexCount;
     public int VertexCount;
 
+    public float[] Vertices;
+    public uint[] Indices;
+
+    /// <summary>
+    /// Contains the list of vertices and indices for a mesh
+    /// </summary>
     internal struct MeshData
     {
         internal List<float> Vertices;
         internal List<uint> Indices;
     }
 
-    public void CreateMesh(Chunk currentChunk)
+    /// <summary>
+    /// Creates a new mesh for a chunk
+    /// </summary>
+    /// <param name="currentChunk">Chunk to mesh</param>
+    public Mesh(Chunk currentChunk)
     {
         List<float> vertices = new List<float>();
         List<uint> indices = new List<uint>();
@@ -29,17 +38,22 @@ internal class Mesh : IDisposable
         //CulledMesher.CreateCulledMesh(currentChunk, vertices, indices);
         GreedyMesher.CreateGreedyMesh(currentChunk, vertices, indices);
 
-        VertexCount = vertices.Count / MainRenderer.VertexStride;
+        VertexCount = vertices.Count / Renderer.VertexStride;
         IndexCount = (uint)indices.Count;
 
         meshData = new MeshData()
-        { 
-            Vertices = vertices, 
-            Indices = indices 
+        {
+            Vertices = vertices,
+            Indices = indices
         };
+
+        Vertices = vertices.ToArray();
+        Indices = indices.ToArray();
+
+        CreateBuffers();
     }
 
-    public void CreateBuffers()
+    private void CreateBuffers()
     {
         if (meshData == null) return;
 

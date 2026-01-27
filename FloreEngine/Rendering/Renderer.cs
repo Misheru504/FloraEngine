@@ -7,10 +7,10 @@ using System.Numerics;
 
 namespace FloreEngine.Rendering;
 
-internal unsafe class MainRenderer : IDisposable
+internal unsafe class Renderer : IDisposable
 {
-    private static readonly Lazy<MainRenderer> _instance = new Lazy<MainRenderer>(() => new MainRenderer());
-    public static MainRenderer Instance => _instance.Value;
+    private static readonly Lazy<Renderer> _instance = new Lazy<Renderer>(() => new Renderer());
+    public static Renderer Instance => _instance.Value;
     private static GL Graphics => Program.Graphics;
 
     // Vertex stride: 3 (position) + 3 (normal) + 2 (uv) = 8 floats
@@ -20,8 +20,6 @@ internal unsafe class MainRenderer : IDisposable
     internal RenderMode RenderingMode;
 
     public long VertexCount;
-
-
 
     // Storing shader code for simplicity, there are methods in Shader class to read them from files
     private const string VERTEX_SHADER = @"
@@ -104,7 +102,7 @@ internal unsafe class MainRenderer : IDisposable
         UV = 3,
     }
 
-    private MainRenderer()
+    private Renderer()
     {
         Logger.Render("Loading renderer...");
 
@@ -148,7 +146,7 @@ internal unsafe class MainRenderer : IDisposable
         shader?.Dispose();
     }
 
-    public static bool IsInFrustum(Chunk c, Frustum frustum)
+    private static bool IsInFrustum(Chunk c, Frustum frustum)
     {
         foreach (var plane in frustum.Planes)
         {
