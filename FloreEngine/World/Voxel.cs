@@ -1,0 +1,60 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace FloreEngine.World
+{
+    internal class Voxel
+    {
+        public static List<Voxel> Voxels = new List<Voxel>();
+
+        public ushort ID { get; }
+        public string Name { get; }
+
+        public Voxel(ushort id, string name)
+        {
+            ID = id;
+            Name = name;
+
+            Voxels.Add(this);
+        }
+
+        public VoxelData GetDefaultData()
+        {
+            return new VoxelData(ID, "");
+        }
+
+        public static Voxel AIR = new Voxel(0, "air");
+        public static Voxel PURPLE = new Voxel(1, "purple");
+
+        public static string GetVoxelName(ushort id)
+        {
+            return Voxels[id].Name;
+        }
+    }
+
+    internal struct VoxelData
+    {
+        public ushort ID { get; }
+        public string Data { get; private set; }
+
+        public VoxelData()
+        {
+            ID = 0;
+            Data = "";
+        }
+
+        public VoxelData(ushort id, string data)
+        {
+            ID = id; 
+            Data = data;
+        }
+
+        public void SetData(string data)
+        {
+            Data = data;
+        }
+    }
+}

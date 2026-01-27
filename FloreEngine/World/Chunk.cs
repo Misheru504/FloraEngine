@@ -19,7 +19,7 @@ internal class Chunk : IDisposable
     public int WorldSize { get; }
     public Mesh? Mesh { get; private set; }
 
-    private readonly ushort[] voxels;
+    private readonly VoxelData[] voxels;
 
     public Chunk(Vector3 position, int level, bool hasFeatures)
     {
@@ -29,7 +29,7 @@ internal class Chunk : IDisposable
         Scale = 1 << LodLevel;
         WorldSize = Scale * SIZE;
 
-        voxels = new ushort[VOLUME];
+        voxels = new VoxelData[VOLUME];
 
         CreateBaseTerrain();
         if (HasFeatures)
@@ -58,7 +58,7 @@ internal class Chunk : IDisposable
 
                     if (worldY <= height)
                     {
-                        SetVoxelAt(x, y, z, 1);
+                        SetVoxelAt(x, y, z, Voxel.PURPLE.GetDefaultData());
                     }
                 }
             }
@@ -77,8 +77,8 @@ internal class Chunk : IDisposable
     }
 
     public static int GetIndex(int x, int y, int z) => x + z * SIZE + y * SIZE * SIZE;
-    public ushort GetVoxelAt(int x, int y, int z) => voxels[GetIndex(x, y, z)];
-    public void SetVoxelAt(int x, int y, int z, ushort voxel) => voxels[GetIndex(x, y, z)] = voxel;
+    public VoxelData GetVoxelAt(int x, int y, int z) => voxels[GetIndex(x, y, z)];
+    public void SetVoxelAt(int x, int y, int z, VoxelData voxel) => voxels[GetIndex(x, y, z)] = voxel;
 
     public void Dispose()
     {

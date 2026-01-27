@@ -88,7 +88,7 @@ internal class WorldManager : IDisposable
         }
     }
 
-    public ushort GetVoxelAtWorldPos(int x, int y, int z, int lodLevel)
+    public ushort GetVoxelIdAtWorldPos(int x, int y, int z, int lodLevel)
     {
         int scale = 1 << lodLevel;
         int chunkSize = Chunk.SIZE * (1 << lodLevel);
@@ -106,7 +106,7 @@ internal class WorldManager : IDisposable
         }
 
         // if (level != 0) return 0;
-        return c.GetVoxelAt((int)localTilePos.X, (int)localTilePos.Y, (int)localTilePos.Z);
+        return c.GetVoxelAt((int)localTilePos.X, (int)localTilePos.Y, (int)localTilePos.Z).ID;
     }
 
     public void Dispose()

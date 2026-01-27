@@ -17,7 +17,7 @@ public static class CulledMesher
             {
                 for (int z = 0; z < sideSIZE; z++)
                 {
-                    if (currentChunk.GetVoxelAt(x, y, z) == 0) continue;
+                    if (currentChunk.GetVoxelAt(x, y, z).ID == Voxel.AIR.ID) continue;
 
                     if (IsFaceVisible(currentChunk, sideSIZE, x, y - 1, z))
                     {
@@ -119,10 +119,10 @@ public static class CulledMesher
             // Voxel out of bounds
             Vector3 voxelPos = new Vector3(voxelX, voxelY, voxelZ);
             Vector3 worldTilePos = currentChunk.Position + (voxelPos * currentChunk.Scale);
-            return WorldManager.Instance.GetVoxelAtWorldPos((int)worldTilePos.X, (int)worldTilePos.Y, (int)worldTilePos.Z, currentChunk.LodLevel) == 0;
+            return WorldManager.Instance.GetVoxelIdAtWorldPos((int)worldTilePos.X, (int)worldTilePos.Y, (int)worldTilePos.Z, currentChunk.LodLevel) == 0;
         }
 
-        return currentChunk.GetVoxelAt(voxelX, voxelY, voxelZ) == 0;
+        return currentChunk.GetVoxelAt(voxelX, voxelY, voxelZ).ID == Voxel.AIR.ID;
     }
 
 }

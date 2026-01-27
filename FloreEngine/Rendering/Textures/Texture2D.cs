@@ -47,8 +47,8 @@ internal unsafe class Texture2D : Texture, IDisposable
     {
         Bind();
         Graphics.GenerateMipmap(target);
-        Graphics.TexParameter(target, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
-        Graphics.TexParameter(target, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+        Graphics.TexParameter(target, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.NearestMipmapLinear);
+        Graphics.TexParameter(target, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
         Graphics.TexParameter(target, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
         Graphics.TexParameter(target, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
         Graphics.TexParameter(target, TextureParameterName.TextureWrapR, (int)TextureWrapMode.Repeat);
