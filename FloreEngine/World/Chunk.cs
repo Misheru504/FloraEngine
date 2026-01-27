@@ -36,6 +36,7 @@ internal class Chunk : IDisposable
         {
             CreateFeatures();
             UpdateMesh();
+            UpdateBuffers();
         }
     }
 
@@ -74,6 +75,11 @@ internal class Chunk : IDisposable
     {
         Mesh?.Dispose();
         Mesh = new Mesh(this);
+    }
+
+    public void UpdateBuffers()
+    {
+        Mesh?.CreateBuffers();
     }
 
     public static int GetIndex(int x, int y, int z) => x + z * SIZE + y * SIZE * SIZE;

@@ -16,7 +16,8 @@ internal class WorldManager : IDisposable
     public readonly ConcurrentDictionary<Vector3, Chunk> RenderedChunks;
     public readonly ConcurrentDictionary<(Vector3, int), Chunk> LoadedChunks;
 
-    public static bool centerWorldGen = true;
+    private readonly ConcurrentQueue<Chunk> chunksToGenerate;
+    private readonly ConcurrentQueue<Chunk> chunksToMesh;
 
     internal Vector3 centerPos = Camera.Instance.Position;
 
@@ -35,6 +36,9 @@ internal class WorldManager : IDisposable
 
         RenderedChunks = new ConcurrentDictionary<Vector3, Chunk>();
         LoadedChunks = new ConcurrentDictionary<(Vector3, int), Chunk>();
+
+        chunksToGenerate = new ConcurrentQueue<Chunk>();
+        chunksToMesh = new ConcurrentQueue<Chunk>();
     }
 
 
@@ -56,7 +60,11 @@ internal class WorldManager : IDisposable
                             chunk.CreateFeatures();
 
                         if (chunk.Mesh == null)
+                        {
                             chunk.UpdateMesh();
+                            chunk.UpdateBuffers();
+                        }
+                           
                     }
                     else
                     {

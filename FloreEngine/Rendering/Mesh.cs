@@ -14,9 +14,6 @@ internal class Mesh : IDisposable
     public uint IndexCount;
     public int VertexCount;
 
-    public float[] Vertices;
-    public uint[] Indices;
-
     /// <summary>
     /// Contains the list of vertices and indices for a mesh
     /// </summary>
@@ -46,14 +43,9 @@ internal class Mesh : IDisposable
             Vertices = vertices,
             Indices = indices
         };
-
-        Vertices = vertices.ToArray();
-        Indices = indices.ToArray();
-
-        CreateBuffers();
     }
 
-    private void CreateBuffers()
+    public void CreateBuffers()
     {
         if (meshData == null) return;
 
