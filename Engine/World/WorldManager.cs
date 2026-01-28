@@ -168,32 +168,27 @@ internal class WorldManager : IDisposable
 
         foreach (var pos in positions)
         {
-            // Skip if already rendered or in progress
             if (RenderedChunks.ContainsKey(pos) || _chunksInProgress.ContainsKey(pos))
                 continue;
 
-            // Check if already loaded
             if (LoadedChunks.TryGetValue((pos, 0), out Chunk? chunk))
             {
                 if (chunk.Mesh != null)
                 {
-                    // Already has mesh, just needs buffer upload
                     if (_chunksInProgress.TryAdd(pos, 0))
                         _chunksReadyForBuffers.Enqueue(chunk);
                 }
                 else
                 {
-                    // Needs meshing
                     if (_chunksInProgress.TryAdd(pos, 0))
                         _chunksToMesh.Enqueue(chunk);
                 }
             }
             else
             {
-                // Create new chunk and queue for generation
                 if (_chunksInProgress.TryAdd(pos, 0))
                 {
-                    chunk = new Chunk(pos, 0, false); // Don't generate features in constructor
+                    chunk = new Chunk(pos, 0, false);
                     LoadedChunks[(pos, 0)] = chunk;
                     _chunksToGenerate.Enqueue(chunk);
                 }
@@ -209,10 +204,7 @@ internal class WorldManager : IDisposable
         {
             try
             {
-                // Upload to GPU (must be on main thread)
                 chunk.UpdateBuffers();
-
-                // Add to rendered chunks
                 RenderedChunks[chunk.Position] = chunk;
             }
             finally
@@ -269,10 +261,7 @@ internal class WorldManager : IDisposable
 
     public void Dispose()
     {
-        // Signal threads to stop
         _cancellationTokenSource.Cancel();
-
-        // Wait for threads to finish
         Task.WaitAll(_generationTasks.Concat(_meshingTasks).ToArray(), TimeSpan.FromSeconds(2));
 
         _cancellationTokenSource.Dispose();
