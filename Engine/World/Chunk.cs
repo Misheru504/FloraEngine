@@ -13,7 +13,7 @@ internal class Chunk : IDisposable
     private static FastNoise Noise => WorldManager.Instance.Noise;
 
     public Vector3 Position { get; }
-    public int LodLevel { get; }
+    public byte LodLevel { get; }
     public bool HasFeatures { get; set; }
     public int Scale { get; }
     public int WorldSize { get; }
@@ -21,26 +21,26 @@ internal class Chunk : IDisposable
 
     private readonly VoxelData[] voxels;
 
-    public Chunk(Vector3 position, int level, bool hasFeatures)
+    public Chunk(Vector3 position, byte level, bool createFeatures)
     {
         Position = position;
         LodLevel = level;
-        HasFeatures = hasFeatures;
+        HasFeatures = false; // Always start false
         Scale = 1 << LodLevel;
         WorldSize = Scale * SIZE;
 
         voxels = new VoxelData[VOLUME];
 
-        CreateBaseTerrain();
-        if (HasFeatures)
+        if (createFeatures)
         {
+            CreateBaseTerrain();
             CreateFeatures();
             UpdateMesh();
             UpdateBuffers();
         }
     }
 
-    private void CreateBaseTerrain()
+    public void CreateBaseTerrain()
     {
         float[] noiseMap = new float[WorldSize * WorldSize];
         Noise.GenUniformGrid2D(noiseMap, (int)Position.X, (int)Position.Z, WorldSize, WorldSize, FastNoise.FREQUENCY, Noise.Seed);
