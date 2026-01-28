@@ -14,7 +14,7 @@ namespace FloreEngine;
 
 public static class Program
 {
-    public const string NAME = "Flore-Engine";
+    public const string NAME = "Flora-Engine";
     public const string VERSION = "alpha-0";
     internal static Vector2D<int> WindowResolution = new Vector2D<int>(1280, 720);
     private static readonly string appName = $"{NAME}@{VERSION}";
