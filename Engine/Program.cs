@@ -97,8 +97,8 @@ public static class Program
         if (InputContext.Mice.Count != 0)
         {
             InputContext.Mice[0].Cursor.CursorMode = CursorMode.Raw;
-            InputContext.Mice[0].MouseMove += Controller.Instance.MouseMove;
-            InputContext.Mice[0].Scroll += Controller.Instance.MouseWheel;
+            InputContext.Mice[0].MouseMove += Player.Instance.MouseMove;
+            InputContext.Mice[0].Scroll += Player.Instance.MouseWheel;
         }
 
         // Graphics settings
@@ -128,7 +128,7 @@ public static class Program
         //if (BoxColliderAA.IsColliding(spawnCollider, Controller.Instance.Collider)) Console.WriteLine($"{EngineWindow.Time} Inside!");
 
         ImGuiController.Update((float)deltaTime);
-        Controller.Instance.Update(deltaTime);
+        Player.Instance.Update((float)deltaTime);
         WorldManager.Instance.Update(deltaTime);
     }
 
@@ -150,6 +150,9 @@ public static class Program
         {
             case Key.Escape:
                 EngineWindow.Close();
+                break;
+            case Key.T:
+                Player.Instance.IsFreecamMovement = !Player.Instance.IsFreecamMovement;
                 break;
         }
     }

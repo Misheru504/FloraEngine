@@ -1,4 +1,5 @@
-﻿using FloreEngine.Diagnostics;
+﻿using FloraEngine.Player;
+using FloreEngine.Diagnostics;
 using FloreEngine.Rendering;
 using FloreEngine.World;
 using ImGuiNET;
@@ -20,6 +21,7 @@ internal class MainMenuBar : IMainMenuBar
         if (!ImGui.BeginMainMenuBar()) return;
 
         ShowGameMenu();
+        ShowPlayerMenu();
         if (ImGui.BeginMenu("Window"))
         {
             foreach(IImGuiWindow window in windowManager.windows)
@@ -50,6 +52,15 @@ internal class MainMenuBar : IMainMenuBar
         ImGui.Separator();
         if (ImGui.MenuItem("/!\\ Crash game /!\\")) { throw new Exception("You crashed the game on purpose!"); }
         if (ImGui.MenuItem("Quit", "ALT+F4")) { Program.EngineWindow.Close(); }
+        ImGui.EndMenu();
+    }
+
+    private static void ShowPlayerMenu()
+    {
+        if (!ImGui.BeginMenu("Player")) return;
+
+        ImGui.MenuItem("Freecam", "", ref Player.Instance.IsFreecamMovement);
+
         ImGui.EndMenu();
     }
 }

@@ -14,7 +14,7 @@ internal class WorldManager : IDisposable
     private static readonly Lazy<WorldManager> _instance = new Lazy<WorldManager>(() => new WorldManager());
     public static WorldManager Instance => _instance.Value;
 
-    internal static Vector3 CenterPos => Controller.ChunkPos;
+    internal static Vector3 CenterPos => Player.ChunkPos;
 
     public int MaxLOD = 0;
     public int RenderDistance = 5;

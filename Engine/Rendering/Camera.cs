@@ -24,7 +24,7 @@ public sealed class Camera
     /// <summary>
     /// Uses absolute coordinates for rendering (may cause issues with floating point errors for large distances)
     /// </summary>
-    internal Matrix4x4 ViewMatrix => Matrix4x4.CreateLookAt(Position, Position + Forward, Up);
+    internal Matrix4x4 ViewMatrix => Matrix4x4.CreateLookAt(Position, Position + Vector3.Normalize(Direction), Up);
 
     /// <summary>
     /// Uses the position relative to the camera for rendering 
@@ -32,7 +32,7 @@ public sealed class Camera
     /// <remarks>
     /// (every rendered objects position needs to be sustracted with Camera.Position)
     /// </remarks>
-    internal Matrix4x4 RelativeViewMatrix => Matrix4x4.CreateLookAt(Vector3.Zero, Forward, Up);
+    internal Matrix4x4 RelativeViewMatrix => Matrix4x4.CreateLookAt(Vector3.Zero, Vector3.Normalize(Direction), Up);
     internal Matrix4x4 ProjectionMatrix => Matrix4x4.CreatePerspectiveFieldOfView(MathUtils.DegreesToRadians(FoV), Program.AspectRatio, NearPlane, FarPlane);
     internal Frustum Frustum => new Frustum(ViewMatrix * ProjectionMatrix);
 

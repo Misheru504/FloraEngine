@@ -18,9 +18,9 @@ internal class MainOverlay : IImGuiOverlay
         if (ImGui.Begin("Overlay", ImGuiWindowFlags.NoBringToFrontOnFocus | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoMove))
         {
             Camera camera = Camera.Instance;
-            Vector3 voxelPos = Controller.LocalVoxelPos;
+            Vector3 voxelPos = Player.LocalVoxelPos;
 
-            Vector3 reconstructedPos = Controller.ChunkPos + voxelPos;
+            Vector3 reconstructedPos = Player.ChunkPos + voxelPos;
             ushort voxel = WorldManager.Instance.GetVoxelIdAtWorldPos((int) reconstructedPos.X, (int) reconstructedPos.Y, (int) reconstructedPos.Z, 0);
             string voxelName = Voxel.GetVoxelName(voxel);
 
@@ -30,14 +30,14 @@ internal class MainOverlay : IImGuiOverlay
             ImGui.Spacing();
             ImGui.Text($"Camera pos: {camera.Position:F2}");
             ImGui.Text($"Camera rot: <{camera.Yaw:F2}, {camera.Pitch:F2}>");
-            ImGui.Text($"Camera speed: {Controller.Instance.Speed:F2}");
+            ImGui.Text($"Camera speed: {Player.Instance.Speed:F2}");
             ImGui.Text($"Vertex count: {Renderer.Instance.VertexCount}");
             ImGui.Spacing();
             ImGui.Text($"Seed: {WorldManager.Instance.Noise.Seed}");
             ImGui.Text($"Chunks count (rendered): {WorldManager.Instance.RenderedChunks.Count}");
             ImGui.Text($"Chunks count (loaded): {WorldManager.Instance.LoadedChunks.Count}");
             ImGui.Spacing();
-            ImGui.Text($"Chunk pos: {Controller.ChunkPos:0}");
+            ImGui.Text($"Chunk pos: {Player.ChunkPos:0}");
             ImGui.Text($"Voxel pos: {voxelPos:0}");
             ImGui.Text($"Reconstruced pos: {reconstructedPos:0}");
             ImGui.Text($"voxel type: {voxelName}");
