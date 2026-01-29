@@ -51,7 +51,7 @@ internal class Player
             Rigidbody.Update(deltaTime);
         }
 
-        Camera.Position = Rigidbody.Position + (Vector3.UnitY * 1.5f);
+        Camera.Position = Rigidbody.Position + (Vector3.UnitY * 1.6f);
     }
 
     internal void MouseMove(IMouse mouse, Vector2 position)

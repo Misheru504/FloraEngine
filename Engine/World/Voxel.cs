@@ -22,12 +22,24 @@ internal class Voxel
         return new VoxelData(ID, "");
     }
 
+    public static Voxel? GetVoxelByID(ushort id)
+    {
+        int indice = 0;
+
+        while (Voxels[indice].ID != id && indice < Voxels.Count - 1)
+            indice++;
+
+        Voxel? voxel = Voxels[indice].ID == id ? Voxels[indice] : null;
+
+        return voxel;
+    }
+
     public static Voxel AIR = new Voxel(0, "air", false);
     public static Voxel PURPLE = new Voxel(1, "purple", true);
 
     public static string GetVoxelName(ushort id)
     {
-        return Voxels[id].Name;
+        return GetVoxelByID(id)!.Name;
     }
 }
 

@@ -96,13 +96,13 @@ public static class GreedyMesher
 
                             if (b == 0)
                             {
-                                if (current == 0 && compare != 0) mask[maskIndex] = compare;
-                                else mask[maskIndex] = 0;
+                                if (current == Voxel.AIR.ID && compare != Voxel.AIR.ID) mask[maskIndex] = compare;
+                                else mask[maskIndex] = Voxel.AIR.ID;
                             }
                             else
                             {
-                                if (current != 0 && compare == 0) mask[maskIndex] = current;
-                                else mask[maskIndex] = 0;
+                                if (current != Voxel.AIR.ID && compare == Voxel.AIR.ID) mask[maskIndex] = current;
+                                else mask[maskIndex] = Voxel.AIR.ID;
                             }
 
                             maskIndex++;
@@ -120,7 +120,7 @@ public static class GreedyMesher
                         {
                             ushort voxel = mask[maskIndex];
 
-                            if (voxel == 0)
+                            if (voxel == Voxel.AIR.ID)
                             {
                                 maskIndex += 1;
                                 i += 1;
@@ -165,7 +165,7 @@ public static class GreedyMesher
                             for (int l = 0; l < height; l++)
                                 for (int k = 0; k < width; k++)
                                 {
-                                    mask[maskIndex + k + l * Chunk.SIZE] = 0;
+                                    mask[maskIndex + k + l * Chunk.SIZE] = Voxel.AIR.ID;
                                 }
 
                             i += width;
