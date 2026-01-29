@@ -1,6 +1,6 @@
 ﻿using Silk.NET.OpenGL;
 
-namespace FloreEngine.Rendering;
+namespace FloraEngine.Rendering;
 
 /// <summary>
 /// An object that provides methods for uploading vertex data (position, normals, etc) to the gpu

@@ -1,6 +1,6 @@
 ﻿using Silk.NET.OpenGL;
 
-namespace FloreEngine.Rendering.Shaders;
+namespace FloraEngine.Rendering.Shaders;
 
 /// <summary>
 /// Shader computing inputs and returns output. Code is executed on the GPU

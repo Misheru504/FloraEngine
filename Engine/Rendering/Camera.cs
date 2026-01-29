@@ -1,7 +1,7 @@
 ﻿using FloraEngine.Utils;
 using System.Numerics;
 
-namespace FloreEngine.Rendering;
+namespace FloraEngine.Rendering;
 
 /// <summary>
 /// A camera contains methods to transform the world into the screen

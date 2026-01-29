@@ -1,8 +1,6 @@
 ﻿using FloraEngine.Utils;
-using FloreEngine.Rendering;
-using FloreEngine.World;
+using FloraEngine.Rendering;
 using Silk.NET.Input;
-using System.Drawing;
 using System.Numerics;
 
 namespace FloraEngine.Entities.Player;

@@ -1,11 +1,5 @@
-﻿using FloreEngine.Rendering;
-using FloreEngine.World;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using FloraEngine.World;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FloraEngine.Entities;
 

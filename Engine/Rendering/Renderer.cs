@@ -1,11 +1,11 @@
-﻿using FloreEngine.Diagnostics;
-using FloreEngine.Rendering.Shaders;
-using FloreEngine.Rendering.Textures;
-using FloreEngine.World;
+﻿using FloraEngine.Diagnostics;
+using FloraEngine.Rendering.Shaders;
+using FloraEngine.Rendering.Textures;
+using FloraEngine.World;
 using Silk.NET.OpenGL;
 using System.Numerics;
 
-namespace FloreEngine.Rendering;
+namespace FloraEngine.Rendering;
 
 internal unsafe class Renderer : IDisposable
 {

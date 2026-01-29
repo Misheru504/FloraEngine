@@ -1,10 +1,9 @@
 ﻿using FloraEngine.Entities.Player;
-using FloraEngine.Player;
-using FloreEngine.Diagnostics;
-using FloreEngine.Rendering;
-using FloreEngine.UI;
-using FloreEngine.UI.Overlays;
-using FloreEngine.World;
+using FloraEngine.Diagnostics;
+using FloraEngine.Rendering;
+using FloraEngine.UI;
+using FloraEngine.UI.Overlays;
+using FloraEngine.World;
 using Silk.NET.Input;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
@@ -13,7 +12,7 @@ using Silk.NET.Windowing;
 using System.Drawing;
 using System.Numerics;
 
-namespace FloreEngine;
+namespace FloraEngine;
 
 public static class Program
 {
@@ -35,8 +34,6 @@ public static class Program
     public static OverlayManager OverlayManager { get; private set; } = null!;  
 
     internal static MainMenuBar MainMenuBar { get; private set; } = null!;
-
-    private static BoxColliderAA spawnCollider = new BoxColliderAA(Vector3.Zero, 16, 16, 16);
 
     public static void Main()
     {

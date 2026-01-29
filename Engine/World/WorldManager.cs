@@ -1,14 +1,11 @@
 ﻿using FloraEngine.Entities.Player;
 using FloraEngine.Utils;
-using FloreEngine.Diagnostics;
-using FloreEngine.Rendering;
-using FloreEngine.Utils;
-using Silk.NET.Maths;
+using FloraEngine.Diagnostics;
+using FloraEngine.Rendering;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Numerics;
 
-namespace FloreEngine.World;
+namespace FloraEngine.World;
 
 internal class WorldManager : IDisposable
 {

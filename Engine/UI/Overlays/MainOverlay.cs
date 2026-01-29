@@ -1,11 +1,10 @@
 ﻿using FloraEngine.Entities.Player;
-using FloreEngine.Rendering;
-using FloreEngine.Utils;
-using FloreEngine.World;
+using FloraEngine.Rendering;
+using FloraEngine.World;
 using ImGuiNET;
 using System.Numerics;
 
-namespace FloreEngine.UI.Overlays;
+namespace FloraEngine.UI.Overlays;
 
 internal class MainOverlay : IImGuiOverlay
 {

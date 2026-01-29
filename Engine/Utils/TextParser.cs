@@ -1,4 +1,4 @@
-﻿using FloreEngine.Diagnostics;
+﻿using FloraEngine.Diagnostics;
 
 namespace FloraEngine.Utils;
 

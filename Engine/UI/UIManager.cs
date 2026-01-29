@@ -1,4 +1,4 @@
-﻿namespace FloreEngine.UI;
+﻿namespace FloraEngine.UI;
 
 public class WindowManager
 {

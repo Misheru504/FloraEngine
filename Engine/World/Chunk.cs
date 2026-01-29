@@ -1,9 +1,8 @@
-﻿using FloreEngine.Rendering;
-using FloreEngine.Utils;
-using System.Drawing;
+﻿using FloraEngine.Rendering;
+using FloraEngine.Utils;
 using System.Numerics;
 
-namespace FloreEngine.World;
+namespace FloraEngine.World;
 
 internal class Chunk : IDisposable
 {

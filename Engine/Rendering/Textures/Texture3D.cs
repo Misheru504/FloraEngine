@@ -1,6 +1,6 @@
 ﻿using Silk.NET.OpenGL;
 
-namespace FloreEngine.Rendering.Textures;
+namespace FloraEngine.Rendering.Textures;
 
 /// <summary>
 /// A 3d texture is an "image" that can be used in compute shaders

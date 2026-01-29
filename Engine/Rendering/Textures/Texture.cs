@@ -1,5 +1,6 @@
 ﻿using Silk.NET.OpenGL;
-namespace FloreEngine.Rendering.Textures;
+
+namespace FloraEngine.Rendering.Textures;
 
 internal abstract class Texture : IDisposable
 {

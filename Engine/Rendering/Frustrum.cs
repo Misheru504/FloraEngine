@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 
-namespace FloreEngine.Rendering;
+namespace FloraEngine.Rendering;
 
 internal struct Frustum
 {

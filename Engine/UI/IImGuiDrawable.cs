@@ -1,4 +1,4 @@
-﻿namespace FloreEngine.UI;
+﻿namespace FloraEngine.UI;
 
 /// <summary>
 /// Base interface for UI elements

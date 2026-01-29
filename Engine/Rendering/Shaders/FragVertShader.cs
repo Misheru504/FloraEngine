@@ -1,6 +1,6 @@
 ﻿using Silk.NET.OpenGL;
 
-namespace FloreEngine.Rendering.Shaders;
+namespace FloraEngine.Rendering.Shaders;
 
 /// <summary>
 /// Shader to process vertices and indices to show them on screen

@@ -1,7 +1,7 @@
-﻿using FloreEngine.World;
+﻿using FloraEngine.World;
 using System.Numerics;
 
-namespace FloreEngine.Utils;
+namespace FloraEngine.Utils;
 
 public static class GreedyMesher
 {

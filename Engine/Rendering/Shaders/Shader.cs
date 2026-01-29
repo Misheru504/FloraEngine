@@ -1,7 +1,7 @@
 ﻿using Silk.NET.OpenGL;
 using System.Numerics;
 
-namespace FloreEngine.Rendering.Shaders;
+namespace FloraEngine.Rendering.Shaders;
 
 /// <summary>
 /// Shaders are programs used in the GPU

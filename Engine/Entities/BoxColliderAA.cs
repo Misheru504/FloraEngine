@@ -1,7 +1,6 @@
-﻿using System.Drawing;
-using System.Numerics;
+﻿using System.Numerics;
 
-namespace FloraEngine.Player;
+namespace FloraEngine.Entities;
 
 internal class BoxColliderAA
 {

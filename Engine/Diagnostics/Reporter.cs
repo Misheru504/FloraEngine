@@ -1,9 +1,7 @@
 ﻿using FloraEngine.Utils;
-using FloreEngine.Utils;
 using System.Text;
-using System.Text.RegularExpressions;
 
-namespace FloreEngine.Diagnostics;
+namespace FloraEngine.Diagnostics;
 
 /// <summary>
 /// Wrapper used to catch exceptions and prints them in the console and a separate file

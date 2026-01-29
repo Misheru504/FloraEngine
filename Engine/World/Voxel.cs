@@ -1,62 +1,55 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace FloraEngine.World;
 
-namespace FloreEngine.World
+internal class Voxel
 {
-    internal class Voxel
+    public static List<Voxel> Voxels = new List<Voxel>();
+
+    public ushort ID { get; }
+    public string Name { get; }
+    public bool IsSolid { get; }
+
+    public Voxel(ushort id, string name, bool isSolid)
     {
-        public static List<Voxel> Voxels = new List<Voxel>();
+        ID = id;
+        Name = name;
 
-        public ushort ID { get; }
-        public string Name { get; }
-        public bool IsSolid { get; }
-
-        public Voxel(ushort id, string name, bool isSolid)
-        {
-            ID = id;
-            Name = name;
-
-            Voxels.Add(this);
-            IsSolid = isSolid;
-        }
-
-        public VoxelData GetDefaultData()
-        {
-            return new VoxelData(ID, "");
-        }
-
-        public static Voxel AIR = new Voxel(0, "air", false);
-        public static Voxel PURPLE = new Voxel(1, "purple", true);
-
-        public static string GetVoxelName(ushort id)
-        {
-            return Voxels[id].Name;
-        }
+        Voxels.Add(this);
+        IsSolid = isSolid;
     }
 
-    internal struct VoxelData
+    public VoxelData GetDefaultData()
     {
-        public ushort ID { get; }
-        public string Data { get; private set; }
+        return new VoxelData(ID, "");
+    }
 
-        public VoxelData()
-        {
-            ID = 0;
-            Data = "";
-        }
+    public static Voxel AIR = new Voxel(0, "air", false);
+    public static Voxel PURPLE = new Voxel(1, "purple", true);
 
-        public VoxelData(ushort id, string data)
-        {
-            ID = id; 
-            Data = data;
-        }
+    public static string GetVoxelName(ushort id)
+    {
+        return Voxels[id].Name;
+    }
+}
 
-        public void SetData(string data)
-        {
-            Data = data;
-        }
+internal struct VoxelData
+{
+    public ushort ID { get; }
+    public string Data { get; private set; }
+
+    public VoxelData()
+    {
+        ID = 0;
+        Data = "";
+    }
+
+    public VoxelData(ushort id, string data)
+    {
+        ID = id; 
+        Data = data;
+    }
+
+    public void SetData(string data)
+    {
+        Data = data;
     }
 }

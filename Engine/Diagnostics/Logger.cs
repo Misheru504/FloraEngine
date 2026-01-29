@@ -1,9 +1,8 @@
 ﻿using FloraEngine.Utils;
-using FloreEngine.Utils;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace FloreEngine.Diagnostics;
+namespace FloraEngine.Diagnostics;
 
 // Apparently, using a static class is wrong for logging because we are using dependencies. A singleton is what we need.
 // I will have a look into this later.

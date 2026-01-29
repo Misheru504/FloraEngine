@@ -1,7 +1,7 @@
 ﻿using Silk.NET.OpenGL;
 using StbImageSharp;
 
-namespace FloreEngine.Rendering.Textures;
+namespace FloraEngine.Rendering.Textures;
 
 /// <summary>
 /// A texture is an image applied to vertices

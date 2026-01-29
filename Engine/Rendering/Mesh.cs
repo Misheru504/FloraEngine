@@ -1,8 +1,8 @@
-﻿using FloreEngine.Utils;
-using FloreEngine.World;
+﻿using FloraEngine.Utils;
+using FloraEngine.World;
 using Silk.NET.OpenGL;
 
-namespace FloreEngine.Rendering;
+namespace FloraEngine.Rendering;
 
 internal class Mesh : IDisposable
 {

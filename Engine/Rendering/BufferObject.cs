@@ -1,6 +1,6 @@
 ﻿using Silk.NET.OpenGL;
 
-namespace FloreEngine.Rendering;
+namespace FloraEngine.Rendering;
 
 /// <summary>
 /// A buffer stores an array of memory allocated by the GPU on its side

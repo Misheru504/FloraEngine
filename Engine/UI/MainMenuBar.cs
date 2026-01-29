@@ -1,11 +1,10 @@
 ﻿using FloraEngine.Entities.Player;
-using FloreEngine.Diagnostics;
-using FloreEngine.Rendering;
-using FloreEngine.World;
+using FloraEngine.Diagnostics;
+using FloraEngine.Rendering;
 using ImGuiNET;
 using Silk.NET.OpenGL;
 
-namespace FloreEngine.UI;
+namespace FloraEngine.UI;
 
 internal class MainMenuBar : IMainMenuBar
 {
