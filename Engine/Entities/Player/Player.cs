@@ -1,11 +1,12 @@
-﻿using FloreEngine;
+﻿using FloraEngine.Player;
+using FloraEngine.Utils;
+using FloreEngine;
 using FloreEngine.Rendering;
-using FloreEngine.Utils;
 using FloreEngine.World;
 using Silk.NET.Input;
 using System.Numerics;
 
-namespace FloraEngine.Player;
+namespace FloraEngine.Entities.Player;
 
 internal class Player
 {
@@ -17,6 +18,7 @@ internal class Player
     public static Vector3 LocalVoxelPos => MathUtils.WorldToTilePosition(Camera.Instance.Position);
 
     public BoxColliderAA Collider { get; private set; }
+    public Rigidbody Rigidbody { get; private set; }
     public Vector3 Size { get; private set; }
     private static IKeyboard Keyboard => Program.Keyboard;
     private static ICursor Cursor => Program.InputContext.Mice[0].Cursor;
@@ -25,13 +27,13 @@ internal class Player
     internal float Speed = 2f;
 
     public bool IsFreecamMovement;
-    public bool IsOnGround { get; private set; }
 
     private Player()
     {
-        Size = new Vector3(0.7f, 1.5f, 0.7f);
-        Vector3 position = Camera.Position - (Size * 0.5f);
+        Size = new Vector3(0.7f, 2f, 0.7f);
+        Vector3 position = Camera.Position - Size * 0.5f;
         Collider = new BoxColliderAA(position, Size.X, Size.Y, Size.Z);
+        Rigidbody = new Rigidbody(Vector3.Zero, 1f, Size);
     }
 
     public void Update(float deltaTime)
@@ -43,15 +45,15 @@ internal class Player
 
         if (IsFreecamMovement)
         {
-            IsOnGround = false;
-            Camera.Position += FreecamMovement.GetVelocity(deltaTime, Keyboard);
+            Rigidbody.Position += FreecamMovement.GetVelocity(deltaTime, Keyboard);
         }
         else
         {
-            IsOnGround = true; // TODO: GROUND DETECTION
-            Collider.Position = Camera.Position - (Size * 0.5f);
-            Camera.Position = HumanMovement.GetNextPosition(deltaTime, Keyboard);
+            HumanMovement.GetNextPosition(deltaTime, Keyboard, Rigidbody);
+            Rigidbody.Update(deltaTime);
         }
+
+        Camera.Position = Rigidbody.Position + (Vector3.UnitY * 1.5f);
     }
 
     internal void MouseMove(IMouse mouse, Vector2 position)
@@ -74,7 +76,7 @@ internal class Player
             Camera.Direction.X = MathF.Cos(MathUtils.DegreesToRadians(Camera.Yaw)) * MathF.Cos(MathUtils.DegreesToRadians(Camera.Pitch));
             Camera.Direction.Y = MathF.Sin(MathUtils.DegreesToRadians(Camera.Pitch));
             Camera.Direction.Z = MathF.Sin(MathUtils.DegreesToRadians(Camera.Yaw)) * MathF.Cos(MathUtils.DegreesToRadians(Camera.Pitch));
-            Camera.Forward = Vector3.Normalize(new Vector3(Camera.Direction.X, IsFreecamMovement ? Camera.Direction.Y : 0, Camera.Direction.Z));
+            Camera.Forward = Vector3.Normalize(new Vector3(Camera.Direction.X, Camera.Direction.Y, Camera.Direction.Z));
         }
     }
 

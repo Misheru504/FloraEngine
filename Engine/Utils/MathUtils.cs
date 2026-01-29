@@ -1,10 +1,12 @@
 ﻿using FloreEngine.World;
 using System.Numerics;
 
-namespace FloreEngine.Utils;
+namespace FloraEngine.Utils;
 
 public static class MathUtils
 {
+    public static float Lerp(float a, float b, float t) => a + (b - a) * t;
+
     public static float DegreesToRadians(float degrees) => MathF.PI / 180f * degrees;
     public static int ManhattanDistance(Vector3 pointA, Vector3 pointB)
     {

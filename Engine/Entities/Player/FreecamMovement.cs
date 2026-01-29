@@ -2,7 +2,7 @@
 using Silk.NET.Input;
 using System.Numerics;
 
-namespace FloraEngine.Player;
+namespace FloraEngine.Entities.Player;
 
 internal static class FreecamMovement
 {

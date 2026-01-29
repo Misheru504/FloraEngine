@@ -1,4 +1,4 @@
-﻿using FloraEngine.Player;
+﻿using FloraEngine.Entities.Player;
 using FloreEngine.Rendering;
 using FloreEngine.Utils;
 using FloreEngine.World;
