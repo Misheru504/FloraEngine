@@ -1,14 +1,13 @@
-﻿using FloreEngine.Rendering;
+﻿using FloreEngine;
+using FloreEngine.Rendering;
 using FloreEngine.Utils;
 using FloreEngine.World;
 using Silk.NET.Input;
+using Silk.NET.Maths;
 using System.Numerics;
 
-namespace FloreEngine;
+namespace FloraEngine.Player;
 
-/// <summary>
-/// Simple camera controller
-/// </summary>
 internal class Controller
 {
     private static readonly Lazy<Controller> _instance = new Lazy<Controller>(() => new Controller());
@@ -16,20 +15,30 @@ internal class Controller
     private static Camera Camera => Camera.Instance;
     private static IKeyboard Keyboard => Program.Keyboard;
     public static Vector3 ChunkPos => MathUtils.WorldToChunkCoord(Camera.Position, Chunk.SIZE);
+    public static Vector3 LocalVoxelPos => MathUtils.WorldToTilePosition(Camera.Instance.Position);
 
     private static ICursor Cursor => Program.InputContext.Mice[0].Cursor;
 
     private Vector2 mousePosition;
     internal float Speed = 2f;
-    private double deltaTime;
+
+    public BoxColliderAA Collider { get; private set; }
+    public Vector3 Size { get; private set; }
+
+    private Controller()
+    {
+        Size = new Vector3(1,1.5f,1);
+        Vector3 position = Camera.Position - (Size * 0.5f);
+        Collider = new BoxColliderAA(position, Size.X, Size.Y, Size.Z);
+    }
 
     internal void Update(double deltaTime)
     {
-        this.deltaTime = deltaTime;
         float moveSpeed = Speed * (float)deltaTime;
         Vector3 camFrontAndBack = moveSpeed * Camera.Forward;
         Vector3 camSides = Vector3.Normalize(Vector3.Cross(Camera.Forward, Camera.Up)) * moveSpeed;
         Vector3 camUpAndDown = moveSpeed * Camera.Up;
+        Vector3 velocity = Vector3.Zero;
 
         if (Keyboard.IsKeyPressed(Key.AltLeft))
             Cursor.CursorMode = CursorMode.Normal;
@@ -37,22 +46,73 @@ internal class Controller
             Cursor.CursorMode = CursorMode.Raw;
 
         if (Keyboard.IsKeyPressed(Key.W))
-            Camera.Position += camFrontAndBack;
+            velocity += camFrontAndBack;
 
         if (Keyboard.IsKeyPressed(Key.S))
-            Camera.Position -= camFrontAndBack;
+            velocity -= camFrontAndBack;
 
         if (Keyboard.IsKeyPressed(Key.D))
-            Camera.Position += camSides;
+            velocity += camSides;
 
         if (Keyboard.IsKeyPressed(Key.A))
-            Camera.Position -= camSides;
+            velocity -= camSides;
 
         if(Keyboard.IsKeyPressed(Key.Space))
-            Camera.Position += camUpAndDown;
+            velocity += camUpAndDown * 5;
 
         if (Keyboard.IsKeyPressed(Key.ShiftLeft))
-            Camera.Position -= camUpAndDown;
+            velocity -= camUpAndDown;
+
+        if (!Keyboard.IsKeyPressed(Key.ControlLeft))
+        {
+            Collider.Position = Camera.Position - (Size * 0.5f);
+            velocity -= Vector3.UnitY * (10f * (float)deltaTime);
+            Camera.Position = ResolveCollision(velocity);
+        }
+        else
+        {
+            Camera.Position += velocity;
+        }
+    }
+
+    private Vector3 ResolveCollision(Vector3 velocity)
+    {
+        Vector3 newPos = Camera.Position;
+
+        newPos.X += velocity.X;
+        if (CheckCollision(newPos, Size))
+            newPos.X = Camera.Position.X;
+
+        newPos.Y += velocity.Y;
+        if (CheckCollision(newPos, Size))
+            newPos.Y = Camera.Position.Y;
+
+        newPos.Z += velocity.Z;
+        if (CheckCollision(newPos, Size))
+            newPos.Z = Camera.Position.Z;
+
+        return newPos;
+    }
+
+    private bool CheckCollision(Vector3 position, Vector3 size)
+    {
+        // Check all voxels the player's AABB overlaps
+        int minX = (int)MathF.Floor(position.X - size.X / 2);
+        int maxX = (int)MathF.Floor(position.X + size.X / 2);
+        int minY = (int)MathF.Floor(position.Y - size.Y);
+        int maxY = (int)MathF.Floor(position.Y);
+        int minZ = (int)MathF.Floor(position.Z - size.Z / 2);
+        int maxZ = (int)MathF.Floor(position.Z + size.Z / 2);
+
+        for (int x = minX; x <= maxX; x++)
+            for (int y = minY; y <= maxY; y++)
+                for (int z = minZ; z <= maxZ; z++)
+                {
+                    ushort voxelId = WorldManager.Instance.GetVoxelIdAtWorldPos(x, y, z, 0);
+                    if (Voxel.Voxels[voxelId].IsSolid)
+                        return true;
+                }
+        return false;
     }
 
     internal void MouseMove(IMouse mouse, Vector2 position)

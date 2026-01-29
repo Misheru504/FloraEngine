@@ -1,4 +1,5 @@
-﻿using FloreEngine.Rendering;
+﻿using FloraEngine.Player;
+using FloreEngine.Rendering;
 using FloreEngine.Utils;
 using FloreEngine.World;
 using ImGuiNET;
@@ -17,7 +18,7 @@ internal class MainOverlay : IImGuiOverlay
         if (ImGui.Begin("Overlay", ImGuiWindowFlags.NoBringToFrontOnFocus | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoMove))
         {
             Camera camera = Camera.Instance;
-            Vector3 voxelPos = MathUtils.WorldToTilePosition(camera.Position);
+            Vector3 voxelPos = Controller.LocalVoxelPos;
 
             Vector3 reconstructedPos = Controller.ChunkPos + voxelPos;
             ushort voxel = WorldManager.Instance.GetVoxelIdAtWorldPos((int) reconstructedPos.X, (int) reconstructedPos.Y, (int) reconstructedPos.Z, 0);

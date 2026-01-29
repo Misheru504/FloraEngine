@@ -12,13 +12,15 @@ namespace FloreEngine.World
 
         public ushort ID { get; }
         public string Name { get; }
+        public bool IsSolid { get; }
 
-        public Voxel(ushort id, string name)
+        public Voxel(ushort id, string name, bool isSolid)
         {
             ID = id;
             Name = name;
 
             Voxels.Add(this);
+            IsSolid = isSolid;
         }
 
         public VoxelData GetDefaultData()
@@ -26,8 +28,8 @@ namespace FloreEngine.World
             return new VoxelData(ID, "");
         }
 
-        public static Voxel AIR = new Voxel(0, "air");
-        public static Voxel PURPLE = new Voxel(1, "purple");
+        public static Voxel AIR = new Voxel(0, "air", false);
+        public static Voxel PURPLE = new Voxel(1, "purple", true);
 
         public static string GetVoxelName(ushort id)
         {

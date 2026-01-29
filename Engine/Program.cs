@@ -1,4 +1,5 @@
-﻿using FloreEngine.Diagnostics;
+﻿using FloraEngine.Player;
+using FloreEngine.Diagnostics;
 using FloreEngine.Rendering;
 using FloreEngine.UI;
 using FloreEngine.UI.Overlays;
@@ -9,6 +10,7 @@ using Silk.NET.OpenGL;
 using Silk.NET.OpenGL.Extensions.ImGui;
 using Silk.NET.Windowing;
 using System.Drawing;
+using System.Numerics;
 
 namespace FloreEngine;
 
@@ -32,6 +34,8 @@ public static class Program
     public static OverlayManager OverlayManager { get; private set; } = null!;  
 
     internal static MainMenuBar MainMenuBar { get; private set; } = null!;
+
+    private static BoxColliderAA spawnCollider = new BoxColliderAA(Vector3.Zero, 16, 16, 16);
 
     public static void Main()
     {
@@ -120,6 +124,8 @@ public static class Program
     public static void Update(double deltaTime)
     {
         ComputeFPS(deltaTime);
+
+        //if (BoxColliderAA.IsColliding(spawnCollider, Controller.Instance.Collider)) Console.WriteLine($"{EngineWindow.Time} Inside!");
 
         ImGuiController.Update((float)deltaTime);
         Controller.Instance.Update(deltaTime);
