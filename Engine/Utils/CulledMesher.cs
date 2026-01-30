@@ -22,10 +22,10 @@ public static class CulledMesher
                     if (IsFaceVisible(currentChunk, x, y - 1, z))
                     {
                         float[] aos = [
-                            ComputeVertexAO(!IsFaceVisible(currentChunk, x+1, y, z), !IsFaceVisible(currentChunk, x, y, z+1), !IsFaceVisible(currentChunk, x+1, y, z+1)),
-                            ComputeVertexAO(!IsFaceVisible(currentChunk, x+1, y, z), !IsFaceVisible(currentChunk, x, y, z-1), !IsFaceVisible(currentChunk, x+1, y, z-1)),
-                            ComputeVertexAO(!IsFaceVisible(currentChunk, x-1, y, z), !IsFaceVisible(currentChunk, x, y, z-1), !IsFaceVisible(currentChunk, x-1, y, z-1)),
-                            ComputeVertexAO(!IsFaceVisible(currentChunk, x-1, y, z), !IsFaceVisible(currentChunk, x, y, z+1), !IsFaceVisible(currentChunk, x-1, y, z+1))
+                            ComputeVertexAO(!IsFaceVisible(currentChunk, x+1, y-1, z), !IsFaceVisible(currentChunk, x, y-1, z+1), !IsFaceVisible(currentChunk, x+1, y-1, z+1)),
+                            ComputeVertexAO(!IsFaceVisible(currentChunk, x+1, y-1, z), !IsFaceVisible(currentChunk, x, y-1, z-1), !IsFaceVisible(currentChunk, x+1, y-1, z-1)),
+                            ComputeVertexAO(!IsFaceVisible(currentChunk, x-1, y-1, z), !IsFaceVisible(currentChunk, x, y-1, z-1), !IsFaceVisible(currentChunk, x-1, y-1, z-1)),
+                            ComputeVertexAO(!IsFaceVisible(currentChunk, x-1, y-1, z), !IsFaceVisible(currentChunk, x, y-1, z+1), !IsFaceVisible(currentChunk, x-1, y-1, z+1))
                         ];
 
                         if (!Renderer.Instance.IsGeneratingAOs)
@@ -76,10 +76,10 @@ public static class CulledMesher
                     if (IsFaceVisible(currentChunk, x - 1, y, z))
                     {
                         float[] aos = [
-                            ComputeVertexAO(!IsFaceVisible(currentChunk, x, y-1, z), !IsFaceVisible(currentChunk, x, y, z+1), !IsFaceVisible(currentChunk, x, y-1, z+1)),
-                            ComputeVertexAO(!IsFaceVisible(currentChunk, x, y-1, z), !IsFaceVisible(currentChunk, x, y, z-1), !IsFaceVisible(currentChunk, x, y-1, z-1)),
-                            ComputeVertexAO(!IsFaceVisible(currentChunk, x, y+1, z), !IsFaceVisible(currentChunk, x, y, z-1), !IsFaceVisible(currentChunk, x, y+1, z-1)),
-                            ComputeVertexAO(!IsFaceVisible(currentChunk, x, y+1, z), !IsFaceVisible(currentChunk, x, y, z+1), !IsFaceVisible(currentChunk, x, y+1, z+1))
+                            ComputeVertexAO(!IsFaceVisible(currentChunk, x-1, y-1, z), !IsFaceVisible(currentChunk, x-1, y, z+1), !IsFaceVisible(currentChunk, x-1, y-1, z+1)),
+                            ComputeVertexAO(!IsFaceVisible(currentChunk, x-1, y-1, z), !IsFaceVisible(currentChunk, x-1, y, z-1), !IsFaceVisible(currentChunk, x-1, y-1, z-1)),
+                            ComputeVertexAO(!IsFaceVisible(currentChunk, x-1, y+1, z), !IsFaceVisible(currentChunk, x-1, y, z-1), !IsFaceVisible(currentChunk, x-1, y+1, z-1)),
+                            ComputeVertexAO(!IsFaceVisible(currentChunk, x-1, y+1, z), !IsFaceVisible(currentChunk, x-1, y, z+1), !IsFaceVisible(currentChunk, x-1, y+1, z+1))
                         ];
 
                         if (!Renderer.Instance.IsGeneratingAOs)
@@ -157,10 +157,10 @@ public static class CulledMesher
                     if (IsFaceVisible(currentChunk, x, y, z - 1))
                     {
                         float[] aos = [
-                            ComputeVertexAO(!IsFaceVisible(currentChunk, x-1, y, z), !IsFaceVisible(currentChunk, x, y-1, z), !IsFaceVisible(currentChunk, x-1, y-1, z)),
-                            ComputeVertexAO(!IsFaceVisible(currentChunk, x+1, y, z), !IsFaceVisible(currentChunk, x, y-1, z), !IsFaceVisible(currentChunk, x+1, y-1, z)),
-                            ComputeVertexAO(!IsFaceVisible(currentChunk, x+1, y, z), !IsFaceVisible(currentChunk, x, y+1, z), !IsFaceVisible(currentChunk, x+1, y+1, z)),
-                            ComputeVertexAO(!IsFaceVisible(currentChunk, x-1, y, z), !IsFaceVisible(currentChunk, x, y+1, z), !IsFaceVisible(currentChunk, x-1, y+1, z))
+                            ComputeVertexAO(!IsFaceVisible(currentChunk, x-1, y, z-1), !IsFaceVisible(currentChunk, x, y-1, z-1), !IsFaceVisible(currentChunk, x-1, y-1, z-1)),
+                            ComputeVertexAO(!IsFaceVisible(currentChunk, x+1, y, z-1), !IsFaceVisible(currentChunk, x, y-1, z-1), !IsFaceVisible(currentChunk, x+1, y-1, z-1)),
+                            ComputeVertexAO(!IsFaceVisible(currentChunk, x+1, y, z-1), !IsFaceVisible(currentChunk, x, y+1, z-1), !IsFaceVisible(currentChunk, x+1, y+1, z-1)),
+                            ComputeVertexAO(!IsFaceVisible(currentChunk, x-1, y, z-1), !IsFaceVisible(currentChunk, x, y+1, z-1), !IsFaceVisible(currentChunk, x-1, y+1, z-1))
                         ];
 
                         if (!Renderer.Instance.IsGeneratingAOs)
