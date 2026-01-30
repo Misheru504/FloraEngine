@@ -20,7 +20,7 @@ internal unsafe class Renderer : IDisposable
     internal RenderMode RenderingMode;
 
     public long VertexCount;
-    public bool IsGeneratingAOs = true;
+    public static bool IsGeneratingAOs = true;
 
     // Storing shader code for simplicity, there are methods in Shader class to read them from files
     private const string VERTEX_SHADER = @"

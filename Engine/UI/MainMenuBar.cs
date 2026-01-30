@@ -41,7 +41,7 @@ internal class MainMenuBar : IMainMenuBar
         if (ImGui.MenuItem("Delete logs folder")) Logger.ClearLogFolder();
         if (ImGui.MenuItem("Wireframe view", null, ref Program.IsWireframe)) Program.Graphics.PolygonMode(GLEnum.FrontAndBack, Program.IsWireframe ? GLEnum.Line : GLEnum.Fill);
         if (ImGui.MenuItem("Test console colors")) Logger.TestColors();
-        if (ImGui.MenuItem("Generate AOs", null, ref Renderer.Instance.IsGeneratingAOs)) WorldManager.Instance.UpdateChunksMeshes();
+        if (ImGui.MenuItem("Generate AOs", null, ref Renderer.IsGeneratingAOs)) WorldManager.Instance.UpdateChunksMeshes();
         if (ImGui.BeginMenu("Rendering mode"))
         {
             if (ImGui.MenuItem("Default")) Renderer.Instance.RenderingMode = Renderer.RenderMode.Default;
