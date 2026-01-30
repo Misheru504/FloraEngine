@@ -273,4 +273,13 @@ internal class WorldManager : IDisposable
 
         GC.SuppressFinalize(this);
     }
+
+    public void UpdateChunksMeshes()
+    {
+        foreach(Chunk chunk in RenderedChunks.Values)
+        {
+            chunk.UpdateMesh();
+            chunk.UpdateBuffers();
+        }
+    }
 }

@@ -20,6 +20,7 @@ internal unsafe class Renderer : IDisposable
     internal RenderMode RenderingMode;
 
     public long VertexCount;
+    public bool IsGeneratingAOs = true;
 
     // Storing shader code for simplicity, there are methods in Shader class to read them from files
     private const string VERTEX_SHADER = @"
@@ -27,6 +28,7 @@ internal unsafe class Renderer : IDisposable
         layout (location = 0) in vec3 vPos;
         layout (location = 1) in vec3 vNormal;
         layout (location = 2) in vec2 vUV;
+        layout (location = 3) in float vAO;
 
         uniform mat4 uModel; 
         uniform mat4 uView;
@@ -34,6 +36,7 @@ internal unsafe class Renderer : IDisposable
 
         out vec2 fUV;
         out vec3 fNormal;
+        out float fAO;
 
         void main()
         {
@@ -41,6 +44,7 @@ internal unsafe class Renderer : IDisposable
             gl_Position = uProjection * uView * uModel * vec4(vPos, 1.0);
             fUV = vUV;
             fNormal = vNormal;
+            fAO = vAO;
         }
     ";
 
@@ -51,9 +55,11 @@ internal unsafe class Renderer : IDisposable
         const int DEPTH = 1;
         const int NORMAL = 2;
         const int UV = 3;
+        const int AO = 4;
 
         in vec2 fUV;
         in vec3 fNormal;
+        in float fAO;
 
         uniform sampler2D fTexture;
         uniform int fRenderMode;
@@ -68,7 +74,14 @@ internal unsafe class Renderer : IDisposable
             float diff = max(dot(normal, light), 0.0);
 
             float ambient = 0.3;
-            float lighting = ambient + (1.0 - ambient) * diff;
+            float directional = (1.0 - ambient) * diff;
+        
+            // Apply AO to both ambient and slightly to directional lighting
+            float aoFactor = fAO;
+            float aoAmbient = ambient * (0.5 + 0.5 * aoFactor);  // AO affects ambient more
+            float aoDirectional = directional * (0.7 + 0.3 * aoFactor);  // AO affects directional less
+        
+            float lighting = aoAmbient + aoDirectional;
 
             vec4 texColor = texture(fTexture, fUV);
             
@@ -90,6 +103,9 @@ internal unsafe class Renderer : IDisposable
                 case UV:
                     fragColor = vec4(fUV.x, fUV.y, 0, texColor.w);
                     break;
+                case AO:
+                    fragColor = vec4(vec3(fAO), 1.0);
+                    break;
             }
         }
     ";
@@ -100,6 +116,7 @@ internal unsafe class Renderer : IDisposable
         Depth = 1,
         Normals = 2,
         UV = 3,
+        AO = 4,
     }
 
     private Renderer()

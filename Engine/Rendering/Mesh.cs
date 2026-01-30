@@ -32,8 +32,8 @@ internal class Mesh : IDisposable
         List<float> vertices = new List<float>();
         List<uint> indices = new List<uint>();
 
-        //CulledMesher.CreateCulledMesh(currentChunk, vertices, indices);
-        GreedyMesher.CreateGreedyMesh(currentChunk, vertices, indices);
+        CulledMesher.CreateCulledMesh(currentChunk, vertices, indices);
+        //GreedyMesher.CreateGreedyMesh(currentChunk, vertices, indices);
 
         VertexCount = vertices.Count / Renderer.VertexStride;
         IndexCount = (uint)indices.Count;
@@ -54,9 +54,10 @@ internal class Mesh : IDisposable
         vbo = new BufferObject<float>(meshData?.Vertices.ToArray(), BufferTargetARB.ArrayBuffer, BufferUsageARB.StaticDraw);
         ebo = new BufferObject<uint>(meshData?.Indices.ToArray(), BufferTargetARB.ElementArrayBuffer, BufferUsageARB.StaticDraw);
 
-        VertexArrayObject.VertexAttributePointer<float>(0, 3, VertexAttribPointerType.Float, 8, 0);
-        VertexArrayObject.VertexAttributePointer<float>(1, 3, VertexAttribPointerType.Float, 8, 3);
-        VertexArrayObject.VertexAttributePointer<float>(2, 2, VertexAttribPointerType.Float, 8, 6);
+        VertexArrayObject.VertexAttributePointer<float>(0, 3, VertexAttribPointerType.Float, 9, 0); // Position
+        VertexArrayObject.VertexAttributePointer<float>(1, 3, VertexAttribPointerType.Float, 9, 3); // Normals
+        VertexArrayObject.VertexAttributePointer<float>(2, 2, VertexAttribPointerType.Float, 9, 6); // UVs
+        VertexArrayObject.VertexAttributePointer<float>(3, 1, VertexAttribPointerType.Float, 9, 8); // AOs
 
         VertexArrayObject.Unbind();
         vbo.Unbind();

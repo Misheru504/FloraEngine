@@ -3,6 +3,7 @@ using FloraEngine.Diagnostics;
 using FloraEngine.Rendering;
 using ImGuiNET;
 using Silk.NET.OpenGL;
+using FloraEngine.World;
 
 namespace FloraEngine.UI;
 
@@ -40,12 +41,14 @@ internal class MainMenuBar : IMainMenuBar
         if (ImGui.MenuItem("Delete logs folder")) Logger.ClearLogFolder();
         if (ImGui.MenuItem("Wireframe view", null, ref Program.IsWireframe)) Program.Graphics.PolygonMode(GLEnum.FrontAndBack, Program.IsWireframe ? GLEnum.Line : GLEnum.Fill);
         if (ImGui.MenuItem("Test console colors")) Logger.TestColors();
+        if (ImGui.MenuItem("Generate AOs", null, ref Renderer.Instance.IsGeneratingAOs)) WorldManager.Instance.UpdateChunksMeshes();
         if (ImGui.BeginMenu("Rendering mode"))
         {
             if (ImGui.MenuItem("Default")) Renderer.Instance.RenderingMode = Renderer.RenderMode.Default;
             if (ImGui.MenuItem("Depth")) Renderer.Instance.RenderingMode = Renderer.RenderMode.Depth;
             if (ImGui.MenuItem("Normals")) Renderer.Instance.RenderingMode = Renderer.RenderMode.Normals;
             if (ImGui.MenuItem("UVs")) Renderer.Instance.RenderingMode = Renderer.RenderMode.UV;
+            if (ImGui.MenuItem("AOs")) Renderer.Instance.RenderingMode = Renderer.RenderMode.AO;
             ImGui.EndMenu();
         }
         ImGui.Separator();

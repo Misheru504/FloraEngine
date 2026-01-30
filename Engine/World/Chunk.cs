@@ -70,6 +70,7 @@ internal class Chunk : IDisposable
 
         // TODO: TERRAIN FEATURES
     }
+
     public void UpdateMesh()
     {
         Mesh?.Dispose();
