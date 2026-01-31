@@ -1,4 +1,5 @@
-﻿using FloraEngine.World;
+﻿using FloraEngine.Rendering;
+using FloraEngine.World;
 using System.Numerics;
 
 namespace FloraEngine.Utils;
@@ -7,12 +8,29 @@ public static class GreedyMesher
 {
     enum Face
     {
-        Left, 
-        Right, 
-        Top, 
-        Bottom, 
-        Back, 
+        Left,
+        Right,
+        Top,
+        Bottom,
+        Back,
         Front
+    }
+
+    private struct FaceMask
+    {
+        public ushort VoxelId;
+        public float AO0, AO1, AO2, AO3;
+
+        public static FaceMask Air => new FaceMask { VoxelId = Voxel.AIR.ID, AO0 = 1f, AO1 = 1f, AO2 = 1f, AO3 = 1f };
+
+        public bool IsAir => VoxelId == Voxel.AIR.ID;
+
+        public bool CanMergeWith(FaceMask other)
+        {
+            return VoxelId == other.VoxelId &&
+                   AO0 == other.AO0 && AO1 == other.AO1 &&
+                   AO2 == other.AO2 && AO3 == other.AO3;
+        }
     }
 
     private static float[] GetNormals(Face type)
@@ -60,7 +78,7 @@ public static class GreedyMesher
                 int[] pos = [0, 0, 0];
                 int[] q = [0, 0, 0];
 
-                ushort[] mask = new ushort[Chunk.SIZE * Chunk.SIZE];
+                FaceMask[] mask = new FaceMask[Chunk.SIZE * Chunk.SIZE];
                 q[d] = 1;
 
                 Face face = Face.Front;
@@ -82,7 +100,6 @@ public static class GreedyMesher
                             ushort current;
                             ushort compare;
 
-                            // Voxel out of bounds
                             Vector3 voxelPos = new Vector3(pos[0], pos[1], pos[2]);
                             Vector3 comparePos = new Vector3(pos[0] + q[0], pos[1] + q[1], pos[2] + q[2]);
                             Vector3 worldVoxelPos = currentChunk.Position + (voxelPos * currentChunk.Scale);
@@ -96,13 +113,26 @@ public static class GreedyMesher
 
                             if (b == 0)
                             {
-                                if (current == Voxel.AIR.ID && compare != Voxel.AIR.ID) mask[maskIndex] = compare;
-                                else mask[maskIndex] = Voxel.AIR.ID;
+                                if (current == Voxel.AIR.ID && compare != Voxel.AIR.ID)
+                                {
+                                    int faceX = pos[0] + q[0];
+                                    int faceY = pos[1] + q[1];
+                                    int faceZ = pos[2] + q[2];
+                                    float[] aos = ComputeFaceAOs(currentChunk, faceX, faceY, faceZ, face);
+                                    mask[maskIndex] = new FaceMask { VoxelId = compare, AO0 = aos[0], AO1 = aos[1], AO2 = aos[2], AO3 = aos[3] };
+                                }
+                                else
+                                    mask[maskIndex] = FaceMask.Air;
                             }
                             else
                             {
-                                if (current != Voxel.AIR.ID && compare == Voxel.AIR.ID) mask[maskIndex] = current;
-                                else mask[maskIndex] = Voxel.AIR.ID;
+                                if (current != Voxel.AIR.ID && compare == Voxel.AIR.ID)
+                                {
+                                    float[] aos = ComputeFaceAOs(currentChunk, pos[0], pos[1], pos[2], face);
+                                    mask[maskIndex] = new FaceMask { VoxelId = current, AO0 = aos[0], AO1 = aos[1], AO2 = aos[2], AO3 = aos[3] };
+                                }
+                                else
+                                    mask[maskIndex] = FaceMask.Air;
                             }
 
                             maskIndex++;
@@ -118,9 +148,9 @@ public static class GreedyMesher
                         int i = 0;
                         while (i < Chunk.SIZE)
                         {
-                            ushort voxel = mask[maskIndex];
+                            FaceMask faceMask = mask[maskIndex];
 
-                            if (voxel == Voxel.AIR.ID)
+                            if (faceMask.IsAir)
                             {
                                 maskIndex += 1;
                                 i += 1;
@@ -128,7 +158,7 @@ public static class GreedyMesher
                             }
 
                             width = 1;
-                            while (i + width < Chunk.SIZE && voxel == mask[maskIndex + width])
+                            while (i + width < Chunk.SIZE && faceMask.CanMergeWith(mask[maskIndex + width]))
                             {
                                 width++;
                             }
@@ -138,9 +168,9 @@ public static class GreedyMesher
 
                             while (height + j < Chunk.SIZE)
                             {
-                                for(int k = 0; k < width; k++)
+                                for (int k = 0; k < width; k++)
                                 {
-                                    if (voxel != mask[maskIndex + k + height * Chunk.SIZE])
+                                    if (!faceMask.CanMergeWith(mask[maskIndex + k + height * Chunk.SIZE]))
                                     {
                                         done = true;
                                         break;
@@ -160,12 +190,13 @@ public static class GreedyMesher
                             pos[u] = i;
                             pos[v] = j;
 
-                            AddFace(pos, deltaU, deltaV, width, height, face, vertices, indices, ref vertexOffset, b == 0);
+                            float[] aos = [faceMask.AO0, faceMask.AO1, faceMask.AO2, faceMask.AO3];
+                            AddFace(currentChunk, pos, deltaU, deltaV, width, height, face, vertices, indices, ref vertexOffset, b == 0, aos);
 
                             for (int l = 0; l < height; l++)
                                 for (int k = 0; k < width; k++)
                                 {
-                                    mask[maskIndex + k + l * Chunk.SIZE] = Voxel.AIR.ID;
+                                    mask[maskIndex + k + l * Chunk.SIZE] = FaceMask.Air;
                                 }
 
                             i += width;
@@ -177,7 +208,7 @@ public static class GreedyMesher
         }
     }
 
-    private static void AddFace(int[] pos, int[] deltaU, int[] deltaV, int width, int height, Face face, List<float> vertices, List<uint> indices, ref uint vertexOffset, bool flip)
+    private static void AddFace(Chunk currentChunk, int[] pos, int[] deltaU, int[] deltaV, int width, int height, Face face, List<float> vertices, List<uint> indices, ref uint vertexOffset, bool windingFlip, float[] aos)
     {
         int x = pos[0], y = pos[1], z = pos[2];
         float[] normals = GetNormals(face);
@@ -185,21 +216,123 @@ public static class GreedyMesher
         float u0 = UVs[0], v0 = UVs[1], u1 = UVs[2], v1 = UVs[3], u2 = UVs[4], v2 = UVs[5], u3 = UVs[6], v3 = UVs[7];
 
         float[] quadVertices = [
-            x + deltaU[0] + deltaV[0], y + deltaU[1] + deltaV[1], z + deltaU[2] + deltaV[2], normals[0], normals[1], normals[2], u0, v0,
-            x + deltaU[0],             y + deltaU[1],             z + deltaU[2],             normals[0], normals[1], normals[2], u1, v1,
-            x,                         y,                         z,                         normals[0], normals[1], normals[2], u2, v2,
-            x + deltaV[0],             y + deltaV[1],             z + deltaV[2],             normals[0], normals[1], normals[2], u3, v3,
+            x + deltaU[0] + deltaV[0], y + deltaU[1] + deltaV[1], z + deltaU[2] + deltaV[2], normals[0], normals[1], normals[2], u0, v0, aos[0],
+            x + deltaU[0],             y + deltaU[1],             z + deltaU[2],             normals[0], normals[1], normals[2], u1, v1, aos[1],
+            x,                         y,                         z,                         normals[0], normals[1], normals[2], u2, v2, aos[2],
+            x + deltaV[0],             y + deltaV[1],             z + deltaV[2],             normals[0], normals[1], normals[2], u3, v3, aos[3]
         ];
         vertices.AddRange(quadVertices);
 
-        AddIndices(indices, ref vertexOffset, flip);
+        bool aoFlip = aos[0] + aos[2] > aos[1] + aos[3];
+        AddIndices(indices, ref vertexOffset, windingFlip, aoFlip);
     }
 
-    private static void AddIndices(List<uint> indices, ref uint vertexOffset, bool flip)
+    private static bool IsFaceVisible(Chunk currentChunk, int voxelX, int voxelY, int voxelZ)
+    {
+        if (voxelX < 0 || voxelX >= Chunk.SIZE || voxelY < 0 || voxelY >= Chunk.SIZE || voxelZ < 0 || voxelZ >= Chunk.SIZE)
+        {
+            Vector3 voxelPos = new Vector3(voxelX, voxelY, voxelZ);
+            Vector3 worldTilePos = currentChunk.Position + (voxelPos * currentChunk.Scale);
+            return WorldManager.Instance.GetVoxelIdAtWorldPos((int)worldTilePos.X, (int)worldTilePos.Y, (int)worldTilePos.Z, currentChunk.LodLevel) == Voxel.AIR.ID;
+        }
+
+        return currentChunk.GetVoxelAt(voxelX, voxelY, voxelZ).ID == Voxel.AIR.ID;
+    }
+
+    private static float ComputeVertexAO(bool side1, bool side2, bool corner)
+    {
+        if (side1 && side2) return 0;
+
+        int ao = 3 - (side1 ? 1 : 0) - (side2 ? 1 : 0) - (corner ? 1 : 0);
+
+        return (float)ao / 3.0f;
+    }
+
+    private static float[] ComputeFaceAOs(Chunk currentChunk, int x, int y, int z, Face face)
+    {
+        if (!Renderer.IsGeneratingAOs)
+        {
+            return [1f, 1f, 1f, 1f];
+        }
+
+        float[] aos = new float[4];
+
+        switch (face)
+        {
+            case Face.Bottom: // -Y, d=1, u=Z, v=X
+                // Vertices: V0(x+1,y,z+1), V1(x,y,z+1), V2(x,y,z), V3(x+1,y,z)
+                aos[0] = ComputeVertexAO(!IsFaceVisible(currentChunk, x + 1, y - 1, z), !IsFaceVisible(currentChunk, x, y - 1, z + 1), !IsFaceVisible(currentChunk, x + 1, y - 1, z + 1));
+                aos[1] = ComputeVertexAO(!IsFaceVisible(currentChunk, x - 1, y - 1, z), !IsFaceVisible(currentChunk, x, y - 1, z + 1), !IsFaceVisible(currentChunk, x - 1, y - 1, z + 1));
+                aos[2] = ComputeVertexAO(!IsFaceVisible(currentChunk, x - 1, y - 1, z), !IsFaceVisible(currentChunk, x, y - 1, z - 1), !IsFaceVisible(currentChunk, x - 1, y - 1, z - 1));
+                aos[3] = ComputeVertexAO(!IsFaceVisible(currentChunk, x + 1, y - 1, z), !IsFaceVisible(currentChunk, x, y - 1, z - 1), !IsFaceVisible(currentChunk, x + 1, y - 1, z - 1));
+                break;
+
+            case Face.Top: // +Y, d=1, u=Z, v=X
+                // Vertices: V0(x+1,y+1,z+1), V1(x,y+1,z+1), V2(x,y+1,z), V3(x+1,y+1,z)
+                aos[0] = ComputeVertexAO(!IsFaceVisible(currentChunk, x + 1, y + 1, z), !IsFaceVisible(currentChunk, x, y + 1, z + 1), !IsFaceVisible(currentChunk, x + 1, y + 1, z + 1));
+                aos[1] = ComputeVertexAO(!IsFaceVisible(currentChunk, x - 1, y + 1, z), !IsFaceVisible(currentChunk, x, y + 1, z + 1), !IsFaceVisible(currentChunk, x - 1, y + 1, z + 1));
+                aos[2] = ComputeVertexAO(!IsFaceVisible(currentChunk, x - 1, y + 1, z), !IsFaceVisible(currentChunk, x, y + 1, z - 1), !IsFaceVisible(currentChunk, x - 1, y + 1, z - 1));
+                aos[3] = ComputeVertexAO(!IsFaceVisible(currentChunk, x + 1, y + 1, z), !IsFaceVisible(currentChunk, x, y + 1, z - 1), !IsFaceVisible(currentChunk, x + 1, y + 1, z - 1));
+                break;
+
+            case Face.Left: // -X, d=0, u=Y, v=Z
+                // Vertices: V0(x,y+1,z+1), V1(x,y+1,z), V2(x,y,z), V3(x,y,z+1)
+                aos[0] = ComputeVertexAO(!IsFaceVisible(currentChunk, x - 1, y + 1, z), !IsFaceVisible(currentChunk, x - 1, y, z + 1), !IsFaceVisible(currentChunk, x - 1, y + 1, z + 1));
+                aos[1] = ComputeVertexAO(!IsFaceVisible(currentChunk, x - 1, y + 1, z), !IsFaceVisible(currentChunk, x - 1, y, z - 1), !IsFaceVisible(currentChunk, x - 1, y + 1, z - 1));
+                aos[2] = ComputeVertexAO(!IsFaceVisible(currentChunk, x - 1, y - 1, z), !IsFaceVisible(currentChunk, x - 1, y, z - 1), !IsFaceVisible(currentChunk, x - 1, y - 1, z - 1));
+                aos[3] = ComputeVertexAO(!IsFaceVisible(currentChunk, x - 1, y - 1, z), !IsFaceVisible(currentChunk, x - 1, y, z + 1), !IsFaceVisible(currentChunk, x - 1, y - 1, z + 1));
+                break;
+
+            case Face.Right: // +X, d=0, u=Y, v=Z
+                // Vertices: V0(x+1,y+1,z+1), V1(x+1,y+1,z), V2(x+1,y,z), V3(x+1,y,z+1)
+                aos[0] = ComputeVertexAO(!IsFaceVisible(currentChunk, x + 1, y + 1, z), !IsFaceVisible(currentChunk, x + 1, y, z + 1), !IsFaceVisible(currentChunk, x + 1, y + 1, z + 1));
+                aos[1] = ComputeVertexAO(!IsFaceVisible(currentChunk, x + 1, y + 1, z), !IsFaceVisible(currentChunk, x + 1, y, z - 1), !IsFaceVisible(currentChunk, x + 1, y + 1, z - 1));
+                aos[2] = ComputeVertexAO(!IsFaceVisible(currentChunk, x + 1, y - 1, z), !IsFaceVisible(currentChunk, x + 1, y, z - 1), !IsFaceVisible(currentChunk, x + 1, y - 1, z - 1));
+                aos[3] = ComputeVertexAO(!IsFaceVisible(currentChunk, x + 1, y - 1, z), !IsFaceVisible(currentChunk, x + 1, y, z + 1), !IsFaceVisible(currentChunk, x + 1, y - 1, z + 1));
+                break;
+
+            case Face.Back: // -Z, d=2, u=X, v=Y
+                // Vertices: V0(x+1,y+1,z), V1(x+1,y,z), V2(x,y,z), V3(x,y+1,z)
+                aos[0] = ComputeVertexAO(!IsFaceVisible(currentChunk, x + 1, y, z - 1), !IsFaceVisible(currentChunk, x, y + 1, z - 1), !IsFaceVisible(currentChunk, x + 1, y + 1, z - 1));
+                aos[1] = ComputeVertexAO(!IsFaceVisible(currentChunk, x + 1, y, z - 1), !IsFaceVisible(currentChunk, x, y - 1, z - 1), !IsFaceVisible(currentChunk, x + 1, y - 1, z - 1));
+                aos[2] = ComputeVertexAO(!IsFaceVisible(currentChunk, x - 1, y, z - 1), !IsFaceVisible(currentChunk, x, y - 1, z - 1), !IsFaceVisible(currentChunk, x - 1, y - 1, z - 1));
+                aos[3] = ComputeVertexAO(!IsFaceVisible(currentChunk, x - 1, y, z - 1), !IsFaceVisible(currentChunk, x, y + 1, z - 1), !IsFaceVisible(currentChunk, x - 1, y + 1, z - 1));
+                break;
+
+            case Face.Front: // +Z, d=2, u=X, v=Y
+                // Vertices: V0(x+1,y+1,z+1), V1(x+1,y,z+1), V2(x,y,z+1), V3(x,y+1,z+1)
+                aos[0] = ComputeVertexAO(!IsFaceVisible(currentChunk, x + 1, y, z + 1), !IsFaceVisible(currentChunk, x, y + 1, z + 1), !IsFaceVisible(currentChunk, x + 1, y + 1, z + 1));
+                aos[1] = ComputeVertexAO(!IsFaceVisible(currentChunk, x + 1, y, z + 1), !IsFaceVisible(currentChunk, x, y - 1, z + 1), !IsFaceVisible(currentChunk, x + 1, y - 1, z + 1));
+                aos[2] = ComputeVertexAO(!IsFaceVisible(currentChunk, x - 1, y, z + 1), !IsFaceVisible(currentChunk, x, y - 1, z + 1), !IsFaceVisible(currentChunk, x - 1, y - 1, z + 1));
+                aos[3] = ComputeVertexAO(!IsFaceVisible(currentChunk, x - 1, y, z + 1), !IsFaceVisible(currentChunk, x, y + 1, z + 1), !IsFaceVisible(currentChunk, x - 1, y + 1, z + 1));
+                break;
+        }
+
+        return aos;
+    }
+
+    private static void AddIndices(List<uint> indices, ref uint vertexOffset, bool windingFlip, bool aoFlip)
     {
         uint[] indicesToAdd;
-        if (flip)
+
+        // windingFlip: controls triangle winding order (for backface culling)
+        // aoFlip: controls which diagonal to use (for AO interpolation quality)
+
+        if (!windingFlip && !aoFlip)
         {
+            // CCW winding, diagonal 1-3
+            indicesToAdd = [
+                vertexOffset + 0u,
+                vertexOffset + 3u,
+                vertexOffset + 1u,
+                vertexOffset + 1u,
+                vertexOffset + 3u,
+                vertexOffset + 2u,
+            ];
+        }
+        else if (windingFlip && !aoFlip)
+        {
+            // CW winding, diagonal 1-3
             indicesToAdd = [
                 vertexOffset + 0u,
                 vertexOffset + 1u,
@@ -209,15 +342,28 @@ public static class GreedyMesher
                 vertexOffset + 3u,
             ];
         }
-        else
+        else if (!windingFlip && aoFlip)
         {
+            // CCW winding, diagonal 0-2
             indicesToAdd = [
                 vertexOffset + 0u,
-                vertexOffset + 3u,
+                vertexOffset + 2u,
                 vertexOffset + 1u,
-                vertexOffset + 1u,
+                vertexOffset + 0u,
                 vertexOffset + 3u,
                 vertexOffset + 2u,
+            ];
+        }
+        else // windingFlip && aoFlip
+        {
+            // CW winding, diagonal 0-2
+            indicesToAdd = [
+                vertexOffset + 0u,
+                vertexOffset + 1u,
+                vertexOffset + 2u,
+                vertexOffset + 0u,
+                vertexOffset + 2u,
+                vertexOffset + 3u,
             ];
         }
 
