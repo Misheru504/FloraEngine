@@ -6,6 +6,8 @@ namespace FloraEngine.Rendering;
 
 internal class Mesh : IDisposable
 {
+    public static bool IsUsingGreedyMeshing = true;
+
     public VertexArrayObject? vao;
     private BufferObject<float>? vbo;
     private BufferObject<uint>? ebo;
@@ -32,8 +34,8 @@ internal class Mesh : IDisposable
         List<float> vertices = new List<float>();
         List<uint> indices = new List<uint>();
 
-        //CulledMesher.CreateCulledMesh(currentChunk, vertices, indices);
-        GreedyMesher.CreateGreedyMesh(currentChunk, vertices, indices);
+        if(IsUsingGreedyMeshing) GreedyMesher.CreateGreedyMesh(currentChunk, vertices, indices);
+        else CulledMesher.CreateCulledMesh(currentChunk, vertices, indices);
 
         VertexCount = vertices.Count / Renderer.VertexStride;
         IndexCount = (uint)indices.Count;

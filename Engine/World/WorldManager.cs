@@ -276,10 +276,13 @@ internal class WorldManager : IDisposable
 
     public void UpdateChunksMeshes()
     {
-        foreach(Chunk chunk in RenderedChunks.Values)
+        foreach(Chunk chunk in LoadedChunks.Values)
         {
-            chunk.UpdateMesh();
-            chunk.UpdateBuffers();
+            if(chunk.Mesh != null)
+            {
+                chunk.UpdateMesh();
+                chunk.UpdateBuffers();
+            }
         }
     }
 }
