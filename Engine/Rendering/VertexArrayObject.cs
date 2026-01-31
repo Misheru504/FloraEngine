@@ -5,7 +5,7 @@ namespace FloraEngine.Rendering;
 /// <summary>
 /// An object that provides methods for uploading vertex data (position, normals, etc) to the gpu
 /// </summary>
-internal unsafe class VertexArrayObject : IDisposable
+public unsafe class VertexArrayObject : IDisposable
 {
     private static GL Graphics => Program.Graphics;
     private readonly uint handle;

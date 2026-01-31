@@ -42,26 +42,3 @@ internal class Voxel
         return GetVoxelByID(id)!.Name;
     }
 }
-
-internal struct VoxelData
-{
-    public ushort ID { get; }
-    public string Data { get; private set; }
-
-    public VoxelData()
-    {
-        ID = 0;
-        Data = "";
-    }
-
-    public VoxelData(ushort id, string data)
-    {
-        ID = id; 
-        Data = data;
-    }
-
-    public void SetData(string data)
-    {
-        Data = data;
-    }
-}

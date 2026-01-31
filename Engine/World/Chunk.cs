@@ -4,7 +4,7 @@ using System.Numerics;
 
 namespace FloraEngine.World;
 
-internal class Chunk : IDisposable
+public class Chunk : IDisposable
 {
     public const int SIZE = 16;
     public const int VOLUME = SIZE * SIZE * SIZE;
@@ -37,6 +37,17 @@ internal class Chunk : IDisposable
             UpdateMesh();
             UpdateBuffers();
         }
+    }
+
+    public Chunk(ChunkData data)
+    {
+        Position = new Vector3(data.x, data.y, data.z);
+        LodLevel = data.lodLevel;
+        HasFeatures = data.hasFeatures;
+        Scale = 1 << LodLevel;
+        WorldSize = Scale * SIZE;
+
+        voxels = data.voxels;
     }
 
     public void CreateBaseTerrain()
@@ -85,6 +96,8 @@ internal class Chunk : IDisposable
     public static int GetIndex(int x, int y, int z) => x + z * SIZE + y * SIZE * SIZE;
     public VoxelData GetVoxelAt(int x, int y, int z) => voxels[GetIndex(x, y, z)];
     public void SetVoxelAt(int x, int y, int z, VoxelData voxel) => voxels[GetIndex(x, y, z)] = voxel;
+
+    internal VoxelData[] GetVoxels() => voxels;
 
     public void Dispose()
     {

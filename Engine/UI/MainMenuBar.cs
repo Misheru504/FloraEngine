@@ -24,6 +24,7 @@ internal class MainMenuBar : IMainMenuBar
         ShowPlayerMenu();
         ShowWorldMenu();
 
+
         if (ImGui.BeginMenu("Window"))
         {
             foreach(IImGuiWindow window in windowManager.windows)
@@ -82,7 +83,9 @@ internal class MainMenuBar : IMainMenuBar
                 Mesh.IsUsingGreedyMeshing = !Mesh.IsUsingGreedyMeshing;
                 WorldManager.Instance.UpdateChunksMeshes();
             }
+            ImGui.EndMenu();
         }
+        if(ImGui.MenuItem("Save world to disk")) WorldManager.Instance.SaveActiveWorld();
 
         ImGui.EndMenu();
     }

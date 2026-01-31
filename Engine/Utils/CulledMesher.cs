@@ -17,7 +17,7 @@ public static class CulledMesher
             {
                 for (int z = 0; z < sideSize; z++)
                 {
-                    if (currentChunk.GetVoxelAt(x, y, z).ID == Voxel.AIR.ID) continue;
+                    if (currentChunk.GetVoxelAt(x, y, z).id == Voxel.AIR.ID) continue;
 
                     if (IsFaceVisible(currentChunk, x, y - 1, z))
                     {
@@ -225,7 +225,7 @@ public static class CulledMesher
             return true;
         }
 
-        voxel = currentChunk.GetVoxelAt(voxelX, voxelY, voxelZ).ID;
+        voxel = currentChunk.GetVoxelAt(voxelX, voxelY, voxelZ).id;
         return false;
     }
 

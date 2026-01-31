@@ -4,7 +4,7 @@ using Silk.NET.OpenGL;
 
 namespace FloraEngine.Rendering;
 
-internal class Mesh : IDisposable
+public class Mesh : IDisposable
 {
     public static bool IsUsingGreedyMeshing = true;
 

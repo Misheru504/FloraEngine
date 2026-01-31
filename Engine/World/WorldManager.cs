@@ -16,6 +16,8 @@ internal class WorldManager : IDisposable
 
     public int MaxLOD = 0;
     public int RenderDistance = 5;
+    public bool IsWorldLoaded => World != null;
+    public World? World { get; private set; }
 
     #region Multi-threading
     private const int GENERATION_THREAD_COUNT = 4;
@@ -39,10 +41,8 @@ internal class WorldManager : IDisposable
 
     public WorldManager()
     {
-        Random r = new Random();
+        World = null;
         Noise = FastNoise.FromEncodedNodeTree(FastNoise.TREE_METADATA);
-        Noise.Seed = 1444320271;
-        Logger.Print($"Seed: {Noise.Seed}");
 
         RenderedChunks = new ConcurrentDictionary<Vector3, Chunk>();
         LoadedChunks = new ConcurrentDictionary<(Vector3, int), Chunk>();
@@ -53,8 +53,31 @@ internal class WorldManager : IDisposable
         _chunksReadyForBuffers = new ConcurrentQueue<Chunk>();
 
         _cancellationTokenSource = new CancellationTokenSource();
-
         _generationTasks = new Task[GENERATION_THREAD_COUNT];
+        _meshingTasks = new Task[MESHING_THREAD_COUNT];
+    }
+
+    public void LoadWorld(WorldData worldData)
+    {
+        World world = new World(worldData);
+        World = world;
+        Noise.Seed = world.Seed;
+
+        Logger.Print($"Loaded world '{world.Name}'. Seed: {world.Seed}");
+
+        StartTasks();
+    }
+
+    public void SaveActiveWorld()
+    {
+        if (World == null) return;
+
+        WorldData data = WorldData.FromWorld(World);
+        JsonMapper.PrettySerialize(data, $"./worlds/{data.name}.json");
+    }
+
+    private void StartTasks()
+    {
         for (int i = 0; i < GENERATION_THREAD_COUNT; i++)
         {
             _generationTasks[i] = Task.Factory.StartNew(
@@ -65,7 +88,6 @@ internal class WorldManager : IDisposable
             );
         }
 
-        _meshingTasks = new Task[MESHING_THREAD_COUNT];
         for (int i = 0; i < MESHING_THREAD_COUNT; i++)
         {
             _meshingTasks[i] = Task.Factory.StartNew(
@@ -148,6 +170,8 @@ internal class WorldManager : IDisposable
 
     public unsafe void Update(double deltaTime)
     {
+        if (!IsWorldLoaded) return;
+
         QueueChunksForGeneration();
         ProcessReadyChunks();
         UnloadFarChunks();
@@ -239,6 +263,8 @@ internal class WorldManager : IDisposable
 
     public ushort GetVoxelIdAtWorldPos(int x, int y, int z, byte lodLevel)
     {
+        if (!IsWorldLoaded) return Voxel.AIR.ID;
+
         int scale = 1 << lodLevel;
         int chunkSize = Chunk.SIZE * (1 << lodLevel);
 
@@ -255,7 +281,7 @@ internal class WorldManager : IDisposable
             LoadedChunks[(chunkPos, lodLevel)] = c;
         }
 
-        return c.GetVoxelAt((int)localTilePos.X, (int)localTilePos.Y, (int)localTilePos.Z).ID;
+        return c.GetVoxelAt((int)localTilePos.X, (int)localTilePos.Y, (int)localTilePos.Z).id;
     }
 
     public void Dispose()

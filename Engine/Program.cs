@@ -78,6 +78,8 @@ public static class Program
         OverlayManager = new OverlayManager();
         OverlayManager.AddWindow(new MainOverlay());
         MainMenuBar = new MainMenuBar(WindowManager);
+
+        WorldManager.Instance.LoadWorld(new WorldData { name = "pluh", seed = 1444320271, chunks = [] });
     }
     private static void GraphicsLoad()
     {
