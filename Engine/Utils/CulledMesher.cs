@@ -44,7 +44,7 @@ public static class CulledMesher
                         ];
                         vertices.AddRange(bottomVertices);
 
-                        AddIndices(indices, ref vertexOffset);
+                        AddIndices(indices, ref vertexOffset, (aos[0] + aos[2] > aos[1] + aos[3]));
                     }
                     if (IsFaceVisible(currentChunk, x, y + 1, z))
                     {
@@ -71,7 +71,7 @@ public static class CulledMesher
                         ];
                         vertices.AddRange(topVertices);
 
-                        AddIndices(indices, ref vertexOffset);
+                        AddIndices(indices, ref vertexOffset, (aos[0] + aos[2] > aos[1] + aos[3]));
                     }
                     if (IsFaceVisible(currentChunk, x - 1, y, z))
                     {
@@ -98,7 +98,7 @@ public static class CulledMesher
                         ];
                         vertices.AddRange(leftVertices);
 
-                        AddIndices(indices, ref vertexOffset);
+                        AddIndices(indices, ref vertexOffset, (aos[0] + aos[2] > aos[1] + aos[3]));
                     }
                     if (IsFaceVisible(currentChunk, x + 1, y, z))
                     {
@@ -125,7 +125,7 @@ public static class CulledMesher
                         ];
                         vertices.AddRange(rightVertices);
 
-                        AddIndices(indices, ref vertexOffset);
+                        AddIndices(indices, ref vertexOffset, (aos[0] + aos[2] > aos[1] + aos[3]));
                     }
                     if (IsFaceVisible(currentChunk, x, y, z + 1))
                     {
@@ -152,7 +152,7 @@ public static class CulledMesher
                         ];
                         vertices.AddRange(frontVertices);
 
-                        AddIndices(indices, ref vertexOffset);
+                        AddIndices(indices, ref vertexOffset, (aos[0] + aos[2] > aos[1] + aos[3]));
                     }
                     if (IsFaceVisible(currentChunk, x, y, z - 1))
                     {
@@ -179,24 +179,36 @@ public static class CulledMesher
                         ];
                         vertices.AddRange(backVertices);
 
-                        AddIndices(indices, ref vertexOffset);
+                        AddIndices(indices, ref vertexOffset, (aos[0] + aos[2] > aos[1] + aos[3]));
                     }
                 }
             }
         }
     }
 
-    private static void AddIndices(List<uint> indices, ref uint vertexOffset)
+    private static void AddIndices(List<uint> indices, ref uint vertexOffset, bool flip = false)
     {
-        uint[] indicesToAdd  = [
-            vertexOffset + 0u,
-            vertexOffset + 3u,
-            vertexOffset + 1u,
+        uint[] indicesToAdd;
+        if (flip)
+            indicesToAdd  = [
+                vertexOffset + 0u,
+                vertexOffset + 2u,
+                vertexOffset + 1u,
 
-            vertexOffset + 1u,
-            vertexOffset + 3u,
-            vertexOffset + 2u,
-        ];
+                vertexOffset + 0u,
+                vertexOffset + 3u,
+                vertexOffset + 2u,
+            ];
+        else
+            indicesToAdd = [
+                vertexOffset + 0u,
+                vertexOffset + 3u,
+                vertexOffset + 1u,
+
+                vertexOffset + 1u,
+                vertexOffset + 3u,
+                vertexOffset + 2u,
+            ];
 
         vertexOffset += 4;
         indices.AddRange(indicesToAdd);
