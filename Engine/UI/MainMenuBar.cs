@@ -51,6 +51,7 @@ internal class MainMenuBar : IMainMenuBar
             if (ImGui.MenuItem("Normals")) Renderer.Instance.RenderingMode = Renderer.RenderMode.Normals;
             if (ImGui.MenuItem("UVs")) Renderer.Instance.RenderingMode = Renderer.RenderMode.UV;
             if (ImGui.MenuItem("AOs")) Renderer.Instance.RenderingMode = Renderer.RenderMode.AO;
+            if (ImGui.MenuItem("Layer")) Renderer.Instance.RenderingMode = Renderer.RenderMode.Layer;
             ImGui.EndMenu();
         }
         ImGui.Separator();

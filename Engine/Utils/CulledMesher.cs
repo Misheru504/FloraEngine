@@ -18,6 +18,7 @@ public static class CulledMesher
                 for (int z = 0; z < sideSize; z++)
                 {
                     if (currentChunk.GetVoxelAt(x, y, z).id == Voxel.AIR.ID) continue;
+                    Voxel v = Voxel.GetVoxelByID(currentChunk.GetVoxelAt(x, y, z).id);
 
                     if (IsFaceVisible(currentChunk, x, y - 1, z))
                     {
@@ -37,10 +38,10 @@ public static class CulledMesher
                         }
 
                         float[] bottomVertices = [
-                            x+1, y,   z+1,  0.0f, -1.0f,  0.0f, 1.0f, 1.0f, aos[0],
-                            x+1, y,   z,    0.0f, -1.0f,  0.0f, 0.0f, 1.0f, aos[1],
-                            x,   y,   z,    0.0f, -1.0f,  0.0f, 0.0f, 0.0f, aos[2],
-                            x,   y,   z+1,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f, aos[3]
+                            x+1, y,   z+1,  0.0f, -1.0f,  0.0f, 1.0f, 1.0f, aos[0], v.ID,
+                            x+1, y,   z,    0.0f, -1.0f,  0.0f, 0.0f, 1.0f, aos[1], v.ID,
+                            x,   y,   z,    0.0f, -1.0f,  0.0f, 0.0f, 0.0f, aos[2], v.ID,
+                            x,   y,   z+1,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f, aos[3], v.ID,
                         ];
                         vertices.AddRange(bottomVertices);
 
@@ -64,10 +65,10 @@ public static class CulledMesher
                         }
 
                         float[] topVertices = [
-                            x,   y+1, z+1,  0.0f,  1.0f,  0.0f, 1.0f, 1.0f, aos[0],
-                            x,   y+1, z,    0.0f,  1.0f,  0.0f, 0.0f, 1.0f, aos[1],
-                            x+1, y+1, z,    0.0f,  1.0f,  0.0f, 0.0f, 0.0f, aos[2],
-                            x+1, y+1, z+1,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, aos[3],
+                            x,   y+1, z+1,  0.0f,  1.0f,  0.0f, 1.0f, 1.0f, aos[0], v.ID,
+                            x,   y+1, z,    0.0f,  1.0f,  0.0f, 0.0f, 1.0f, aos[1], v.ID,
+                            x+1, y+1, z,    0.0f,  1.0f,  0.0f, 0.0f, 0.0f, aos[2], v.ID,
+                            x+1, y+1, z+1,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, aos[3], v.ID,
                         ];
                         vertices.AddRange(topVertices);
 
@@ -91,10 +92,10 @@ public static class CulledMesher
                         }
 
                         float[] leftVertices = [
-                            x,   y,   z+1, -1.0f,  0.0f,  0.0f, 1.0f, 1.0f, aos[0],
-                            x,   y,   z,   -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, aos[1],
-                            x,   y+1, z,   -1.0f,  0.0f,  0.0f, 0.0f, 0.0f, aos[2],
-                            x,   y+1, z+1, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f, aos[3],
+                            x,   y,   z+1, -1.0f,  0.0f,  0.0f, 1.0f, 1.0f, aos[0], v.ID,
+                            x,   y,   z,   -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, aos[1], v.ID,
+                            x,   y+1, z,   -1.0f,  0.0f,  0.0f, 0.0f, 0.0f, aos[2], v.ID,
+                            x,   y+1, z+1, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f, aos[3], v.ID,
                         ];
                         vertices.AddRange(leftVertices);
 
@@ -118,10 +119,10 @@ public static class CulledMesher
                         }
 
                         float[] rightVertices = [
-                            x+1, y,   z,    1.0f,  0.0f,  0.0f, 1.0f, 1.0f, aos[0],
-                            x+1, y,   z+1,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, aos[1],
-                            x+1, y+1, z+1,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f, aos[2],
-                            x+1, y+1, z,    1.0f,  0.0f,  0.0f, 1.0f, 0.0f, aos[3],
+                            x+1, y,   z,    1.0f,  0.0f,  0.0f, 1.0f, 1.0f, aos[0], v.ID,
+                            x+1, y,   z+1,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, aos[1], v.ID,
+                            x+1, y+1, z+1,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f, aos[2], v.ID,
+                            x+1, y+1, z,    1.0f,  0.0f,  0.0f, 1.0f, 0.0f, aos[3], v.ID,
                         ];
                         vertices.AddRange(rightVertices);
 
@@ -145,10 +146,10 @@ public static class CulledMesher
                         }
 
                         float[] frontVertices = [
-                            x+1, y,   z+1,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, aos[0],
-                            x,   y,   z+1,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f, aos[1],
-                            x,   y+1, z+1,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, aos[2],
-                            x+1, y+1, z+1,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f, aos[3],
+                            x+1, y,   z+1,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, aos[0], v.ID,
+                            x,   y,   z+1,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f, aos[1], v.ID,
+                            x,   y+1, z+1,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, aos[2], v.ID,
+                            x+1, y+1, z+1,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f, aos[3], v.ID,
                         ];
                         vertices.AddRange(frontVertices);
 
@@ -172,10 +173,10 @@ public static class CulledMesher
                         }
 
                         float[] backVertices = [
-                            x,   y,   z,    0.0f,  0.0f, -1.0f, 1.0f, 1.0f, aos[0],
-                            x+1, y,   z,    0.0f,  0.0f, -1.0f, 0.0f, 1.0f, aos[1],
-                            x+1, y+1, z,    0.0f,  0.0f, -1.0f, 0.0f, 0.0f, aos[2],
-                            x,   y+1, z,    0.0f,  0.0f, -1.0f, 1.0f, 0.0f, aos[3],
+                            x,   y,   z,    0.0f,  0.0f, -1.0f, 1.0f, 1.0f, aos[0], v.ID,
+                            x+1, y,   z,    0.0f,  0.0f, -1.0f, 0.0f, 1.0f, aos[1], v.ID,
+                            x+1, y+1, z,    0.0f,  0.0f, -1.0f, 0.0f, 0.0f, aos[2], v.ID,
+                            x,   y+1, z,    0.0f,  0.0f, -1.0f, 1.0f, 0.0f, aos[3], v.ID,
                         ];
                         vertices.AddRange(backVertices);
 

@@ -225,7 +225,8 @@ internal class WorldManager : IDisposable
         {
             if (MathUtils.OutOfDistance(v.Key, CenterPos, RenderDistance * v.Value.WorldSize))
             {
-                RenderedChunks.TryRemove(v.Key, out _);
+                RenderedChunks.TryRemove(v.Key, out Chunk? c);
+                c?.Dispose();
             }
         }
     }

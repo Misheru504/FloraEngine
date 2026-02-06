@@ -29,6 +29,7 @@ internal unsafe class Renderer : IDisposable
         layout (location = 1) in vec3 vNormal;
         layout (location = 2) in vec2 vUV;
         layout (location = 3) in float vAO;
+        layout (location = 4) in float vTextureLayer;
 
         uniform mat4 uModel; 
         uniform mat4 uView;
@@ -37,6 +38,7 @@ internal unsafe class Renderer : IDisposable
         out vec2 fUV;
         out vec3 fNormal;
         out float fAO;
+        out float fTextureLayer;
 
         void main()
         {
@@ -45,6 +47,7 @@ internal unsafe class Renderer : IDisposable
             fUV = vUV;
             fNormal = vNormal;
             fAO = vAO;
+            fTextureLayer = vTextureLayer;
         }
     ";
 
@@ -56,16 +59,26 @@ internal unsafe class Renderer : IDisposable
         const int NORMAL = 2;
         const int UV = 3;
         const int AO = 4;
+        const int LAYER = 5;
 
         in vec2 fUV;
         in vec3 fNormal;
         in float fAO;
+        in float fTextureLayer;
 
-        uniform sampler2D fTexture;
+        uniform sampler2DArray fTexture;
         uniform int fRenderMode;
         out vec4 fragColor;
 
         vec3 lightPos = vec3(0.3, 1.0, 0.7);
+
+        vec3 hashColor(float n) {
+            // Pseudo-random hash that gives consistent colors per layer
+            vec3 p = vec3(n * 0.1031, n * 0.1030, n * 0.0973);
+            p = fract(p * vec3(127.1, 311.7, 74.7));
+            p += dot(p, p.yzx + 33.33);
+            return fract((p.xxy + p.yzz) * p.zyx);
+        }
 
         void main()
         {
@@ -83,7 +96,7 @@ internal unsafe class Renderer : IDisposable
         
             float lighting = aoAmbient + aoDirectional;
 
-            vec4 texColor = texture(fTexture, fUV);
+            vec4 texColor = texture(fTexture, vec3(fUV, fTextureLayer));
             
             switch(fRenderMode){
                 default:
@@ -106,6 +119,9 @@ internal unsafe class Renderer : IDisposable
                 case AO:
                     fragColor = vec4(vec3(fAO), 1.0);
                     break;
+                case LAYER:
+                    fragColor = vec4(hashColor(fTextureLayer), 1.0);
+                    break;
             }
         }
     ";
@@ -117,7 +133,10 @@ internal unsafe class Renderer : IDisposable
         Normals = 2,
         UV = 3,
         AO = 4,
+        Layer = 5,
     }
+
+    private TextureArray atlas;
 
     private Renderer()
     {
@@ -127,6 +146,9 @@ internal unsafe class Renderer : IDisposable
         texture = Texture2D.FromFile("Assets/block.png", TextureUnit.Texture0);
         texture.SetDefaultParameters();
 
+        atlas = new TextureArray("Assets/atlas.png", TextureUnit.Texture1, 16);
+        atlas.SetDefaultParameters();
+
         RenderingMode = RenderMode.Default;
 
         Logger.Render("Successfully loaded!");
@@ -135,12 +157,12 @@ internal unsafe class Renderer : IDisposable
     internal void Draw()
     {
         shader.UseProgram();
-        texture.Bind();
+        atlas.Bind();
 
         shader.SetUniform("uView", Camera.Instance.RelativeViewMatrix);
         shader.SetUniform("uProjection", Camera.Instance.ProjectionMatrix);
         shader.SetUniform("fRenderMode", (int) RenderingMode);
-        shader.SetUniform("fTexture", 0);
+        shader.SetUniform("fTexture", 1);
 
         VertexCount = 0;
         foreach(Chunk chunk in WorldManager.Instance.RenderedChunks.Values)

@@ -56,9 +56,17 @@ public class Chunk : IDisposable
                 {
                     float worldY = (y * Scale) + Position.Y + 64;
 
-                    if (worldY <= height)
+                    if (worldY <= height - 4)
                     {
-                        SetVoxelAt(x, y, z, Voxel.PURPLE.GetDefaultData());
+                        SetVoxelAt(x, y, z, Voxel.STONE.GetDefaultData());
+                    }
+                    else if (worldY <= height - 1)
+                    {
+                        SetVoxelAt(x, y, z, Voxel.DIRT.GetDefaultData());
+                    }
+                    else if (worldY <= height)
+                    {
+                        SetVoxelAt(x, y, z, Voxel.GRASS.GetDefaultData());
                     }
                 }
             }

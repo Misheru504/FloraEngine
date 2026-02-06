@@ -6,7 +6,7 @@ namespace FloraEngine.Rendering;
 
 public class Mesh : IDisposable
 {
-    public static bool IsUsingGreedyMeshing = true;
+    public static bool IsUsingGreedyMeshing = false;
 
     public VertexArrayObject? vao;
     private BufferObject<float>? vbo;
@@ -56,10 +56,11 @@ public class Mesh : IDisposable
         vbo = new BufferObject<float>(meshData?.Vertices.ToArray(), BufferTargetARB.ArrayBuffer, BufferUsageARB.StaticDraw);
         ebo = new BufferObject<uint>(meshData?.Indices.ToArray(), BufferTargetARB.ElementArrayBuffer, BufferUsageARB.StaticDraw);
 
-        VertexArrayObject.VertexAttributePointer<float>(0, 3, VertexAttribPointerType.Float, 9, 0); // Position
-        VertexArrayObject.VertexAttributePointer<float>(1, 3, VertexAttribPointerType.Float, 9, 3); // Normals
-        VertexArrayObject.VertexAttributePointer<float>(2, 2, VertexAttribPointerType.Float, 9, 6); // UVs
-        VertexArrayObject.VertexAttributePointer<float>(3, 1, VertexAttribPointerType.Float, 9, 8); // AOs
+        VertexArrayObject.VertexAttributePointer<float>(0, 3, VertexAttribPointerType.Float, 10, 0); // Position
+        VertexArrayObject.VertexAttributePointer<float>(1, 3, VertexAttribPointerType.Float, 10, 3); // Normals
+        VertexArrayObject.VertexAttributePointer<float>(2, 2, VertexAttribPointerType.Float, 10, 6); // UVs
+        VertexArrayObject.VertexAttributePointer<float>(3, 1, VertexAttribPointerType.Float, 10, 8); // AOs
+        VertexArrayObject.VertexAttributePointer<float>(4, 1, VertexAttribPointerType.Float, 10, 9); // Texture layer
 
         VertexArrayObject.Unbind();
         vbo.Unbind();

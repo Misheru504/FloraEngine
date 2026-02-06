@@ -97,7 +97,7 @@ internal class Rigidbody
             for (int y = minY; y <= maxY; y++)
                 for (int z = minZ; z <= maxZ; z++)
                 {
-                    if (Voxel.GetVoxelByID(WorldManager.GetVoxelIdAtWorldPos(x, y, z, 0))!.IsSolid)
+                    if (Voxel.GetVoxelByID(WorldManager.GetVoxelIdAtWorldPos(x, y, z, 0)).IsSolid)
                         return true;
                 }
 
