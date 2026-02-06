@@ -24,7 +24,6 @@ internal class WorldManager : IDisposable
     private const int MESHING_THREAD_COUNT = 4;
     private const int MAX_BUFFER_UPLOADS_PER_FRAME = 8;
     public readonly ConcurrentDictionary<Vector3, Chunk> RenderedChunks;
-    public readonly ConcurrentDictionary<(Vector3, int), Chunk> LoadedChunks;
 
     private readonly ConcurrentDictionary<Vector3, byte> _chunksInProgress;
 
@@ -45,7 +44,6 @@ internal class WorldManager : IDisposable
         Noise = FastNoise.FromEncodedNodeTree(FastNoise.TREE_METADATA);
 
         RenderedChunks = new ConcurrentDictionary<Vector3, Chunk>();
-        LoadedChunks = new ConcurrentDictionary<(Vector3, int), Chunk>();
         _chunksInProgress = new ConcurrentDictionary<Vector3, byte>();
 
         _chunksToGenerate = new ConcurrentQueue<Chunk>();
@@ -115,10 +113,7 @@ internal class WorldManager : IDisposable
                         continue;
                     }
 
-                    chunk.CreateBaseTerrain();
-
-                    if (!chunk.HasFeatures)
-                        chunk.CreateFeatures();
+                    chunk.CreateTerrain();
 
                     _chunksToMesh.Enqueue(chunk);
                 }
@@ -193,29 +188,14 @@ internal class WorldManager : IDisposable
         {
             if (RenderedChunks.ContainsKey(pos) || _chunksInProgress.ContainsKey(pos))
                 continue;
-
-            if (LoadedChunks.TryGetValue((pos, 0), out Chunk? chunk))
+            
+            if (_chunksInProgress.TryAdd(pos, 0))
             {
-                if (chunk.Mesh != null)
-                {
-                    if (_chunksInProgress.TryAdd(pos, 0))
-                        _chunksReadyForBuffers.Enqueue(chunk);
-                }
-                else
-                {
-                    if (_chunksInProgress.TryAdd(pos, 0))
-                        _chunksToMesh.Enqueue(chunk);
-                }
+                Chunk chunk = new Chunk(pos, 0);
+                RenderedChunks[pos] = chunk;
+                _chunksToGenerate.Enqueue(chunk);
             }
-            else
-            {
-                if (_chunksInProgress.TryAdd(pos, 0))
-                {
-                    chunk = new Chunk(pos, 0, false);
-                    LoadedChunks[(pos, 0)] = chunk;
-                    _chunksToGenerate.Enqueue(chunk);
-                }
-            }
+            
         }
     }
 
@@ -248,17 +228,6 @@ internal class WorldManager : IDisposable
                 RenderedChunks.TryRemove(v.Key, out _);
             }
         }
-
-        foreach (var v in LoadedChunks)
-        {
-            if (MathUtils.OutOfDistance(v.Key.Item1, CenterPos, (RenderDistance + 1) * v.Value.WorldSize))
-            {
-                if (LoadedChunks.TryRemove(v.Key, out Chunk? chunk))
-                {
-                    chunk.Dispose();
-                }
-            }
-        }
     }
 
     public ushort GetVoxelIdAtWorldPos(int x, int y, int z, byte lodLevel)
@@ -272,13 +241,14 @@ internal class WorldManager : IDisposable
         Vector3 localTilePos = MathUtils.WorldToTilePosition(worldTilePos / scale);
         Vector3 chunkPos = MathUtils.WorldToChunkCoord(worldTilePos, chunkSize);
 
-        LoadedChunks.TryGetValue((chunkPos, lodLevel), out Chunk? c);
+        RenderedChunks.TryGetValue(chunkPos, out Chunk? c);
 
         if (c == null)
         {
-            c = new Chunk(chunkPos, lodLevel, false);
-            c.CreateBaseTerrain();
-            LoadedChunks[(chunkPos, lodLevel)] = c;
+            c = new Chunk(chunkPos, lodLevel);
+            c.CreateTerrain();
+            RenderedChunks[chunkPos] = c;
+            _chunksToMesh.Enqueue(c);
         }
 
         return c.GetVoxelAt((int)localTilePos.X, (int)localTilePos.Y, (int)localTilePos.Z).id;
@@ -291,18 +261,17 @@ internal class WorldManager : IDisposable
 
         _cancellationTokenSource.Dispose();
 
-        foreach (Chunk chunk in LoadedChunks.Values)
+        foreach (Chunk chunk in RenderedChunks.Values)
             chunk.Dispose();
 
         RenderedChunks.Clear();
-        LoadedChunks.Clear();
 
         GC.SuppressFinalize(this);
     }
 
     public void UpdateChunksMeshes()
     {
-        foreach(Chunk chunk in LoadedChunks.Values)
+        foreach(Chunk chunk in RenderedChunks.Values)
         {
             if(chunk.Mesh != null)
             {

@@ -13,44 +13,33 @@ public class Chunk : IDisposable
 
     public Vector3 Position { get; }
     public byte LodLevel { get; }
-    public bool HasFeatures { get; set; }
     public int Scale { get; }
     public int WorldSize { get; }
     public Mesh? Mesh { get; private set; }
 
     private readonly VoxelData[] voxels;
 
-    public Chunk(Vector3 position, byte level, bool createFeatures)
+    public Chunk(Vector3 position, byte level)
     {
         Position = position;
         LodLevel = level;
-        HasFeatures = false; // Always start false
         Scale = 1 << LodLevel;
         WorldSize = Scale * SIZE;
 
         voxels = new VoxelData[VOLUME];
-
-        if (createFeatures)
-        {
-            CreateBaseTerrain();
-            CreateFeatures();
-            UpdateMesh();
-            UpdateBuffers();
-        }
     }
 
     public Chunk(ChunkData data)
     {
         Position = new Vector3(data.x, data.y, data.z);
         LodLevel = data.lodLevel;
-        HasFeatures = data.hasFeatures;
         Scale = 1 << LodLevel;
         WorldSize = Scale * SIZE;
 
         voxels = data.voxels;
     }
 
-    public void CreateBaseTerrain()
+    public void CreateTerrain()
     {
         float[] noiseMap = new float[WorldSize * WorldSize];
         Noise.GenUniformGrid2D(noiseMap, (int)Position.X, (int)Position.Z, WorldSize, WorldSize, FastNoise.FREQUENCY, Noise.Seed);
@@ -74,11 +63,11 @@ public class Chunk : IDisposable
                 }
             }
         }
-    }
-    public void CreateFeatures()
-    {
-        HasFeatures = true;
 
+        CreateFeatures();
+    }
+    private void CreateFeatures()
+    {
         // TODO: TERRAIN FEATURES
     }
 

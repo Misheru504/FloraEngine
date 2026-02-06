@@ -34,7 +34,6 @@ public struct VoxelData
 public struct ChunkData
 {
     public int x, y, z;
-    public bool hasFeatures;
     public byte lodLevel;
     public VoxelData[] voxels;
 
@@ -45,7 +44,6 @@ public struct ChunkData
             x = (int)chunk.Position.X,
             y = (int)chunk.Position.Y,
             z = (int)chunk.Position.Z,
-            hasFeatures = chunk.HasFeatures,
             lodLevel = chunk.LodLevel,
             voxels = chunk.GetVoxels()
         };

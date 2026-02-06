@@ -34,7 +34,6 @@ internal class MainOverlay : IImGuiOverlay
             ImGui.Spacing();
             ImGui.Text($"Seed: {WorldManager.Instance.Noise.Seed}");
             ImGui.Text($"Chunks count (rendered): {WorldManager.Instance.RenderedChunks.Count}");
-            ImGui.Text($"Chunks count (loaded): {WorldManager.Instance.LoadedChunks.Count}");
             ImGui.Spacing();
             ImGui.Text($"Chunk pos: {Player.ChunkPos:0}");
             ImGui.Text($"Voxel pos: {voxelPos:0}");
