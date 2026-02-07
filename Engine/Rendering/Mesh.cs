@@ -6,7 +6,7 @@ namespace FloraEngine.Rendering;
 
 public class Mesh : IDisposable
 {
-    public static bool IsUsingGreedyMeshing = false;
+    public static bool IsUsingGreedyMeshing = true;
 
     public VertexArrayObject? vao;
     private BufferObject<float>? vbo;
