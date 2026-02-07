@@ -191,7 +191,7 @@ public static class GreedyMesher
                             pos[v] = j;
 
                             float[] aos = [faceMask.AO0, faceMask.AO1, faceMask.AO2, faceMask.AO3];
-                            AddFace(currentChunk, pos, deltaU, deltaV, width, height, face, vertices, indices, ref vertexOffset, b == 0, aos);
+                            AddFace(currentChunk, pos, deltaU, deltaV, width, height, face, vertices, indices, ref vertexOffset, b == 0, aos, faceMask.VoxelId);
 
                             for (int l = 0; l < height; l++)
                                 for (int k = 0; k < width; k++)
@@ -208,7 +208,7 @@ public static class GreedyMesher
         }
     }
 
-    private static void AddFace(Chunk currentChunk, int[] pos, int[] deltaU, int[] deltaV, int width, int height, Face face, List<float> vertices, List<uint> indices, ref uint vertexOffset, bool windingFlip, float[] aos)
+    private static void AddFace(Chunk currentChunk, int[] pos, int[] deltaU, int[] deltaV, int width, int height, Face face, List<float> vertices, List<uint> indices, ref uint vertexOffset, bool windingFlip, float[] aos, ushort id)
     {
         int x = pos[0], y = pos[1], z = pos[2];
         float[] normals = GetNormals(face);
@@ -216,10 +216,10 @@ public static class GreedyMesher
         float u0 = UVs[0], v0 = UVs[1], u1 = UVs[2], v1 = UVs[3], u2 = UVs[4], v2 = UVs[5], u3 = UVs[6], v3 = UVs[7];
 
         float[] quadVertices = [
-            x + deltaU[0] + deltaV[0], y + deltaU[1] + deltaV[1], z + deltaU[2] + deltaV[2], normals[0], normals[1], normals[2], u0, v0, aos[0],
-            x + deltaU[0],             y + deltaU[1],             z + deltaU[2],             normals[0], normals[1], normals[2], u1, v1, aos[1],
-            x,                         y,                         z,                         normals[0], normals[1], normals[2], u2, v2, aos[2],
-            x + deltaV[0],             y + deltaV[1],             z + deltaV[2],             normals[0], normals[1], normals[2], u3, v3, aos[3]
+            x + deltaU[0] + deltaV[0], y + deltaU[1] + deltaV[1], z + deltaU[2] + deltaV[2], normals[0], normals[1], normals[2], u0, v0, aos[0], id,
+            x + deltaU[0],             y + deltaU[1],             z + deltaU[2],             normals[0], normals[1], normals[2], u1, v1, aos[1], id,
+            x,                         y,                         z,                         normals[0], normals[1], normals[2], u2, v2, aos[2], id,
+            x + deltaV[0],             y + deltaV[1],             z + deltaV[2],             normals[0], normals[1], normals[2], u3, v3, aos[3], id,
         ];
         vertices.AddRange(quadVertices);
 

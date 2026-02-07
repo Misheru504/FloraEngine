@@ -27,7 +27,7 @@ internal class WorldManager : IDisposable
 
     private readonly ConcurrentDictionary<Vector3, byte> _chunksInProgress;
 
-    private readonly ConcurrentQueue<Chunk> _chunksToGenerate;
+    private readonly ConcurrentQueue<Vector3> _chunksToGenerate;
     private readonly ConcurrentQueue<Chunk> _chunksToMesh;
     private readonly ConcurrentQueue<Chunk> _chunksReadyForBuffers;
 
@@ -46,7 +46,7 @@ internal class WorldManager : IDisposable
         RenderedChunks = new ConcurrentDictionary<Vector3, Chunk>();
         _chunksInProgress = new ConcurrentDictionary<Vector3, byte>();
 
-        _chunksToGenerate = new ConcurrentQueue<Chunk>();
+        _chunksToGenerate = new ConcurrentQueue<Vector3>();
         _chunksToMesh = new ConcurrentQueue<Chunk>();
         _chunksReadyForBuffers = new ConcurrentQueue<Chunk>();
 
@@ -103,24 +103,25 @@ internal class WorldManager : IDisposable
 
         while (!token.IsCancellationRequested)
         {
-            if (_chunksToGenerate.TryDequeue(out Chunk? chunk))
+            if (_chunksToGenerate.TryDequeue(out Vector3 chunkPos))
             {
                 try
                 {
-                    if (MathUtils.OutOfDistance(chunk.Position, CenterPos, RenderDistance * chunk.WorldSize))
+                    if (MathUtils.OutOfDistance(chunkPos, CenterPos, RenderDistance * Chunk.SIZE))
                     {
-                        _chunksInProgress.TryRemove(chunk.Position, out _);
+                        _chunksInProgress.TryRemove(chunkPos, out _);
                         continue;
                     }
 
+                    Chunk chunk = new Chunk(chunkPos, 0);
                     chunk.CreateTerrain();
 
                     _chunksToMesh.Enqueue(chunk);
                 }
                 catch (Exception ex)
                 {
-                    Logger.Print($"Error generating chunk at {chunk.Position}: {ex.Message}");
-                    _chunksInProgress.TryRemove(chunk.Position, out _);
+                    Logger.Print($"Error generating chunk at {chunkPos}: {ex.Message}");
+                    _chunksInProgress.TryRemove(chunkPos, out _);
                 }
             }
             else
@@ -191,9 +192,7 @@ internal class WorldManager : IDisposable
             
             if (_chunksInProgress.TryAdd(pos, 0))
             {
-                Chunk chunk = new Chunk(pos, 0);
-                RenderedChunks[pos] = chunk;
-                _chunksToGenerate.Enqueue(chunk);
+                _chunksToGenerate.Enqueue(pos);
             }
             
         }
@@ -251,7 +250,7 @@ internal class WorldManager : IDisposable
             RenderedChunks[chunkPos] = c;
             _chunksToMesh.Enqueue(c);
         }
-
+        
         return c.GetVoxelAt((int)localTilePos.X, (int)localTilePos.Y, (int)localTilePos.Z).id;
     }
 
