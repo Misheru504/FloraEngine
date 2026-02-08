@@ -1,34 +1,34 @@
-# Décisions sur le design
+# DÃ©cisions sur le design
 
 > Ca fait beaucoup la, nan ?
 
-Ce document explique les differentes décisions en lien avec le design. Il explique pourquoi cette décision a été prise. Aucun retour en arrière, si une décision est révisée, nouvelle enregistrement dans ce fichier pour expliquer pourquoi. Si il manque une décision "majeure" (qui a besoin d'une explication ou qui change une décision d'ici), merci de le signaler ou de l'ajouter.
+Ce document explique les differentes dÃ©cisions en lien avec le design. Il explique pourquoi cette dÃ©cision a Ã©tÃ© prise. Aucun retour en arriÃ¨re, si une dÃ©cision est rÃ©visÃ©e, nouvelle enregistrement dans ce fichier pour expliquer pourquoi. Si il manque une dÃ©cision "majeure" (qui a besoin d'une explication ou qui change une dÃ©cision d'ici), merci de le signaler ou de l'ajouter.
 
-Ce document est utile à mon moi du futur et à quiconque s'intéresse à projet.
+Ce document est utile Ã  mon moi du futur et Ã  quiconque s'intÃ©resse Ã  projet.
 
-Pour rappel, FloraEngine (ou Flora) et un moteur de rendu de monde en voxel généré procéduralement, grâce à Silk.NET et OpenGL.
+Pour rappel, FloraEngine (ou Flora) et un moteur de rendu de monde en voxel gÃ©nÃ©rÃ© procÃ©duralement, grÃ¢ce Ã  Silk.NET et OpenGL.
 
-Dernière mise-à-jour du document : `08/02/2026 - Michel-Ange (Misheru504)`
+DerniÃ¨re mise-Ã -jour du document : `08/02/2026 - Michel-Ange (Misheru504)`
 
 ---
 <details>
-<summary>DEC-001 : Création du projet</summary>
+<summary>DEC-001 : CrÃ©ation du projet</summary>
 
 **Date** : 07-01-2026 |
-**Statut** : Adopté
+**Statut** : AdoptÃ©
 
 **Contexte** :
-Nécéssité de refactoriser le code LizardEngine, maintenant que les bases de Silk.NET ont été apprises.
+NÃ©cÃ©ssitÃ© de refactoriser le code LizardEngine, maintenant que les bases de Silk.NET ont Ã©tÃ© apprises.
 
 **Options** :
-1. **Rester sur LizardEngine** — Aucun nouveau projet / Besoin de refactoriser tout le code (long)
-2. **Création d'un nouveau projet** — Refactorisation simple, rebranding possible / Besoin de remettre en place un GitHub
+1. **Rester sur LizardEngine** â€” Aucun nouveau projet / Besoin de refactoriser tout le code (long)
+2. **CrÃ©ation d'un nouveau projet** â€” Refactorisation simple, rebranding possible / Besoin de remettre en place un GitHub
 
-**Décision** : Création d'un nouveau projet
+**DÃ©cision** : CrÃ©ation d'un nouveau projet
 
-**Conséquences** :
+**ConsÃ©quences** :
 - Refactorisation simple et permet un rebranding (changement de nom)
-- Création d'un nouveau dépot GitHub, chronophage
+- CrÃ©ation d'un nouveau dÃ©pot GitHub, chronophage
 </details>
 
 
@@ -36,151 +36,151 @@ Nécéssité de refactoriser le code LizardEngine, maintenant que les bases de Silk
 <summary>DEC-002 : Taille des chunks</summary>
 
 **Date** : 07-01-2026 |
-**Statut** : Adopté
+**Statut** : AdoptÃ©
 
 **Contexte** :
-Les chunks de grande taille mettent plus de temps à se générer (volume multiplié par 8 lorsque la largeur est multiplié par 2), besoin d'un compromis.
+Les chunks de grande taille mettent plus de temps Ã  se gÃ©nÃ©rer (volume multipliÃ© par 8 lorsque la largeur est multipliÃ© par 2), besoin d'un compromis.
 
 **Options** :
-1. **16x16x16** — Chunks petit, rapide à utiliser / Prennent peu de place sur le monde, besoin de plus
-2. **32x32x32** — Grand chunks sur le terrain, couvre une grande surface / Lourd dans la mémoire
+1. **16x16x16** â€” Chunks petit, rapide Ã  utiliser / Prennent peu de place sur le monde, besoin de plus
+2. **32x32x32** â€” Grand chunks sur le terrain, couvre une grande surface / Lourd dans la mÃ©moire
 
-**Décision** : 16x16x16
+**DÃ©cision** : 16x16x16
 
-**Conséquences** :
-- Réduction de l'utilisation de la mémoire et du temps de génération/meshing
-- Augmentation du nombre (peut aller jusqu'à 1000)
-- Conditions de réévaluation: Nouvel algorithme de génération
+**ConsÃ©quences** :
+- RÃ©duction de l'utilisation de la mÃ©moire et du temps de gÃ©nÃ©ration/meshing
+- Augmentation du nombre (peut aller jusqu'Ã  1000)
+- Conditions de rÃ©Ã©valuation: Nouvel algorithme de gÃ©nÃ©ration
 </details>
 
 <details>
 <summary>DEC-003 : Greedy meshing</summary>
 
 **Date** : 11-01-2026 |
-**Statut** : Adopté
+**Statut** : AdoptÃ©
 
 **Contexte** :
 Le culled meshing est rapide mais peu efficace en optimisation de mesh, l'ajout de greedy meshing pourrait grandement diminuer le nombre de triangles
 
 **Options** :
-1. **Greedy meshing uniquement** — Optimisation des mesh / Difficile de tester facilement
-2. **Culled meshing uniquement** — Facile à changer et maintenir / Peu efficace en nombre de triangle
-2. **Garder les deux** — Combine les avantages des deux (toggle pour changer entre l'un ou l'autre) / Maintenance double
+1. **Greedy meshing uniquement** â€” Optimisation des mesh / Difficile de tester facilement
+2. **Culled meshing uniquement** â€” Facile Ã  changer et maintenir / Peu efficace en nombre de triangle
+2. **Garder les deux** â€” Combine les avantages des deux (toggle pour changer entre l'un ou l'autre) / Maintenance double
 
-**Décision** : Garder les deux
+**DÃ©cision** : Garder les deux
 
-**Conséquences** :
-- Facile de tester avec le culled meshing, optimisé grâce au greedy meshing final
-- Maintenance double, chaque changement fait sur l'un (ou la structure d'un triangle) doit être modifier sur l'autre
-- Conditions de réévaluation: Déploiement en production, retirer l'un des deux
+**ConsÃ©quences** :
+- Facile de tester avec le culled meshing, optimisÃ© grÃ¢ce au greedy meshing final
+- Maintenance double, chaque changement fait sur l'un (ou la structure d'un triangle) doit Ãªtre modifier sur l'autre
+- Conditions de rÃ©Ã©valuation: DÃ©ploiement en production, retirer l'un des deux
 </details>
 
 <details>
 <summary>DEC-004 : Proto-chunks</summary>
 
 **Date** : 25-01-2026 |
-**Statut** : Révisé (voir DEC-006<>)
+**Statut** : RÃ©visÃ© (voir DEC-006)
 
 **Contexte** :
-La génération de détails sur le terrain et le meshing cross chunk a besoin des chunks adjacents.
-Un proto chunk permettrai de mettre la génération du chunk en pause, et sera fini lorsque c'est nécéssaire.
+La gÃ©nÃ©ration de dÃ©tails sur le terrain et le meshing cross chunk a besoin des chunks adjacents.
+Un proto chunk permettrai de mettre la gÃ©nÃ©ration du chunk en pause, et sera fini lorsque c'est nÃ©cÃ©ssaire.
 
 **Options** :
-1. **Création du chunk à la volée** — Pas besoin des chunks adjacents / Difficulté d'implémenation
-2. **Création d'un proto-chunk** — Facile à mettre en place / Nécéssite plus de mémoire
+1. **CrÃ©ation du chunk Ã  la volÃ©e** â€” Pas besoin des chunks adjacents / DifficultÃ© d'implÃ©menation
+2. **CrÃ©ation d'un proto-chunk** â€” Facile Ã  mettre en place / NÃ©cÃ©ssite plus de mÃ©moire
 
-**Décision** : Création d'un proto-chunk
+**DÃ©cision** : CrÃ©ation d'un proto-chunk
 
-**Conséquences** :
-- Facile à mettre en place
-- Utilise plus de mémoire et à besoin de garder les chunks dans cet état dans une mémoire séparé
-- Conditions de réévaluation: Nouveau système de génération
+**ConsÃ©quences** :
+- Facile Ã  mettre en place
+- Utilise plus de mÃ©moire et Ã  besoin de garder les chunks dans cet Ã©tat dans une mÃ©moire sÃ©parÃ©
+- Conditions de rÃ©Ã©valuation: Nouveau systÃ¨me de gÃ©nÃ©ration
 </details>
 
 <details>
 <summary>DEC-005 : Renommer le projet</summary>
 
 **Date** : 28-01-2026 |
-**Statut** : Adopté
+**Statut** : AdoptÃ©
 
 **Contexte** :
-Le nom FloreEngine ressemble beaucoup à Floor, qui perd son sens en anglais. Proposition de traduire le nom en anglais: Flora
+Le nom FloreEngine ressemble beaucoup Ã  Floor, qui perd son sens en anglais. Proposition de traduire le nom en anglais: Flora
 
 **Options** :
-1. **FloreEngine** — Aucun changement sur le code / Ambiguité anglophone
-2. **FloraEngine** — Nom qui sonne mieux en anglais / Refactorisation du code
+1. **FloreEngine** â€” Aucun changement sur le code / AmbiguitÃ© anglophone
+2. **FloraEngine** â€” Nom qui sonne mieux en anglais / Refactorisation du code
 
-**Décision** : FloraEngine
+**DÃ©cision** : FloraEngine
 
-**Conséquences** :
+**ConsÃ©quences** :
 - Nom plus clair
-- Refactorisation nécéssaire
+- Refactorisation nÃ©cÃ©ssaire
 </details>
 
 <details>
 <summary>DEC-006 : Changement proto-chunks</summary>
 
 **Date** : 06-02-2026 |
-**Statut** : Adopté
+**Statut** : AdoptÃ©
 
 **Contexte** :
-Les protos chunks sont difficiles a géré dans le générateur et coutent chère en mémoire. Il est possible de générer les features sans les chunks adjacents.
+Les protos chunks sont difficiles a gÃ©rÃ© dans le gÃ©nÃ©rateur et coutent chÃ¨re en mÃ©moire. Il est possible de gÃ©nÃ©rer les features sans les chunks adjacents.
 
 **Options** :
-1. **Garder les proto chunks** — Facile à concevoir / Difficile à mettre en place en multithreading]
-2. **Changement pour un nouveau système** — Les chunks n'ont plus besoin des autres pour la génération / Difficle à implementer
+1. **Garder les proto chunks** â€” Facile Ã  concevoir / Difficile Ã  mettre en place en multithreading]
+2. **Changement pour un nouveau systÃ¨me** â€” Les chunks n'ont plus besoin des autres pour la gÃ©nÃ©ration / Difficle Ã  implementer
 
-**Décision** : Changement pour un nouveau système
+**DÃ©cision** : Changement pour un nouveau systÃ¨me
 
-**Conséquences** :
+**ConsÃ©quences** :
 - Multithreading plus simple
-- Création des features plus difficile
-- Conditions de réévaluation: Implémentation trop complexe
+- CrÃ©ation des features plus difficile
+- Conditions de rÃ©Ã©valuation: ImplÃ©mentation trop complexe
 </details>
 
 <details>
 <summary>DEC-007 : Restructuration du projet</summary>
 
 **Date** : 08-02-2026 |
-**Statut** : Adopté
+**Statut** : AdoptÃ©
 
 **Contexte** :
-Le projet commence a être tentaculaire, et a s'éparpiller dans tout les sens. Il est nécéssaire de refactoriser le code maintenant pour le rendre plus simple à maintenir
+Le projet commence a Ãªtre tentaculaire, et a s'Ã©parpiller dans tout les sens. Il est nÃ©cÃ©ssaire de refactoriser le code maintenant pour le rendre plus simple Ã  maintenir
 
 **Options** :
-1. **Restructuration maintenant** — Une fois fait, plus aucun problème / Très chronophage, bloque tout le projet
-2. **Restructuration étalé dans le temps** — Simple a faire, petit à petit / Long dans dans le temps, peut prendre plus de temps à terme
+1. **Restructuration maintenant** â€” Une fois fait, plus aucun problÃ¨me / TrÃ¨s chronophage, bloque tout le projet
+2. **Restructuration Ã©talÃ© dans le temps** â€” Simple a faire, petit Ã  petit / Long dans dans le temps, peut prendre plus de temps Ã  terme
 
-**Décision** : Restructuration maintenant
+**DÃ©cision** : Restructuration maintenant
 
-**Conséquences** :
-- Code final plus simple à maintenir et comprendre
-- Bloquage du projet jusqu'à la fin de la restructuration
+**ConsÃ©quences** :
+- Code final plus simple Ã  maintenir et comprendre
+- Bloquage du projet jusqu'Ã  la fin de la restructuration
 </details>
 
 ---
 
-## Template pour les prochaines décisions
+## Template pour les prochaines dÃ©cisions
 
 ```
 <details>
 <summary>DEC-XXX : [Titre court]</summary>
 
 **Date** : DD-MM-YYYY |
-**Statut** : Adopté / Révisé (voir DEC-YYY) / Abandonné
+**Statut** : AdoptÃ© / RÃ©visÃ© (voir DEC-YYY) / AbandonnÃ©
 
 **Contexte** :
-[Quel problème on résout ? Pourquoi maintenant ?]
+[Quel problÃ¨me on rÃ©sout ? Pourquoi maintenant ?]
 
 **Options** :
-1. **Option A** — [Avantages / Inconvénients]
-2. **Option B** — [Avantages / Inconvénients]
+1. **Option A** â€” [Avantages / InconvÃ©nients]
+2. **Option B** â€” [Avantages / InconvÃ©nients]
 
-**Décision** : [Ce qui a été choisi]
+**DÃ©cision** : [Ce qui a Ã©tÃ© choisi]
 
-**Conséquences** :
+**ConsÃ©quences** :
 - [Impact positif]
-- [Impact négatif / dette technique acceptée]
-- Conditions de réévaluation: [Condition(s)]
+- [Impact nÃ©gatif / dette technique acceptÃ©e]
+- Conditions de rÃ©Ã©valuation: [Condition(s)]
 </details>
 ```
