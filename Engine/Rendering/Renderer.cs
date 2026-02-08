@@ -14,8 +14,9 @@ internal unsafe class Renderer : IDisposable
     private static GL Graphics => Program.Graphics;
 
     // Vertex stride: 3 (position) + 3 (normal) + 2 (uv) = 8 floats
-    public const int VertexStride = 10;
+    public const int VertexStride = 8;
     private readonly FragVertShader shader;
+    private readonly Texture2D texture;
     internal RenderMode RenderingMode;
 
     public long VertexCount;
@@ -142,8 +143,10 @@ internal unsafe class Renderer : IDisposable
         Logger.Render("Loading renderer...");
 
         shader = new FragVertShader(VERTEX_SHADER, FRAGMENT_SHADER);
+        texture = Texture2D.FromFile("Assets/block.png", TextureUnit.Texture0);
+        texture.SetDefaultParameters();
 
-        atlas = new TextureArray("Assets/atlas.png", TextureUnit.Texture0, 16);
+        atlas = new TextureArray("Assets/atlas.png", TextureUnit.Texture1, 16);
         atlas.SetDefaultParameters();
 
         RenderingMode = RenderMode.Default;
@@ -159,7 +162,7 @@ internal unsafe class Renderer : IDisposable
         shader.SetUniform("uView", Camera.Instance.RelativeViewMatrix);
         shader.SetUniform("uProjection", Camera.Instance.ProjectionMatrix);
         shader.SetUniform("fRenderMode", (int) RenderingMode);
-        shader.SetUniform("fTexture", 0);
+        shader.SetUniform("fTexture", 1);
 
         VertexCount = 0;
         foreach(Chunk chunk in WorldManager.Instance.RenderedChunks.Values)
