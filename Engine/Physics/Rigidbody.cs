@@ -1,7 +1,7 @@
 ﻿using FloraEngine.World;
 using System.Numerics;
 
-namespace FloraEngine.Entities;
+namespace FloraEngine.Physics;
 
 internal class Rigidbody
 {

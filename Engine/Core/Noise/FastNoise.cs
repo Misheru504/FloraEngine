@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace FloraEngine.Utils;
+namespace FloraEngine.Core.Noise;
 
 class FastNoise
 {

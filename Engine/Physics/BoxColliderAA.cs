@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 
-namespace FloraEngine.Entities;
+namespace FloraEngine.Physics;
 
 internal class BoxColliderAA
 {

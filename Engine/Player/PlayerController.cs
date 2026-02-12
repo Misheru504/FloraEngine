@@ -1,15 +1,16 @@
-﻿using FloraEngine.Utils;
-using FloraEngine.Rendering;
+﻿using FloraEngine.Rendering;
 using FloraEngine.World;
 using Silk.NET.Input;
 using System.Numerics;
+using FloraEngine.Physics;
+using FloraEngine.Core;
 
-namespace FloraEngine.Entities.Player;
+namespace FloraEngine.Player;
 
-internal class Player
+internal class PlayerController
 {
-    private static readonly Lazy<Player> _instance = new Lazy<Player>(() => new Player());
-    public static Player Instance => _instance.Value;
+    private static readonly Lazy<PlayerController> _instance = new Lazy<PlayerController>(() => new PlayerController());
+    public static PlayerController Instance => _instance.Value;
 
     private static Camera Camera => Camera.Instance;
     public static Vector3 ChunkPos => MathUtils.WorldToChunkCoord(Camera.Position, Chunk.SIZE);
@@ -26,7 +27,7 @@ internal class Player
 
     public bool IsFreecamMovement;
 
-    private Player()
+    private PlayerController()
     {
         Size = new Vector3(0.7f, 2f, 0.7f);
         Vector3 position = Camera.Position - Size * 0.5f;
@@ -51,7 +52,7 @@ internal class Player
             Rigidbody.Update(deltaTime);
         }
 
-        Camera.Position = Rigidbody.Position + (Vector3.UnitY * 1.6f);
+        Camera.Position = Rigidbody.Position + Vector3.UnitY * 1.6f;
     }
 
     internal void MouseMove(IMouse mouse, Vector2 position)

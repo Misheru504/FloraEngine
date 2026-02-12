@@ -1,9 +1,11 @@
-﻿using FloraEngine.Entities.Player;
-using FloraEngine.Utils;
+﻿using FloraEngine.Player;
 using FloraEngine.Diagnostics;
 using FloraEngine.Rendering;
 using System.Collections.Concurrent;
 using System.Numerics;
+using FloraEngine.Core.Noise;
+using FloraEngine.Core.Data;
+using FloraEngine.Core;
 
 namespace FloraEngine.World;
 
@@ -12,7 +14,7 @@ internal class WorldManager : IDisposable
     private static readonly Lazy<WorldManager> _instance = new Lazy<WorldManager>(() => new WorldManager());
     public static WorldManager Instance => _instance.Value;
 
-    internal static Vector3 CenterPos => Player.ChunkPos;
+    internal static Vector3 CenterPos => PlayerController.ChunkPos;
 
     public int MaxLOD = 0;
     public int RenderDistance = 5;

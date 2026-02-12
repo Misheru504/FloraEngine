@@ -2,13 +2,13 @@
 using Silk.NET.Input;
 using System.Numerics;
 
-namespace FloraEngine.Entities.Player;
+namespace FloraEngine.Player;
 
 internal static class FreecamMovement
 {
     public static Vector3 GetVelocity(float deltaTime, IKeyboard keyboard)
     {
-        float speed = Player.Instance.Speed;
+        float speed = PlayerController.Instance.Speed;
         float moveSpeed = speed * deltaTime;
         Vector3 camFrontAndBack = moveSpeed * Camera.Instance.Forward;
         Vector3 camSides = Vector3.Normalize(Vector3.Cross(Camera.Instance.Forward, Camera.Instance.Up)) * moveSpeed;

@@ -1,6 +1,6 @@
 ﻿using FloraEngine.Diagnostics;
 
-namespace FloraEngine.Utils;
+namespace FloraEngine.Core.Data;
 
 /// <summary>
 /// Provides methods for reading and writing simple files

@@ -1,5 +1,4 @@
-﻿using FloraEngine.Entities.Player;
-using FloraEngine.Diagnostics;
+﻿using FloraEngine.Diagnostics;
 using FloraEngine.Rendering;
 using FloraEngine.UI;
 using FloraEngine.UI.Overlays;
@@ -11,6 +10,7 @@ using Silk.NET.OpenGL.Extensions.ImGui;
 using Silk.NET.Windowing;
 using System.Drawing;
 using System.Numerics;
+using FloraEngine.Player;
 
 namespace FloraEngine;
 
@@ -97,8 +97,8 @@ public static class Program
         if (InputContext.Mice.Count != 0)
         {
             InputContext.Mice[0].Cursor.CursorMode = CursorMode.Raw;
-            InputContext.Mice[0].MouseMove += Player.Instance.MouseMove;
-            InputContext.Mice[0].Scroll += Player.Instance.MouseWheel;
+            InputContext.Mice[0].MouseMove += PlayerController.Instance.MouseMove;
+            InputContext.Mice[0].Scroll += PlayerController.Instance.MouseWheel;
         }
 
         // Graphics settings
@@ -128,7 +128,7 @@ public static class Program
         //if (BoxColliderAA.IsColliding(spawnCollider, Controller.Instance.Collider)) Console.WriteLine($"{EngineWindow.Time} Inside!");
 
         ImGuiController.Update((float)deltaTime);
-        Player.Instance.Update((float)deltaTime);
+        PlayerController.Instance.Update((float)deltaTime);
         WorldManager.Instance.Update(deltaTime);
     }
 
@@ -152,7 +152,7 @@ public static class Program
                 EngineWindow.Close();
                 break;
             case Key.T:
-                Player.Instance.IsFreecamMovement = !Player.Instance.IsFreecamMovement;
+                PlayerController.Instance.IsFreecamMovement = !PlayerController.Instance.IsFreecamMovement;
                 break;
         }
     }

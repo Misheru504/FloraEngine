@@ -1,5 +1,5 @@
-﻿using FloraEngine.Rendering;
-using FloraEngine.Utils;
+﻿using FloraEngine.Core.Noise;
+using FloraEngine.Rendering;
 using System.Numerics;
 
 namespace FloraEngine.World;

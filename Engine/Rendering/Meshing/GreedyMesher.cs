@@ -2,7 +2,7 @@
 using FloraEngine.World;
 using System.Numerics;
 
-namespace FloraEngine.Utils;
+namespace FloraEngine.Rendering.Meshing;
 
 public static class GreedyMesher
 {
@@ -102,8 +102,8 @@ public static class GreedyMesher
 
                             Vector3 voxelPos = new Vector3(pos[0], pos[1], pos[2]);
                             Vector3 comparePos = new Vector3(pos[0] + q[0], pos[1] + q[1], pos[2] + q[2]);
-                            Vector3 worldVoxelPos = currentChunk.Position + (voxelPos * currentChunk.Scale);
-                            Vector3 worldComparePos = currentChunk.Position + (comparePos * currentChunk.Scale);
+                            Vector3 worldVoxelPos = currentChunk.Position + voxelPos * currentChunk.Scale;
+                            Vector3 worldComparePos = currentChunk.Position + comparePos * currentChunk.Scale;
 
                             if (pos[d] >= 0) current = currentChunk.GetVoxelAt(pos[0], pos[1], pos[2]).id;
                             else current = WorldManager.Instance.GetVoxelIdAtWorldPos((int)worldVoxelPos.X, (int)worldVoxelPos.Y, (int)worldVoxelPos.Z, currentChunk.LodLevel);
@@ -232,7 +232,7 @@ public static class GreedyMesher
         if (voxelX < 0 || voxelX >= Chunk.SIZE || voxelY < 0 || voxelY >= Chunk.SIZE || voxelZ < 0 || voxelZ >= Chunk.SIZE)
         {
             Vector3 voxelPos = new Vector3(voxelX, voxelY, voxelZ);
-            Vector3 worldTilePos = currentChunk.Position + (voxelPos * currentChunk.Scale);
+            Vector3 worldTilePos = currentChunk.Position + voxelPos * currentChunk.Scale;
             return WorldManager.Instance.GetVoxelIdAtWorldPos((int)worldTilePos.X, (int)worldTilePos.Y, (int)worldTilePos.Z, currentChunk.LodLevel) == Voxel.AIR.ID;
         }
 
@@ -245,7 +245,7 @@ public static class GreedyMesher
 
         int ao = 3 - (side1 ? 1 : 0) - (side2 ? 1 : 0) - (corner ? 1 : 0);
 
-        return (float)ao / 3.0f;
+        return ao / 3.0f;
     }
 
     private static float[] ComputeFaceAOs(Chunk currentChunk, int x, int y, int z, Face face)

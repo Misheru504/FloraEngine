@@ -1,7 +1,7 @@
 ﻿using FloraEngine.World;
 using System.Numerics;
 
-namespace FloraEngine.Utils;
+namespace FloraEngine.Core;
 
 public static class MathUtils
 {

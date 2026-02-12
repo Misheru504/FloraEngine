@@ -1,9 +1,10 @@
-﻿using FloraEngine.Utils;
-using FloraEngine.Rendering;
+﻿using FloraEngine.Rendering;
 using Silk.NET.Input;
 using System.Numerics;
+using FloraEngine.Physics;
+using FloraEngine.Core;
 
-namespace FloraEngine.Entities.Player;
+namespace FloraEngine.Player;
 
 internal static class HumanMovement
 {

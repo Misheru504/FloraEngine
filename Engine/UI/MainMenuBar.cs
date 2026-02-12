@@ -1,4 +1,4 @@
-﻿using FloraEngine.Entities.Player;
+﻿using FloraEngine.Player;
 using FloraEngine.Diagnostics;
 using FloraEngine.Rendering;
 using ImGuiNET;
@@ -64,7 +64,7 @@ internal class MainMenuBar : IMainMenuBar
     {
         if (!ImGui.BeginMenu("Player")) return;
 
-        ImGui.MenuItem("Freecam", "T", ref Player.Instance.IsFreecamMovement);
+        ImGui.MenuItem("Freecam", "T", ref PlayerController.Instance.IsFreecamMovement);
 
         ImGui.EndMenu();
     }

@@ -2,7 +2,7 @@
 using FloraEngine.World;
 using System.Numerics;
 
-namespace FloraEngine.Utils;
+namespace FloraEngine.Rendering.Meshing;
 
 public static class CulledMesher
 {
@@ -45,7 +45,7 @@ public static class CulledMesher
                         ];
                         vertices.AddRange(bottomVertices);
 
-                        AddIndices(indices, ref vertexOffset, (aos[0] + aos[2] > aos[1] + aos[3]));
+                        AddIndices(indices, ref vertexOffset, aos[0] + aos[2] > aos[1] + aos[3]);
                     }
                     if (IsFaceVisible(currentChunk, x, y + 1, z))
                     {
@@ -72,7 +72,7 @@ public static class CulledMesher
                         ];
                         vertices.AddRange(topVertices);
 
-                        AddIndices(indices, ref vertexOffset, (aos[0] + aos[2] > aos[1] + aos[3]));
+                        AddIndices(indices, ref vertexOffset, aos[0] + aos[2] > aos[1] + aos[3]);
                     }
                     if (IsFaceVisible(currentChunk, x - 1, y, z))
                     {
@@ -99,7 +99,7 @@ public static class CulledMesher
                         ];
                         vertices.AddRange(leftVertices);
 
-                        AddIndices(indices, ref vertexOffset, (aos[0] + aos[2] > aos[1] + aos[3]));
+                        AddIndices(indices, ref vertexOffset, aos[0] + aos[2] > aos[1] + aos[3]);
                     }
                     if (IsFaceVisible(currentChunk, x + 1, y, z))
                     {
@@ -126,7 +126,7 @@ public static class CulledMesher
                         ];
                         vertices.AddRange(rightVertices);
 
-                        AddIndices(indices, ref vertexOffset, (aos[0] + aos[2] > aos[1] + aos[3]));
+                        AddIndices(indices, ref vertexOffset, aos[0] + aos[2] > aos[1] + aos[3]);
                     }
                     if (IsFaceVisible(currentChunk, x, y, z + 1))
                     {
@@ -153,7 +153,7 @@ public static class CulledMesher
                         ];
                         vertices.AddRange(frontVertices);
 
-                        AddIndices(indices, ref vertexOffset, (aos[0] + aos[2] > aos[1] + aos[3]));
+                        AddIndices(indices, ref vertexOffset, aos[0] + aos[2] > aos[1] + aos[3]);
                     }
                     if (IsFaceVisible(currentChunk, x, y, z - 1))
                     {
@@ -180,7 +180,7 @@ public static class CulledMesher
                         ];
                         vertices.AddRange(backVertices);
 
-                        AddIndices(indices, ref vertexOffset, (aos[0] + aos[2] > aos[1] + aos[3]));
+                        AddIndices(indices, ref vertexOffset, aos[0] + aos[2] > aos[1] + aos[3]);
                     }
                 }
             }
@@ -221,7 +221,7 @@ public static class CulledMesher
         {
             // Voxel out of bounds
             Vector3 voxelPos = new Vector3(voxelX, voxelY, voxelZ);
-            Vector3 worldTilePos = currentChunk.Position + (voxelPos * currentChunk.Scale);
+            Vector3 worldTilePos = currentChunk.Position + voxelPos * currentChunk.Scale;
             voxel = WorldManager.Instance.GetVoxelIdAtWorldPos((int)worldTilePos.X, (int)worldTilePos.Y, (int)worldTilePos.Z, currentChunk.LodLevel);
             return true;
         }
@@ -242,6 +242,6 @@ public static class CulledMesher
 
         int ao = 3 - (side1 ? 1 : 0) - (side2 ? 1 : 0) - (corner ? 1 : 0);
 
-        return (float)ao / 3.0f; // Normalize
+        return ao / 3.0f; // Normalize
     }
 }

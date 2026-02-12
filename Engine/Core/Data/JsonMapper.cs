@@ -1,7 +1,7 @@
 using FloraEngine.Diagnostics;
 using Utf8Json;
 
-namespace FloraEngine.Utils;
+namespace FloraEngine.Core.Data;
 
 public static class JsonMapper
 {
