@@ -11,13 +11,16 @@ namespace FloraEngine.Rendering;
 
 public unsafe class Renderer : IDisposable
 {
-    private static GL _graphics = null!;
 
     // Vertex stride: 3 (position) + 3 (normal) + 2 (uv) + 2 (aos) = 10 floats
     public const int VertexStride = 10;
+
+    private readonly GL _graphics = null!;
     private readonly FragVertShader shader;
     private readonly Texture2D texture;
     private readonly RenderConfig _renderConfig;
+    private readonly Camera _camera;
+    private readonly WorldManager _worldManager;
 
     // Storing shader code for simplicity, there are methods in Shader class to read them from files
     private const string VERTEX_SHADER = @"
@@ -125,11 +128,13 @@ public unsafe class Renderer : IDisposable
 
     private readonly TextureArray atlas;
 
-    public Renderer(GL graphics, RenderConfig renderConfig)
+    public Renderer(GL graphics, RenderConfig renderConfig, Camera camera, WorldManager worldManager)
     {
         Logger.Render("Loading renderer...");
         _graphics = graphics;
         _renderConfig = renderConfig;
+        _camera = camera;
+        _worldManager = worldManager;
 
         shader = new FragVertShader(_graphics, VERTEX_SHADER, FRAGMENT_SHADER);
         texture = Texture2D.FromFile(_graphics, "Assets/block.png", TextureUnit.Texture0);
@@ -149,24 +154,24 @@ public unsafe class Renderer : IDisposable
         shader.UseProgram();
         atlas.Bind();
 
-        shader.SetUniform("uView", Game.Instance.Camera.RelativeViewMatrix);
-        shader.SetUniform("uProjection", Game.Instance.Camera.ProjectionMatrix);
+        shader.SetUniform("uView", _camera.RelativeViewMatrix);
+        shader.SetUniform("uProjection", _camera.ProjectionMatrix);
         shader.SetUniform("fRenderMode", (int) _renderConfig.RenderMode);
         shader.SetUniform("fTexture", 1);
 
         _renderConfig.VertexCount = 0;
-        foreach(Chunk chunk in WorldManager.Instance.RenderedChunks.Values)
+        foreach(Chunk chunk in _worldManager.RenderedChunks.Values)
             DrawChunk(chunk);
     }
 
     private void DrawChunk(Chunk chunk)
     {
         if (chunk.Mesh == null || chunk.Mesh.vao == null) return;
-        if (!IsInFrustum(chunk, Game.Instance.Camera.Frustum)) return;
+        if (!IsInFrustum(chunk, _camera.Frustum)) return;
 
         _renderConfig.VertexCount += chunk.Mesh.VertexCount;
         chunk.Mesh.vao.Bind();
-        shader.SetUniform("uModel", Matrix4x4.CreateScale(chunk.Scale) * Matrix4x4.CreateTranslation(Game.Instance.Camera.RelativePosition(chunk.Position)));
+        shader.SetUniform("uModel", Matrix4x4.CreateScale(chunk.Scale) * Matrix4x4.CreateTranslation(_camera.RelativePosition(chunk.Position)));
         _graphics.DrawElements(PrimitiveType.Triangles, chunk.Mesh.IndexCount, DrawElementsType.UnsignedInt, (void*) 0);
     }
 

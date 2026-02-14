@@ -38,7 +38,7 @@ internal class MainOverlay : IImGuiOverlay
             ImGui.Text($"Seed: {_diagnosticsData.WorldSeed}");
             ImGui.Text($"Chunks count (rendered): {_diagnosticsData.ChunksLoaded}");
             ImGui.Spacing();
-            ImGui.Text($"Chunk pos: {Game.Instance.Camera.Transform.ChunkPos:0}");
+            ImGui.Text($"Chunk pos: {transform.ChunkPos:0}");
             ImGui.Text($"Voxel pos: {transform.LocalVoxelPos:0}");
             ImGui.Text($"Reconstruced pos: {reconstructedPos:0}");
             ImGui.End();

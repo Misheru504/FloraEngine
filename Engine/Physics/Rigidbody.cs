@@ -6,7 +6,7 @@ namespace FloraEngine.Physics;
 public class Rigidbody
 {
     private static readonly Vector3 Gravity = new Vector3(0, -20f, 0);
-    private WorldManager WorldManager => WorldManager.Instance;
+    public static WorldManager WorldManager { get; set; } = null!;
 
     public Vector3 Position { get; set; }
 

@@ -9,7 +9,7 @@ public class Chunk : IDisposable
 {
     public const int VOLUME = WorldConstants.CHUNK_SIZE * WorldConstants.CHUNK_SIZE * WorldConstants.CHUNK_SIZE;
 
-    private static FastNoise Noise => WorldManager.Instance.Noise;
+    private static FastNoise Noise = null!;
 
     public Vector3 Position { get; }
     public byte LodLevel { get; }
@@ -19,8 +19,9 @@ public class Chunk : IDisposable
 
     private readonly VoxelData[] voxels;
 
-    public Chunk(Vector3 position, byte level)
+    public Chunk(Vector3 position, byte level, FastNoise noise)
     {
+        Noise ??= noise;
         Position = position;
         LodLevel = level;
         Scale = 1 << LodLevel;

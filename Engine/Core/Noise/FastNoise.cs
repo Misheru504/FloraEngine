@@ -2,7 +2,7 @@
 
 namespace FloraEngine.Core.Noise;
 
-class FastNoise
+public class FastNoise
 {
     private const string FASTNOISE_PATH = "Assets/lib/FastNoise";
     public const float FREQUENCY = 0.0005f;

@@ -1,20 +1,18 @@
-﻿using FloraEngine.Player;
-using FloraEngine.Diagnostics;
-using FloraEngine.Rendering;
+﻿using FloraEngine.Diagnostics;
 using System.Collections.Concurrent;
 using System.Numerics;
 using FloraEngine.Core.Noise;
 using FloraEngine.Core.Data;
 using FloraEngine.Core;
+using FloraEngine.Core.Components;
 
 namespace FloraEngine.World;
 
-internal class WorldManager : IDisposable
+public class WorldManager : IDisposable
 {
-    private static readonly Lazy<WorldManager> _instance = new Lazy<WorldManager>(() => new WorldManager());
-    public static WorldManager Instance => _instance.Value;
-
-    internal static Vector3 CenterPos => Game.Instance.Camera.Transform.ChunkPos;
+    private readonly DiagnosticsData _diagnosticsData;
+    private readonly Transform _transform;
+    private Vector3 CenterPos => _transform.ChunkPos;
 
     public int MaxLOD = 0;
     public int RenderDistance = 5;
@@ -40,7 +38,7 @@ internal class WorldManager : IDisposable
 
     public readonly FastNoise Noise;
 
-    public WorldManager()
+    public WorldManager(DiagnosticsData diagnosticsData, Transform transform)
     {
         World = null;
         Noise = FastNoise.FromEncodedNodeTree(FastNoise.TREE_METADATA);
@@ -55,6 +53,9 @@ internal class WorldManager : IDisposable
         _cancellationTokenSource = new CancellationTokenSource();
         _generationTasks = new Task[GENERATION_THREAD_COUNT];
         _meshingTasks = new Task[MESHING_THREAD_COUNT];
+
+        _diagnosticsData = diagnosticsData;
+        _transform = transform;
     }
 
     public void LoadWorld(WorldData worldData)
@@ -62,6 +63,7 @@ internal class WorldManager : IDisposable
         World world = new World(worldData);
         World = world;
         Noise.Seed = world.Seed;
+        _diagnosticsData.WorldSeed = world.Seed;
 
         Logger.Print($"Loaded world '{world.Name}'. Seed: {world.Seed}");
 
@@ -115,7 +117,7 @@ internal class WorldManager : IDisposable
                         continue;
                     }
 
-                    Chunk chunk = new Chunk(chunkPos, 0);
+                    Chunk chunk = new Chunk(chunkPos, 0, Noise);
                     chunk.CreateTerrain();
 
                     _chunksToMesh.Enqueue(chunk);
@@ -173,6 +175,8 @@ internal class WorldManager : IDisposable
         QueueChunksForGeneration();
         ProcessReadyChunks();
         UnloadFarChunks();
+
+        _diagnosticsData.ChunksLoaded = RenderedChunks.Count;
     }
 
     private void QueueChunksForGeneration()
@@ -247,7 +251,7 @@ internal class WorldManager : IDisposable
 
         if (c == null)
         {
-            c = new Chunk(chunkPos, lodLevel);
+            c = new Chunk(chunkPos, lodLevel, Noise);
             c.CreateTerrain();
             RenderedChunks[chunkPos] = c;
             _chunksToMesh.Enqueue(c);

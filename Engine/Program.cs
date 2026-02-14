@@ -44,8 +44,6 @@ public static class Program
         Logger.Print("Window created successfully!");
 
         _engineWindow.Load += Load;
-        _engineWindow.Update += Update;
-        _engineWindow.Render += Render;
         _engineWindow.Closing += Closing;
         _engineWindow.FramebufferResize += ChangeResolution;
 
@@ -61,7 +59,8 @@ public static class Program
 
         Game.Initialize(_graphics, _engineWindow, _inputContext);
 
-        WorldManager.Instance.LoadWorld(new WorldData { name = "DevWorld", seed = 1444320271, chunks = [] });
+        _engineWindow.Update += Game.Instance.Update;
+        _engineWindow.Render += Game.Instance.Draw;
     }
     private static void GraphicsLoad()
     {
@@ -87,20 +86,6 @@ public static class Program
         Logger.Print("OpenGL loaded correctly");
     }
 
-    private static void Update(double deltaTime)
-    {
-        Game.Instance.Update(deltaTime);
-
-        WorldManager.Instance.Update(deltaTime);
-    }
-
-    private static void Render(double deltaTime)
-    {
-        _graphics.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-
-        Game.Instance.Draw(deltaTime);
-    }
-
     public static void ChangeResolution(Vector2D<int> newSize)
     {
         _graphics.Viewport(newSize);
@@ -110,8 +95,6 @@ public static class Program
     private static void Closing()
     {
         Logger.Print("Closing...");
-
-        WorldManager.Instance.Dispose();
 
         Game.Instance.Closing();
 

@@ -7,6 +7,8 @@ namespace FloraEngine.Rendering.Meshing;
 
 public static class CulledMesher
 {
+    public static WorldManager WorldManager { get; set; } = null!;
+
     internal static void CreateCulledMesh(Chunk currentChunk, List<float> vertices, List<uint> indices, RenderConfig config)
     {
         uint vertexOffset = 0;
@@ -223,7 +225,7 @@ public static class CulledMesher
             // Voxel out of bounds
             Vector3 voxelPos = new Vector3(voxelX, voxelY, voxelZ);
             Vector3 worldTilePos = currentChunk.Position + voxelPos * currentChunk.Scale;
-            voxel = WorldManager.Instance.GetVoxelIdAtWorldPos((int)worldTilePos.X, (int)worldTilePos.Y, (int)worldTilePos.Z, currentChunk.LodLevel);
+            voxel = WorldManager.GetVoxelIdAtWorldPos((int)worldTilePos.X, (int)worldTilePos.Y, (int)worldTilePos.Z, currentChunk.LodLevel);
             return true;
         }
 

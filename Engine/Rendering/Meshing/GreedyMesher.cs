@@ -7,6 +7,7 @@ namespace FloraEngine.Rendering.Meshing;
 
 public static class GreedyMesher
 {
+    public static WorldManager WorldManager { get; set; } = null!;
     enum Face
     {
         Left,
@@ -107,10 +108,10 @@ public static class GreedyMesher
                             Vector3 worldComparePos = currentChunk.Position + comparePos * currentChunk.Scale;
 
                             if (pos[d] >= 0) current = currentChunk.GetVoxelAt(pos[0], pos[1], pos[2]).id;
-                            else current = WorldManager.Instance.GetVoxelIdAtWorldPos((int)worldVoxelPos.X, (int)worldVoxelPos.Y, (int)worldVoxelPos.Z, currentChunk.LodLevel);
+                            else current = WorldManager.GetVoxelIdAtWorldPos((int)worldVoxelPos.X, (int)worldVoxelPos.Y, (int)worldVoxelPos.Z, currentChunk.LodLevel);
 
                             if (pos[d] < WorldConstants.CHUNK_SIZE - 1) compare = currentChunk.GetVoxelAt(pos[0] + q[0], pos[1] + q[1], pos[2] + q[2]).id;
-                            else compare = WorldManager.Instance.GetVoxelIdAtWorldPos((int)worldComparePos.X, (int)worldComparePos.Y, (int)worldComparePos.Z, currentChunk.LodLevel);
+                            else compare = WorldManager.GetVoxelIdAtWorldPos((int)worldComparePos.X, (int)worldComparePos.Y, (int)worldComparePos.Z, currentChunk.LodLevel);
 
                             if (b == 0)
                             {
@@ -234,7 +235,7 @@ public static class GreedyMesher
         {
             Vector3 voxelPos = new Vector3(voxelX, voxelY, voxelZ);
             Vector3 worldTilePos = currentChunk.Position + voxelPos * currentChunk.Scale;
-            return WorldManager.Instance.GetVoxelIdAtWorldPos((int)worldTilePos.X, (int)worldTilePos.Y, (int)worldTilePos.Z, currentChunk.LodLevel) == Voxel.AIR.ID;
+            return WorldManager.GetVoxelIdAtWorldPos((int)worldTilePos.X, (int)worldTilePos.Y, (int)worldTilePos.Z, currentChunk.LodLevel) == Voxel.AIR.ID;
         }
 
         return currentChunk.GetVoxelAt(voxelX, voxelY, voxelZ).id == Voxel.AIR.ID;

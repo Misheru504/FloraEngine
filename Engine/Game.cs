@@ -1,8 +1,10 @@
 using FloraEngine.Core;
 using FloraEngine.Core.Components;
 using FloraEngine.Diagnostics;
+using FloraEngine.Physics;
 using FloraEngine.Player;
 using FloraEngine.Rendering;
+using FloraEngine.Rendering.Meshing;
 using FloraEngine.UI;
 using FloraEngine.UI.Overlays;
 using FloraEngine.World;
@@ -19,8 +21,6 @@ public class Game
     private static Game _instance = null!;
     public static Game Instance => _instance;
 
-    public RenderMode RenderingMode;
-
     private readonly GL _graphics;
     private readonly InputManager _inputManager;
     private readonly PlayerController _playerController;
@@ -28,6 +28,7 @@ public class Game
     private readonly Renderer _renderer;
     private readonly DiagnosticsData _diagnosticsData;
     private readonly Profiler _profiler;
+    private readonly WorldManager _worldManager;
 
     // UI Related
     private readonly ImGuiController _imGuiController;
@@ -35,12 +36,10 @@ public class Game
     private readonly OverlayManager _overlayManager;
     private readonly MainMenuBar _mainMenuBar;
 
-    public Camera Camera => _camera;
-
-    public DiagnosticsData DiagnosticsData => _diagnosticsData;
-
     public static void Initialize(GL graphics, IWindow window, IInputContext inputContext)
     {
+        if (_instance != null) throw new Exception("Only one instance of Game can exist at a time");
+
         _instance = new Game(graphics, window, inputContext);
     }
 
@@ -74,22 +73,30 @@ public class Game
             PlayerTransform = transform,
         };
 
+        _worldManager = new WorldManager(_diagnosticsData, transform);
+        _worldManager.LoadWorld(new WorldData { name = "DevWorld", seed = 1444320271, chunks = [] });
+
         _camera = new Camera(transform);
         _playerController = new PlayerController(_inputManager, inputContext.Mice[0], transform, _diagnosticsData);
 
-        _renderer = new Renderer(_graphics, renderConfig);
+        _renderer = new Renderer(_graphics, renderConfig, _camera, _worldManager);
         _profiler = new Profiler(_diagnosticsData);
 
         _imGuiController = new ImGuiController(_graphics, window, inputContext);
         _windowManager = new WindowManager();
         _overlayManager = new OverlayManager();
         _overlayManager.AddWindow(new MainOverlay(_diagnosticsData));
-        _mainMenuBar = new MainMenuBar(_graphics, _windowManager, renderConfig, _diagnosticsData, WorldManager.Instance.UpdateChunksMeshes, WorldManager.Instance.SaveActiveWorld, _playerController.SetPosition);
+        _mainMenuBar = new MainMenuBar(_graphics, _windowManager, renderConfig, _diagnosticsData, _worldManager.UpdateChunksMeshes, _worldManager.SaveActiveWorld, _playerController.SetPosition);
+    
+        CulledMesher.WorldManager = _worldManager;
+        GreedyMesher.WorldManager = _worldManager;
+        Rigidbody.WorldManager = _worldManager;
     }
 
     public void Update(double deltaTime)
     {
         _playerController.Update(deltaTime);
+        _worldManager.Update(deltaTime);
         
         _profiler.Update(deltaTime);
         _imGuiController.Update((float) deltaTime);
@@ -97,6 +104,8 @@ public class Game
 
     public void Draw(double deltaTime)
     {
+        _graphics.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+
         _renderer.Draw();
 
         _mainMenuBar.DrawBar(deltaTime);
@@ -108,5 +117,6 @@ public class Game
     public void Closing()
     {
         _renderer.Dispose();
+        _worldManager.Dispose();
     }
 }
