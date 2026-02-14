@@ -1,5 +1,4 @@
 ﻿using FloraEngine.Diagnostics;
-using FloraEngine.Rendering;
 using FloraEngine.World;
 using Silk.NET.Input;
 using Silk.NET.Maths;
@@ -13,31 +12,30 @@ public static class Program
 {
     public const string NAME = "Flora-Engine";
     public const string VERSION = "alpha-2";
+    private const string APP_NAME = $"{NAME}@{VERSION}";
 
-    internal static Vector2D<int> WindowResolution = new Vector2D<int>(1280, 720);
-    private static readonly string appName = $"{NAME}@{VERSION}";
+    internal static Vector2D<int> WindowResolution { get; private set; } = new Vector2D<int>(1280, 720);
 
     public static float AspectRatio => (float)WindowResolution.X / WindowResolution.Y;
 
-    public static GL Graphics { get; private set; } = null!;
-    public static IWindow EngineWindow { get; private set; } = null!;
+    private static GL _graphics = null!;
+    private static IWindow _engineWindow = null!;
     private static IInputContext _inputContext = null!;
-    private static IKeyboard _keyboard = null!;
 
     public static void Main()
     {
         AppDomain.CurrentDomain.UnhandledException += Reporter.OnUnhandledException;
 
-        Logger.Print($"=== {appName} - {DateTime.Now} ===", Logger.LogLevel.INFO, true, "");
+        Logger.Print($"=== {APP_NAME} - {DateTime.Now} ===", Logger.LogLevel.INFO, true, "");
         Logger.Print("Creating window...");
 
         // Intializing the game window
         WindowOptions options = WindowOptions.Default;
         options.Size = WindowResolution;
-        options.Title = appName;
+        options.Title = APP_NAME;
         options.Samples = 4; // Multisampling (less sharp image)
-        EngineWindow = Window.Create(options);
-        EngineWindow.VSync = false;
+        _engineWindow = Window.Create(options);
+        _engineWindow.VSync = false;
         /* Fixed framerate:
          * Window.UpdatesPerSecond = 180;
          * Window.FramesPerSecond = 180;
@@ -45,98 +43,71 @@ public static class Program
 
         Logger.Print("Window created successfully!");
 
+        _engineWindow.Load += Load;
+        _engineWindow.Update += Update;
+        _engineWindow.Render += Render;
+        _engineWindow.Closing += Closing;
+        _engineWindow.FramebufferResize += ChangeResolution;
 
-        EngineWindow.Load += Load;
-        EngineWindow.Update += Update;
-        EngineWindow.Render += Render;
-        EngineWindow.Closing += Closing;
-        EngineWindow.FramebufferResize += FrameBufferResize;
-
-        EngineWindow.Run();
-        EngineWindow.Dispose();
+        _engineWindow.Run();
+        _engineWindow.Dispose();
 
         Console.ReadKey();
     }
 
-    public static void Load()
+    private static void Load()
     {
         GraphicsLoad();
 
-        Game.Initialize(Graphics, EngineWindow, _inputContext, _keyboard, _inputContext.Mice[0]);
+        Game.Initialize(_graphics, _engineWindow, _inputContext);
 
         WorldManager.Instance.LoadWorld(new WorldData { name = "DevWorld", seed = 1444320271, chunks = [] });
     }
     private static void GraphicsLoad()
     {
         Logger.Print("Loading OpenGL...");
-        if (EngineWindow == null) throw new NullReferenceException("GLWindow is null!");
-        Graphics = EngineWindow.CreateOpenGL();
+        if (_engineWindow == null) throw new NullReferenceException("GLWindow is null!");
+        _graphics = _engineWindow.CreateOpenGL();
 
-        _inputContext = EngineWindow.CreateInput();
-        if (_inputContext.Keyboards.Count != 0)
-        {
-            _keyboard = _inputContext.Keyboards[0];
-        }
+        _inputContext = _engineWindow.CreateInput();
 
         // Graphics settings
-        Graphics.ClearColor(Color.CornflowerBlue); // Background color of the window
-        Graphics.Enable(EnableCap.Blend); // Transparency
-        Graphics.Enable(EnableCap.CullFace); // Only renders one face of a vertex
-        Graphics.CullFace(GLEnum.Back); // Face to show when culling
-        Graphics.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+        _graphics.ClearColor(Color.CornflowerBlue); // Background color of the window
+        _graphics.Enable(EnableCap.Blend); // Transparency
+        _graphics.Enable(EnableCap.CullFace); // Only renders one face of a vertex
+        _graphics.Enable(EnableCap.DepthTest); // Hides objects behind others
+        _graphics.CullFace(GLEnum.Back); // Face to show when culling
+        _graphics.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+        _graphics.DepthFunc(DepthFunction.Less);
+        _graphics.ClearDepth(1.0f); // Distance
 
-        Graphics.Enable(EnableCap.DepthTest);
-
-        Graphics.ClearDepth(1.0f); // Distance
-        Graphics.DepthFunc(DepthFunction.Less);
-
-        Graphics.DepthMask(true);
-        
-
-        Graphics.ColorMask(true, true, true, true);
+        _graphics.DepthMask(true);
+        _graphics.ColorMask(true, true, true, true);
 
         Logger.Print("OpenGL loaded correctly");
     }
 
-    public static void Update(double deltaTime)
+    private static void Update(double deltaTime)
     {
-        ComputeFPS(deltaTime);
         Game.Instance.Update(deltaTime);
-
-        //if (BoxColliderAA.IsColliding(spawnCollider, Controller.Instance.Collider)) Console.WriteLine($"{EngineWindow.Time} Inside!");
 
         WorldManager.Instance.Update(deltaTime);
     }
 
-    public static void Render(double deltaTime)
+    private static void Render(double deltaTime)
     {
-        Graphics.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+        _graphics.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
         Game.Instance.Draw(deltaTime);
     }
 
-    public static void FrameBufferResize(Vector2D<int> newSize)
+    public static void ChangeResolution(Vector2D<int> newSize)
     {
-        Graphics.Viewport(newSize);
+        _graphics.Viewport(newSize);
         WindowResolution = newSize;
     }
 
-
-    public static double FPS { get; private set; } = 0;
-    public static double DeltaFPS { get; private set; } = 0;
-    private static double totalTime = 1;
-    public static void ComputeFPS(double deltaTime)
-    {
-        if (totalTime >= 1)
-        {
-            totalTime = 0;
-            FPS = 1d / deltaTime;
-            DeltaFPS = deltaTime;
-        }
-        totalTime += deltaTime;
-    }
-
-    public static void Closing()
+    private static void Closing()
     {
         Logger.Print("Closing...");
 
@@ -147,4 +118,6 @@ public static class Program
         Logger.Print("See ya!");
         Logger.SaveLogFile();
     }
+
+    public static void CloseGame() => _engineWindow.Close();
 }

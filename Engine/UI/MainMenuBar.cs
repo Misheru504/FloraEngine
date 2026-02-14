@@ -1,9 +1,8 @@
 ﻿using FloraEngine.Core.Components;
 using FloraEngine.Diagnostics;
-using FloraEngine.Player;
-using FloraEngine.World;
 using ImGuiNET;
 using Silk.NET.OpenGL;
+using System.Numerics;
 
 namespace FloraEngine.UI;
 
@@ -11,15 +10,20 @@ internal class MainMenuBar : IMainMenuBar
 {
     private readonly WindowManager _windowManager;
     private readonly RenderConfig _renderConfig;
-    private readonly PlayerController _playerController;
+    private readonly DiagnosticsData _diagnosticsData;
     private readonly GL _graphics;
+    private readonly Action _refreshChunks, _saveWorld;
+    private readonly Action<Vector3> _resetPlayer;
 
-    public MainMenuBar(GL graphics, WindowManager windowManager, RenderConfig renderConfig, PlayerController playerController)
+    public MainMenuBar(GL graphics, WindowManager windowManager, RenderConfig renderConfig, DiagnosticsData diagnosticsData, Action refreshChunks, Action saveWorld, Action<Vector3> resetPlayer)
     {
         _graphics = graphics;
         _windowManager = windowManager;
         _renderConfig = renderConfig;
-        _playerController = playerController;
+        _diagnosticsData = diagnosticsData;
+        _refreshChunks = refreshChunks;
+        _saveWorld = saveWorld;
+        _resetPlayer = resetPlayer;
     }
 
     public void DrawBar(double deltaTime)
@@ -48,7 +52,7 @@ internal class MainMenuBar : IMainMenuBar
         if (!ImGui.BeginMenu("Game")) return;
 
         if (ImGui.MenuItem("Delete logs folder")) Logger.ClearLogFolder();
-        if (ImGui.MenuItem("Wireframe view", null, ref _renderConfig.IsWireframe)) Program.Graphics.PolygonMode(GLEnum.FrontAndBack, _renderConfig.IsWireframe ? GLEnum.Line : GLEnum.Fill);
+        if (ImGui.MenuItem("Wireframe view", null, ref _renderConfig.IsWireframe)) _graphics.PolygonMode(GLEnum.FrontAndBack, _renderConfig.IsWireframe ? GLEnum.Line : GLEnum.Fill);
         if (ImGui.MenuItem("Test console colors")) Logger.TestColors();
         if (ImGui.BeginMenu("Rendering mode"))
         {
@@ -62,7 +66,7 @@ internal class MainMenuBar : IMainMenuBar
         }
         ImGui.Separator();
         if (ImGui.MenuItem("/!\\ Crash game /!\\")) { throw new Exception("You crashed the game on purpose!"); }
-        if (ImGui.MenuItem("Quit", "ALT+F4")) { Program.EngineWindow.Close(); }
+        if (ImGui.MenuItem("Quit", "ALT+F4")) { Program.CloseGame(); }
         ImGui.EndMenu();
     }
 
@@ -70,8 +74,8 @@ internal class MainMenuBar : IMainMenuBar
     {
         if (!ImGui.BeginMenu("Player")) return;
 
-        if(ImGui.MenuItem("Freecam", "T", _playerController.IsFreecam)) _playerController.IsFreecam = !_playerController.IsFreecam;
-        if (ImGui.MenuItem("Respawn", "R", _playerController.IsFreecam)) _playerController.SetPosition(_playerController.SpawnPosition);
+        if(ImGui.MenuItem("Freecam", "T", _renderConfig.IsFreecam)) _renderConfig.IsFreecam = !_renderConfig.IsFreecam;
+        if (ImGui.MenuItem("Respawn", "R")) _resetPlayer(_diagnosticsData.RespawnPosition);
 
         ImGui.EndMenu();
     }
@@ -82,18 +86,18 @@ internal class MainMenuBar : IMainMenuBar
 
         if (ImGui.BeginMenu("Mesher"))
         {
-            if (ImGui.MenuItem("Generate AOs", null, ref _renderConfig.IsGeneratingAOs)) WorldManager.Instance.UpdateChunksMeshes();
+            if (ImGui.MenuItem("Generate AOs", null, ref _renderConfig.IsGeneratingAOs)) _refreshChunks();
             ImGui.Separator();
-            if (ImGui.MenuItem("Greedy", null, ref _renderConfig.IsUsingGreedyMeshing)) WorldManager.Instance.UpdateChunksMeshes();
+            if (ImGui.MenuItem("Greedy", null, ref _renderConfig.IsUsingGreedyMeshing)) _refreshChunks();
             bool notGreedy = !_renderConfig.IsUsingGreedyMeshing;
             if (ImGui.MenuItem("Culled", null, ref notGreedy))
             {
                 _renderConfig.IsUsingGreedyMeshing = !_renderConfig.IsUsingGreedyMeshing;
-                WorldManager.Instance.UpdateChunksMeshes();
+                _refreshChunks();
             }
             ImGui.EndMenu();
         }
-        if(ImGui.MenuItem("Save world to disk")) WorldManager.Instance.SaveActiveWorld();
+        if(ImGui.MenuItem("Save world to disk")) _saveWorld();
 
         ImGui.EndMenu();
     }

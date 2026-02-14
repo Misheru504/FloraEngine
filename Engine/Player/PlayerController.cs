@@ -13,6 +13,7 @@ public class PlayerController
     private readonly Rigidbody _rigidbody;
     private readonly IMouse _mouse;
     private readonly ICursor _cursor;
+    private readonly DiagnosticsData _diagnosticsData;
     private Vector2 _mousePosition;
     private float _speed;
 
@@ -22,28 +23,28 @@ public class PlayerController
 
     public Vector3 SpawnPosition { get; set; }
 
-    public PlayerController(InputManager inputManager, IMouse mouse, Transform transform)
+    public PlayerController(InputManager inputManager, IMouse mouse, Transform transform, DiagnosticsData diagnosticsData)
     {
         Vector3 size = new Vector3(0.7f, 2f, 0.7f);
 
         _inputManager = inputManager;
-
         _transform = transform;
-
-        _rigidbody = new Rigidbody(Vector3.Zero, 1.0f, size);
-        _speed = 5.0f;
-
         _mouse = mouse;
         _cursor = mouse.Cursor;
         _cursor.CursorMode = CursorMode.Raw;
+        _diagnosticsData = diagnosticsData;
+
+        _rigidbody = new Rigidbody(Vector3.Zero, 1.0f, size);
+        _speed = 5.0f;
 
         _mouse.MouseMove += MouseMove;
         _mouse.Scroll += MouseWheel;
 
         SpawnPosition = new Vector3(0.5f, 15, 0.5f);
         SetPosition(SpawnPosition);
+        _diagnosticsData.RespawnPosition = SpawnPosition;
 
-        _inputManager.RegisterKeyPress(Key.Escape, Program.EngineWindow.Close);
+        _inputManager.RegisterKeyPress(Key.Escape, Program.CloseGame);
         _inputManager.RegisterKeyPress(Key.T,  () => IsFreecam = !IsFreecam);
         _inputManager.RegisterKeyPress(Key.R, () => SetPosition(SpawnPosition));
     }
@@ -66,13 +67,15 @@ public class PlayerController
         {
             _rigidbody.Position += FreecamMovement.GetVelocity(deltaTime, _inputManager, _speed, _transform);
             _rigidbody.Velocity = Vector3.Zero;
+            _diagnosticsData.MoveSpeed = _speed;
         }
         else
         {
-            HumanMovement.ComputeVelocity(_inputManager, _rigidbody, _transform);
+            const float speed = 5.0f;
+            HumanMovement.ComputeVelocity(_inputManager, _rigidbody, _transform, speed);
             _rigidbody.Update((float) deltaTime);
+            _diagnosticsData.MoveSpeed = speed;
         }
-
         _transform.Position = _rigidbody.Position + Vector3.UnitY * 1.6f;
     }
 

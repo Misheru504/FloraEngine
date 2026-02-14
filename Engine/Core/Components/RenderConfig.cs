@@ -15,6 +15,7 @@ public class RenderConfig
     public bool IsGeneratingAOs;
     public bool IsUsingGreedyMeshing;
     public bool IsWireframe;
+    public bool IsFreecam;
     public int VertexCount { get; set; }
     public RenderMode RenderMode { get; set; }
 }

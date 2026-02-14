@@ -8,12 +8,10 @@ namespace FloraEngine.Player;
 
 internal static class HumanMovement
 {
-    public static float MoveSpeed { get; set; } = 5f;
-    public static float SprintMultiplier { get; set; } = 1.5f;
-    public static float JumpForce { get; set; } = 8f;
-    public static float AirControl { get; set; } = 0.3f;
+    private static readonly float _jumpForce = 8f;
+    public static readonly float _airControl = 0.3f;
 
-    public static void ComputeVelocity(InputManager inputManager, Rigidbody rigidbody, Transform transform)
+    public static void ComputeVelocity(InputManager inputManager, Rigidbody rigidbody, Transform transform, float speed)
     {
         Vector3 forward = Vector3.Normalize(new Vector3(transform.Forward.X, 0, transform.Forward.Z));
         Vector3 right = Vector3.Normalize(Vector3.Cross(forward, transform.Up));
@@ -28,9 +26,7 @@ internal static class HumanMovement
 
         if (moveDir != Vector3.Zero) moveDir = Vector3.Normalize(moveDir);
 
-        float speed = MoveSpeed;
-
-        float control = rigidbody.IsGrounded ? 1f : AirControl;
+        float control = rigidbody.IsGrounded ? 1f : _airControl;
 
         Vector3 targetVelocity = moveDir * speed;
         rigidbody.Velocity = new Vector3(
@@ -40,6 +36,6 @@ internal static class HumanMovement
         );
 
         if (inputManager.IsKeyHeld(Key.Space))
-            rigidbody.Jump(JumpForce);
+            rigidbody.Jump(_jumpForce);
     }
 }

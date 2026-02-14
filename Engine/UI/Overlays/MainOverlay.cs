@@ -1,5 +1,4 @@
 ﻿using FloraEngine.Core.Components;
-using FloraEngine.World;
 using ImGuiNET;
 using System.Numerics;
 
@@ -9,13 +8,11 @@ internal class MainOverlay : IImGuiOverlay
 {
     public int ZOrder => 100;
 
-    private readonly Transform _transform;
-    private readonly RenderConfig _renderConfig;
+    private readonly DiagnosticsData _diagnosticsData;
 
-    public MainOverlay(Transform transform, RenderConfig renderConfig)
+    public MainOverlay(DiagnosticsData diagnosticsData)
     {
-        _transform = transform;
-        _renderConfig = renderConfig;
+        _diagnosticsData = diagnosticsData;
     }
 
     public void Draw(double deltaTime)
@@ -24,27 +21,26 @@ internal class MainOverlay : IImGuiOverlay
         ImGui.SetNextWindowPos(Vector2.UnitY * 15);
         if (ImGui.Begin("Overlay", ImGuiWindowFlags.NoBringToFrontOnFocus | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoMove))
         {
+            Transform transform = _diagnosticsData.PlayerTransform;
+            RenderConfig renderConfig = _diagnosticsData.RenderConfig;
 
-            Vector3 reconstructedPos = _transform.ChunkPos + _transform.LocalVoxelPos;
-            ushort voxel = WorldManager.Instance.GetVoxelIdAtWorldPos((int) reconstructedPos.X, (int) reconstructedPos.Y, (int) reconstructedPos.Z, 0);
-            string voxelName = Voxel.GetVoxelName(voxel);
+            Vector3 reconstructedPos = transform.ChunkPos + transform.LocalVoxelPos;
 
             ImGui.Text($"Version: {Program.VERSION}");
-            ImGui.Text($"FPS: {Program.FPS:0} ({Program.DeltaFPS*1000:F2}ms/frame)");
+            ImGui.Text($"FPS: {_diagnosticsData.FPS:0} ({_diagnosticsData.FrameTimeMs:F2}ms/frame)");
             ImGui.Text($"Screen res.: {Program.WindowResolution}");
             ImGui.Spacing();
-            ImGui.Text($"Camera pos: {_transform.Position:F2}");
-            ImGui.Text($"Camera rot: <{_transform.Yaw:F2}, {_transform.Pitch:F2}>");
-            //ImGui.Text($"Camera speed: {PlayerControllerOld.Instance.Speed:F2}");
-            ImGui.Text($"Vertex count: {_renderConfig.VertexCount}");
+            ImGui.Text($"Camera pos: {transform.Position:F2}");
+            ImGui.Text($"Camera rot: <{transform.Yaw:F2}, {transform.Pitch:F2}>");
+            ImGui.Text($"Camera speed: {_diagnosticsData.MoveSpeed:F2}");
+            ImGui.Text($"Vertex count: {renderConfig.VertexCount}");
             ImGui.Spacing();
-            ImGui.Text($"Seed: {WorldManager.Instance.Noise.Seed}");
-            ImGui.Text($"Chunks count (rendered): {WorldManager.Instance.RenderedChunks.Count}");
+            ImGui.Text($"Seed: {_diagnosticsData.WorldSeed}");
+            ImGui.Text($"Chunks count (rendered): {_diagnosticsData.ChunksLoaded}");
             ImGui.Spacing();
             ImGui.Text($"Chunk pos: {Game.Instance.Camera.Transform.ChunkPos:0}");
-            ImGui.Text($"Voxel pos: {_transform.LocalVoxelPos:0}");
+            ImGui.Text($"Voxel pos: {transform.LocalVoxelPos:0}");
             ImGui.Text($"Reconstruced pos: {reconstructedPos:0}");
-            ImGui.Text($"voxel type: {voxelName}");
             ImGui.End();
         }
     }

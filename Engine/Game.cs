@@ -1,9 +1,11 @@
 using FloraEngine.Core;
 using FloraEngine.Core.Components;
+using FloraEngine.Diagnostics;
 using FloraEngine.Player;
 using FloraEngine.Rendering;
 using FloraEngine.UI;
 using FloraEngine.UI.Overlays;
+using FloraEngine.World;
 using Silk.NET.Input;
 using Silk.NET.OpenGL;
 using Silk.NET.OpenGL.Extensions.ImGui;
@@ -24,6 +26,8 @@ public class Game
     private readonly PlayerController _playerController;
     private readonly Camera _camera;
     private readonly Renderer _renderer;
+    private readonly DiagnosticsData _diagnosticsData;
+    private readonly Profiler _profiler;
 
     // UI Related
     private readonly ImGuiController _imGuiController;
@@ -33,15 +37,17 @@ public class Game
 
     public Camera Camera => _camera;
 
-    public static void Initialize(GL graphics, IWindow window, IInputContext inputContext, IKeyboard keyboard, IMouse mouse)
+    public DiagnosticsData DiagnosticsData => _diagnosticsData;
+
+    public static void Initialize(GL graphics, IWindow window, IInputContext inputContext)
     {
-        _instance = new Game(graphics, window, inputContext, keyboard, mouse);
+        _instance = new Game(graphics, window, inputContext);
     }
 
-    public Game(GL graphics, IWindow window, IInputContext inputContext, IKeyboard keyboard, IMouse mouse)
+    public Game(GL graphics, IWindow window, IInputContext inputContext)
     {
         _graphics = graphics;
-        _inputManager = new InputManager(keyboard);
+        _inputManager = new InputManager(inputContext.Keyboards[0]);
 
         Transform transform = new Transform()
         {
@@ -54,7 +60,7 @@ public class Game
             Pitch = 0,
         };
 
-        RenderConfig config = new RenderConfig()
+        RenderConfig renderConfig = new RenderConfig()
         {
             RenderMode = RenderMode.Default,
             IsUsingGreedyMeshing = true,
@@ -62,23 +68,30 @@ public class Game
             VertexCount = 0
         };
 
+        _diagnosticsData = new DiagnosticsData()
+        {
+            RenderConfig = renderConfig,
+            PlayerTransform = transform,
+        };
+
         _camera = new Camera(transform);
-        _playerController = new PlayerController(_inputManager, mouse, transform);
+        _playerController = new PlayerController(_inputManager, inputContext.Mice[0], transform, _diagnosticsData);
 
-        _renderer = new Renderer(_graphics, config);
-
+        _renderer = new Renderer(_graphics, renderConfig);
+        _profiler = new Profiler(_diagnosticsData);
 
         _imGuiController = new ImGuiController(_graphics, window, inputContext);
         _windowManager = new WindowManager();
         _overlayManager = new OverlayManager();
-        _overlayManager.AddWindow(new MainOverlay(transform, config));
-        _mainMenuBar = new MainMenuBar(_graphics, _windowManager, config, _playerController);
+        _overlayManager.AddWindow(new MainOverlay(_diagnosticsData));
+        _mainMenuBar = new MainMenuBar(_graphics, _windowManager, renderConfig, _diagnosticsData, WorldManager.Instance.UpdateChunksMeshes, WorldManager.Instance.SaveActiveWorld, _playerController.SetPosition);
     }
 
     public void Update(double deltaTime)
     {
         _playerController.Update(deltaTime);
-
+        
+        _profiler.Update(deltaTime);
         _imGuiController.Update((float) deltaTime);
     }
 
