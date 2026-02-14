@@ -1,4 +1,4 @@
-﻿using FloraEngine.Rendering;
+﻿using FloraEngine.Core.Components;
 using Silk.NET.Input;
 using System.Numerics;
 
@@ -6,31 +6,30 @@ namespace FloraEngine.Player;
 
 internal static class FreecamMovement
 {
-    public static Vector3 GetVelocity(float deltaTime, IKeyboard keyboard)
+    public static Vector3 GetVelocity(double deltaTime, InputManager inputManager, float speed, Transform transform)
     {
-        float speed = PlayerController.Instance.Speed;
-        float moveSpeed = speed * deltaTime;
-        Vector3 camFrontAndBack = moveSpeed * Camera.Instance.Forward;
-        Vector3 camSides = Vector3.Normalize(Vector3.Cross(Camera.Instance.Forward, Camera.Instance.Up)) * moveSpeed;
-        Vector3 camUpAndDown = moveSpeed * Camera.Instance.Up;
+        float moveSpeed = (float) (speed * deltaTime);
+        Vector3 camFrontAndBack = moveSpeed * transform.Forward;
+        Vector3 camSides = Vector3.Normalize(Vector3.Cross(transform.Forward, transform.Up)) * moveSpeed;
+        Vector3 camUpAndDown = moveSpeed * transform.Up;
         Vector3 velocity = Vector3.Zero;
 
-        if (keyboard.IsKeyPressed(Key.W))
+        if (inputManager.IsKeyHeld(Key.W))
             velocity += camFrontAndBack;
 
-        if (keyboard.IsKeyPressed(Key.S))
+        if (inputManager.IsKeyHeld(Key.S))
             velocity -= camFrontAndBack;
 
-        if (keyboard.IsKeyPressed(Key.D))
+        if (inputManager.IsKeyHeld(Key.D))
             velocity += camSides;
 
-        if (keyboard.IsKeyPressed(Key.A))
+        if (inputManager.IsKeyHeld(Key.A))
             velocity -= camSides;
 
-        if (keyboard.IsKeyPressed(Key.Space))
+        if (inputManager.IsKeyHeld(Key.Space))
             velocity += camUpAndDown;
 
-        if (keyboard.IsKeyPressed(Key.ShiftLeft))
+        if (inputManager.IsKeyHeld(Key.ShiftLeft))
             velocity -= camUpAndDown;
 
         return velocity;

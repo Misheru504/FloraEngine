@@ -1,4 +1,4 @@
-﻿using FloraEngine.Rendering;
+﻿using FloraEngine.Core;
 using FloraEngine.World;
 using System.Numerics;
 
@@ -9,7 +9,7 @@ public static class CulledMesher
     internal static void CreateCulledMesh(Chunk currentChunk, List<float> vertices, List<uint> indices)
     {
         uint vertexOffset = 0;
-        int sideSize = Chunk.SIZE;
+        int sideSize = WorldConstants.CHUNK_SIZE;
 
         for (int x = 0; x < sideSize; x++)
         {
@@ -217,7 +217,7 @@ public static class CulledMesher
 
     private static bool TryGetVoxelOut(Chunk currentChunk, int voxelX, int voxelY, int voxelZ, out ushort voxel)
     {
-        if (voxelX < 0 || voxelX >= Chunk.SIZE || voxelY < 0 || voxelY >= Chunk.SIZE || voxelZ < 0 || voxelZ >= Chunk.SIZE)
+        if (voxelX < 0 || voxelX >= WorldConstants.CHUNK_SIZE || voxelY < 0 || voxelY >= WorldConstants.CHUNK_SIZE || voxelZ < 0 || voxelZ >= WorldConstants.CHUNK_SIZE)
         {
             // Voxel out of bounds
             Vector3 voxelPos = new Vector3(voxelX, voxelY, voxelZ);

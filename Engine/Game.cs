@@ -1,31 +1,77 @@
+using FloraEngine.Core.Components;
 using FloraEngine.Player;
+using FloraEngine.Rendering;
+using FloraEngine.UI;
+using FloraEngine.UI.Overlays;
 using Silk.NET.Input;
 using Silk.NET.OpenGL;
+using Silk.NET.OpenGL.Extensions.ImGui;
+using Silk.NET.Windowing;
+using System.Numerics;
 
 namespace FloraEngine;
 
 public class Game
 {
-    private static readonly Game _instance = new Game();
+    private static Game _instance = null!;
     public static Game Instance => _instance;
 
-    private GL _graphics;
-    private InputManager _inputManager;
+    private readonly GL _graphics;
+    private readonly InputManager _inputManager;
+    private readonly PlayerController _playerController;
+    private readonly Camera _camera;
+    private readonly ImGuiController _imGuiController;
+    private readonly WindowManager _windowManager;
+    private readonly OverlayManager _overlayManager;
+    private readonly MainMenuBar _mainMenuBar;
 
-    public void Initialize(GL grahics, IKeyboard keyboard)
+    public Camera Camera => _camera;
+
+
+    public static void Initialize(GL graphics, IWindow window, IInputContext inputContext, IKeyboard keyboard, IMouse mouse)
     {
-        _graphics = grahics;
+        _instance = new Game(graphics, window, inputContext, keyboard, mouse);
+    }
+
+    public Game(GL graphics, IWindow window, IInputContext inputContext, IKeyboard keyboard, IMouse mouse)
+    {
+        _graphics = graphics;
         _inputManager = new InputManager(keyboard);
+
+        Transform transform = new Transform()
+        {
+            Position = Vector3.Zero,
+            Up = Vector3.UnitY,
+            Forward = -Vector3.UnitZ,
+            Direction = Vector3.Zero,
+
+            Yaw = 0,
+            Pitch = 0,
+        };
+
+        _camera = new Camera(transform);
+        _playerController = new PlayerController(_inputManager, mouse, transform);
+
+        _imGuiController = new ImGuiController(_graphics, window, inputContext);
+        _windowManager = new WindowManager();
+        _overlayManager = new OverlayManager();
+        _overlayManager.AddWindow(new MainOverlay(transform));
+        _mainMenuBar = new MainMenuBar(_windowManager);
     }
 
     public void Update(double deltaTime)
     {
+        _playerController.Update(deltaTime);
 
+        _imGuiController.Update((float) deltaTime);
     }
 
     public void Draw(double deltaTime)
     {
-
+        _mainMenuBar.DrawBar(deltaTime);
+        _windowManager.DrawAll(deltaTime);
+        _overlayManager.DrawAll(deltaTime);
+        _imGuiController.Render();
     }
 
     public void Closing()

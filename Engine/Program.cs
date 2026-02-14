@@ -1,23 +1,19 @@
 ﻿using FloraEngine.Diagnostics;
 using FloraEngine.Rendering;
-using FloraEngine.UI;
-using FloraEngine.UI.Overlays;
 using FloraEngine.World;
 using Silk.NET.Input;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
-using Silk.NET.OpenGL.Extensions.ImGui;
 using Silk.NET.Windowing;
 using System.Drawing;
-using System.Numerics;
-using FloraEngine.Player;
 
 namespace FloraEngine;
 
 public static class Program
 {
     public const string NAME = "Flora-Engine";
-    public const string VERSION = "alpha-1";
+    public const string VERSION = "alpha-2";
+
     internal static Vector2D<int> WindowResolution = new Vector2D<int>(1280, 720);
     private static readonly string appName = $"{NAME}@{VERSION}";
 
@@ -27,13 +23,8 @@ public static class Program
 
     public static GL Graphics { get; private set; } = null!;
     public static IWindow EngineWindow { get; private set; } = null!;
-    public static IInputContext InputContext { get; private set; } = null!;
-    public static IKeyboard Keyboard { get; private set; } = null!;
-    public static ImGuiController ImGuiController { get; private set; } = null!;
-    public static WindowManager WindowManager { get; private set; } = null!;
-    public static OverlayManager OverlayManager { get; private set; } = null!;  
-
-    internal static MainMenuBar MainMenuBar { get; private set; } = null!;
+    private static IInputContext _inputContext = null!;
+    private static IKeyboard _keyboard = null!;
 
     public static void Main()
     {
@@ -73,11 +64,7 @@ public static class Program
     {
         GraphicsLoad();
 
-        ImGuiController = new ImGuiController(Graphics, EngineWindow, InputContext);
-        WindowManager = new WindowManager();
-        OverlayManager = new OverlayManager();
-        OverlayManager.AddWindow(new MainOverlay());
-        MainMenuBar = new MainMenuBar(WindowManager);
+        Game.Initialize(Graphics, EngineWindow, _inputContext, _keyboard, _inputContext.Mice[0]);
 
         WorldManager.Instance.LoadWorld(new WorldData { name = "DevWorld", seed = 1444320271, chunks = [] });
     }
@@ -87,18 +74,11 @@ public static class Program
         if (EngineWindow == null) throw new NullReferenceException("GLWindow is null!");
         Graphics = EngineWindow.CreateOpenGL();
 
-        InputContext = EngineWindow.CreateInput();
-        if (InputContext.Keyboards.Count != 0)
+        _inputContext = EngineWindow.CreateInput();
+        if (_inputContext.Keyboards.Count != 0)
         {
-            Keyboard = InputContext.Keyboards[0];
-            Keyboard.KeyDown += KeyDown;
-        }
-
-        if (InputContext.Mice.Count != 0)
-        {
-            InputContext.Mice[0].Cursor.CursorMode = CursorMode.Raw;
-            InputContext.Mice[0].MouseMove += PlayerController.Instance.MouseMove;
-            InputContext.Mice[0].Scroll += PlayerController.Instance.MouseWheel;
+            _keyboard = _inputContext.Keyboards[0];
+            _keyboard.KeyDown += KeyDown;
         }
 
         // Graphics settings
@@ -124,11 +104,10 @@ public static class Program
     public static void Update(double deltaTime)
     {
         ComputeFPS(deltaTime);
+        Game.Instance.Update(deltaTime);
 
         //if (BoxColliderAA.IsColliding(spawnCollider, Controller.Instance.Collider)) Console.WriteLine($"{EngineWindow.Time} Inside!");
 
-        ImGuiController.Update((float)deltaTime);
-        PlayerController.Instance.Update((float)deltaTime);
         WorldManager.Instance.Update(deltaTime);
     }
 
@@ -137,11 +116,7 @@ public static class Program
         Graphics.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
         Renderer.Instance.Draw();
 
-
-        MainMenuBar.DrawBar(deltaTime);
-        WindowManager.DrawAll(deltaTime);
-        OverlayManager.DrawAll(deltaTime);
-        ImGuiController.Render();
+        Game.Instance.Draw(deltaTime);
     }
 
     public static void KeyDown(IKeyboard keyboard, Key key, int keyCode)
@@ -152,7 +127,7 @@ public static class Program
                 EngineWindow.Close();
                 break;
             case Key.T:
-                PlayerController.Instance.IsFreecamMovement = !PlayerController.Instance.IsFreecamMovement;
+                //PlayerControllerOld.Instance.IsFreecamMovement = !PlayerControllerOld.Instance.IsFreecamMovement;
                 break;
         }
     }
@@ -185,6 +160,8 @@ public static class Program
         Renderer.Instance.Dispose();
 
         WorldManager.Instance.Dispose();
+
+        Game.Instance.Closing();
 
         Logger.Print("See ya!");
         Logger.SaveLogFile();

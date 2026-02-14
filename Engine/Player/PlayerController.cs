@@ -1,85 +1,102 @@
-﻿using FloraEngine.Rendering;
-using FloraEngine.World;
+﻿using FloraEngine.Core;
+using FloraEngine.Core.Components;
+using FloraEngine.Physics;
 using Silk.NET.Input;
 using System.Numerics;
-using FloraEngine.Physics;
-using FloraEngine.Core;
 
 namespace FloraEngine.Player;
 
-internal class PlayerController
+public class PlayerController
 {
-    private static readonly Lazy<PlayerController> _instance = new Lazy<PlayerController>(() => new PlayerController());
-    public static PlayerController Instance => _instance.Value;
+    private readonly InputManager _inputManager;
+    private readonly Transform _transform;
+    private readonly Rigidbody _rigidbody;
+    private readonly IMouse _mouse;
+    private readonly ICursor _cursor;
+    private Vector2 _mousePosition;
+    private float _speed;
 
-    private static Camera Camera => Camera.Instance;
-    public static Vector3 ChunkPos => MathUtils.WorldToChunkCoord(Camera.Position, Chunk.SIZE);
-    public static Vector3 LocalVoxelPos => MathUtils.WorldToTilePosition(Camera.Instance.Position);
+    private bool _isFreecam = false;
 
-    public BoxColliderAA Collider { get; private set; }
-    public Rigidbody Rigidbody { get; private set; }
-    public Vector3 Size { get; private set; }
-    private static IKeyboard Keyboard => Program.Keyboard;
-    private static ICursor Cursor => Program.InputContext.Mice[0].Cursor;
+    public bool IsFreecam {  get { return _isFreecam; } set { _isFreecam = value; } }
 
-    private Vector2 mousePosition;
-    internal float Speed = 2f;
+    public float Speed { get { return _speed; } set { _speed = value < 0 ? 0 : value; } }
 
-    public bool IsFreecamMovement;
-
-    private PlayerController()
+    public PlayerController(InputManager inputManager, IMouse mouse, Transform transform)
     {
-        Size = new Vector3(0.7f, 2f, 0.7f);
-        Vector3 position = Camera.Position - Size * 0.5f;
-        Collider = new BoxColliderAA(position, Size.X, Size.Y, Size.Z);
-        Rigidbody = new Rigidbody(Vector3.Zero, 1f, Size);
+        Vector3 size = new Vector3(0.7f, 2f, 0.7f);
+
+        _inputManager = inputManager;
+
+        _transform = transform;
+
+        _rigidbody = new Rigidbody(Vector3.Zero, 1.0f, size);
+        _speed = 2.0f;
+
+        SetPosition(Vector3.UnitY * 100 - size * 0.5f);
+
+        _mouse = mouse;
+        _cursor = mouse.Cursor;
+        _cursor.CursorMode = CursorMode.Raw;
+
+        _mouse.MouseMove += MouseMove;
+        _mouse.Scroll += MouseWheel;
     }
 
-    public void Update(float deltaTime)
+    public void SetPosition(Vector3 position)
     {
-        if (Keyboard.IsKeyPressed(Key.AltLeft))
-            Cursor.CursorMode = CursorMode.Normal;
-        else
-            Cursor.CursorMode = CursorMode.Raw;
+        _transform.Position = position + Vector3.UnitY * 1.6f;
+        _rigidbody.Position = position;
+        _rigidbody.Velocity = Vector3.Zero;
+    }
 
-        if (IsFreecamMovement)
+    public void Update(double deltaTime)
+    {
+        if (_inputManager.IsKeyHeld(Key.AltLeft))
+            _cursor.CursorMode = CursorMode.Normal;
+        else
+            _cursor.CursorMode = CursorMode.Raw;
+
+        if (_isFreecam)
         {
-            Rigidbody.Position += FreecamMovement.GetVelocity(deltaTime, Keyboard);
+            _rigidbody.Position += FreecamMovement.GetVelocity(deltaTime, _inputManager, _speed, _transform);
         }
         else
         {
-            HumanMovement.GetNextPosition(deltaTime, Keyboard, Rigidbody);
-            Rigidbody.Update(deltaTime);
+            HumanMovement.ComputeVelocity(_inputManager, _rigidbody, _transform);
+            _rigidbody.Update((float) deltaTime);
         }
 
-        Camera.Position = Rigidbody.Position + Vector3.UnitY * 1.6f;
+        _transform.Position = _rigidbody.Position + Vector3.UnitY * 1.6f;
     }
 
-    internal void MouseMove(IMouse mouse, Vector2 position)
+    private void MouseMove(IMouse mouse, Vector2 position)
     {
-        if (Cursor.CursorMode == CursorMode.Normal) return;
+        if (_cursor.CursorMode == CursorMode.Normal) return;
         float lookSensitivity = 0.1f;
-        if (mousePosition == default) mousePosition = position;
+        if (_mousePosition == default) _mousePosition = position;
         else
         {
-            float xOffset = (position.X - mousePosition.X) * lookSensitivity;
-            float yOffset = (position.Y - mousePosition.Y) * lookSensitivity;
-            mousePosition = position;
+            float xOffset = (position.X - _mousePosition.X) * lookSensitivity;
+            float yOffset = (position.Y - _mousePosition.Y) * lookSensitivity;
+            _mousePosition = position;
 
-            Camera.Yaw += xOffset;
-            Camera.Pitch -= yOffset;
+            _transform.Yaw += xOffset;
+            _transform.Pitch -= yOffset;
 
-            //We don't want to be able to look behind us by going over our head or under our feet so make sure it stays within these bounds
-            Camera.Pitch = Math.Clamp(Camera.Pitch, -89.0f, 89.0f);
+            Vector3 direction = new Vector3(
+                MathF.Cos(MathUtils.DegreesToRadians(_transform.Yaw)) * MathF.Cos(MathUtils.DegreesToRadians(_transform.Pitch)),
+                MathF.Sin(MathUtils.DegreesToRadians(_transform.Pitch)),
+                MathF.Sin(MathUtils.DegreesToRadians(_transform.Yaw)) * MathF.Cos(MathUtils.DegreesToRadians(_transform.Pitch))
+            );
 
-            Camera.Direction.X = MathF.Cos(MathUtils.DegreesToRadians(Camera.Yaw)) * MathF.Cos(MathUtils.DegreesToRadians(Camera.Pitch));
-            Camera.Direction.Y = MathF.Sin(MathUtils.DegreesToRadians(Camera.Pitch));
-            Camera.Direction.Z = MathF.Sin(MathUtils.DegreesToRadians(Camera.Yaw)) * MathF.Cos(MathUtils.DegreesToRadians(Camera.Pitch));
-            Camera.Forward = Vector3.Normalize(new Vector3(Camera.Direction.X, Camera.Direction.Y, Camera.Direction.Z));
+            _transform.Direction = direction;
+
+            _transform.Forward = Vector3.Normalize(direction);
         }
     }
 
-    internal void MouseWheel(IMouse mouse, ScrollWheel scrollWheel)
+    private void MouseWheel(IMouse mouse, ScrollWheel scrollWheel)
     {
         float y = scrollWheel.Y < 0 ? -1 : 1;
         Speed *= Math.Abs(y + 0.05f);

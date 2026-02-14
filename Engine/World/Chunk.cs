@@ -1,4 +1,5 @@
-﻿using FloraEngine.Core.Noise;
+﻿using FloraEngine.Core;
+using FloraEngine.Core.Noise;
 using FloraEngine.Rendering;
 using System.Numerics;
 
@@ -6,8 +7,7 @@ namespace FloraEngine.World;
 
 public class Chunk : IDisposable
 {
-    public const int SIZE = 16;
-    public const int VOLUME = SIZE * SIZE * SIZE;
+    public const int VOLUME = WorldConstants.CHUNK_SIZE * WorldConstants.CHUNK_SIZE * WorldConstants.CHUNK_SIZE;
 
     private static FastNoise Noise => WorldManager.Instance.Noise;
 
@@ -24,7 +24,7 @@ public class Chunk : IDisposable
         Position = position;
         LodLevel = level;
         Scale = 1 << LodLevel;
-        WorldSize = Scale * SIZE;
+        WorldSize = Scale * WorldConstants.CHUNK_SIZE;
 
         voxels = new VoxelData[VOLUME];
     }
@@ -34,7 +34,7 @@ public class Chunk : IDisposable
         Position = new Vector3(data.x, data.y, data.z);
         LodLevel = data.lodLevel;
         Scale = 1 << LodLevel;
-        WorldSize = Scale * SIZE;
+        WorldSize = Scale * WorldConstants.CHUNK_SIZE;
 
         voxels = data.voxels;
     }
@@ -44,15 +44,15 @@ public class Chunk : IDisposable
         float[] noiseMap = new float[WorldSize * WorldSize];
         Noise.GenUniformGrid2D(noiseMap, (int)Position.X, (int)Position.Z, WorldSize, WorldSize, FastNoise.FREQUENCY, Noise.Seed);
 
-        for (int x = 0; x < SIZE; x++)
+        for (int x = 0; x < WorldConstants.CHUNK_SIZE; x++)
         {
             int worldX = x * Scale;
-            for (int z = 0; z < SIZE; z++)
+            for (int z = 0; z < WorldConstants.CHUNK_SIZE; z++)
             {
                 int worldZ = z * Scale;
                 float height = noiseMap[worldZ * WorldSize + worldX];
 
-                for (int y = 0; y < SIZE; y++)
+                for (int y = 0; y < WorldConstants.CHUNK_SIZE; y++)
                 {
                     float worldY = (y * Scale) + Position.Y + 64;
 
@@ -90,7 +90,7 @@ public class Chunk : IDisposable
         Mesh?.CreateBuffers();
     }
 
-    public static int GetIndex(int x, int y, int z) => x + z * SIZE + y * SIZE * SIZE;
+    public static int GetIndex(int x, int y, int z) => x + z * WorldConstants.CHUNK_SIZE + y * WorldConstants.CHUNK_SIZE * WorldConstants.CHUNK_SIZE;
     public VoxelData GetVoxelAt(int x, int y, int z) => voxels[GetIndex(x, y, z)];
     public void SetVoxelAt(int x, int y, int z, VoxelData voxel) => voxels[GetIndex(x, y, z)] = voxel;
 

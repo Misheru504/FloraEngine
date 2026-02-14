@@ -2,9 +2,9 @@
 
 namespace FloraEngine.Player;
 
-internal class InputManager
+public class InputManager
 {
-    private IKeyboard _keyboard;
+    private readonly IKeyboard _keyboard;
 
     public InputManager(IKeyboard keyboard)
     {
@@ -12,4 +12,5 @@ internal class InputManager
     }
 
     public bool IsKeyHeld(Key key) => _keyboard.IsKeyPressed(key);
+
 }

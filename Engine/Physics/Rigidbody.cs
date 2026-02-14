@@ -3,7 +3,7 @@ using System.Numerics;
 
 namespace FloraEngine.Physics;
 
-internal class Rigidbody
+public class Rigidbody
 {
     private static readonly Vector3 Gravity = new Vector3(0, -20f, 0);
     private WorldManager WorldManager => WorldManager.Instance;

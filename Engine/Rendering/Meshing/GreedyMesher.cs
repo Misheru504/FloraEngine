@@ -1,4 +1,4 @@
-﻿using FloraEngine.Rendering;
+﻿using FloraEngine.Core;
 using FloraEngine.World;
 using System.Numerics;
 
@@ -78,7 +78,7 @@ public static class GreedyMesher
                 int[] pos = [0, 0, 0];
                 int[] q = [0, 0, 0];
 
-                FaceMask[] mask = new FaceMask[Chunk.SIZE * Chunk.SIZE];
+                FaceMask[] mask = new FaceMask[WorldConstants.CHUNK_SIZE * WorldConstants.CHUNK_SIZE];
                 q[d] = 1;
 
                 Face face = Face.Front;
@@ -88,14 +88,14 @@ public static class GreedyMesher
 
                 pos[d] = -1;
 
-                while (pos[d] < Chunk.SIZE)
+                while (pos[d] < WorldConstants.CHUNK_SIZE)
                 {
                     int maskIndex = 0;
                     pos[v] = 0;
-                    while (pos[v] < Chunk.SIZE)
+                    while (pos[v] < WorldConstants.CHUNK_SIZE)
                     {
                         pos[u] = 0;
-                        while (pos[u] < Chunk.SIZE)
+                        while (pos[u] < WorldConstants.CHUNK_SIZE)
                         {
                             ushort current;
                             ushort compare;
@@ -108,7 +108,7 @@ public static class GreedyMesher
                             if (pos[d] >= 0) current = currentChunk.GetVoxelAt(pos[0], pos[1], pos[2]).id;
                             else current = WorldManager.Instance.GetVoxelIdAtWorldPos((int)worldVoxelPos.X, (int)worldVoxelPos.Y, (int)worldVoxelPos.Z, currentChunk.LodLevel);
 
-                            if (pos[d] < Chunk.SIZE - 1) compare = currentChunk.GetVoxelAt(pos[0] + q[0], pos[1] + q[1], pos[2] + q[2]).id;
+                            if (pos[d] < WorldConstants.CHUNK_SIZE - 1) compare = currentChunk.GetVoxelAt(pos[0] + q[0], pos[1] + q[1], pos[2] + q[2]).id;
                             else compare = WorldManager.Instance.GetVoxelIdAtWorldPos((int)worldComparePos.X, (int)worldComparePos.Y, (int)worldComparePos.Z, currentChunk.LodLevel);
 
                             if (b == 0)
@@ -143,10 +143,10 @@ public static class GreedyMesher
                     pos[d]++;
                     maskIndex = 0;
 
-                    for (int j = 0; j < Chunk.SIZE; j++)
+                    for (int j = 0; j < WorldConstants.CHUNK_SIZE; j++)
                     {
                         int i = 0;
-                        while (i < Chunk.SIZE)
+                        while (i < WorldConstants.CHUNK_SIZE)
                         {
                             FaceMask faceMask = mask[maskIndex];
 
@@ -158,7 +158,7 @@ public static class GreedyMesher
                             }
 
                             width = 1;
-                            while (i + width < Chunk.SIZE && faceMask.CanMergeWith(mask[maskIndex + width]))
+                            while (i + width < WorldConstants.CHUNK_SIZE && faceMask.CanMergeWith(mask[maskIndex + width]))
                             {
                                 width++;
                             }
@@ -166,11 +166,11 @@ public static class GreedyMesher
                             bool done = false;
                             height = 1;
 
-                            while (height + j < Chunk.SIZE)
+                            while (height + j < WorldConstants.CHUNK_SIZE)
                             {
                                 for (int k = 0; k < width; k++)
                                 {
-                                    if (!faceMask.CanMergeWith(mask[maskIndex + k + height * Chunk.SIZE]))
+                                    if (!faceMask.CanMergeWith(mask[maskIndex + k + height * WorldConstants.CHUNK_SIZE]))
                                     {
                                         done = true;
                                         break;
@@ -196,7 +196,7 @@ public static class GreedyMesher
                             for (int l = 0; l < height; l++)
                                 for (int k = 0; k < width; k++)
                                 {
-                                    mask[maskIndex + k + l * Chunk.SIZE] = FaceMask.Air;
+                                    mask[maskIndex + k + l * WorldConstants.CHUNK_SIZE] = FaceMask.Air;
                                 }
 
                             i += width;
@@ -229,7 +229,7 @@ public static class GreedyMesher
 
     private static bool IsFaceVisible(Chunk currentChunk, int voxelX, int voxelY, int voxelZ)
     {
-        if (voxelX < 0 || voxelX >= Chunk.SIZE || voxelY < 0 || voxelY >= Chunk.SIZE || voxelZ < 0 || voxelZ >= Chunk.SIZE)
+        if (voxelX < 0 || voxelX >= WorldConstants.CHUNK_SIZE || voxelY < 0 || voxelY >= WorldConstants.CHUNK_SIZE || voxelZ < 0 || voxelZ >= WorldConstants.CHUNK_SIZE)
         {
             Vector3 voxelPos = new Vector3(voxelX, voxelY, voxelZ);
             Vector3 worldTilePos = currentChunk.Position + voxelPos * currentChunk.Scale;

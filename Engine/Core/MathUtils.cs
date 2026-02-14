@@ -1,5 +1,4 @@
-﻿using FloraEngine.World;
-using System.Numerics;
+﻿using System.Numerics;
 
 namespace FloraEngine.Core;
 
@@ -29,13 +28,13 @@ public static class MathUtils
 
     public static Vector3 WorldToTilePosition(Vector3 worldPostion)
     {
-        int localX = (int)Math.Floor(worldPostion.X) % Chunk.SIZE;
-        int localY = (int)Math.Floor(worldPostion.Y) % Chunk.SIZE;
-        int localZ = (int)Math.Floor(worldPostion.Z) % Chunk.SIZE;
+        int localX = (int)Math.Floor(worldPostion.X) % WorldConstants.CHUNK_SIZE;
+        int localY = (int)Math.Floor(worldPostion.Y) % WorldConstants.CHUNK_SIZE;
+        int localZ = (int)Math.Floor(worldPostion.Z) % WorldConstants.CHUNK_SIZE;
 
-        if (localX < 0) localX += Chunk.SIZE;
-        if (localY < 0) localY += Chunk.SIZE;
-        if (localZ < 0) localZ += Chunk.SIZE;
+        if (localX < 0) localX += WorldConstants.CHUNK_SIZE;
+        if (localY < 0) localY += WorldConstants.CHUNK_SIZE;
+        if (localZ < 0) localZ += WorldConstants.CHUNK_SIZE;
 
         return new Vector3(localX, localY, localZ);
     }

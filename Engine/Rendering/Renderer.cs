@@ -159,8 +159,8 @@ internal unsafe class Renderer : IDisposable
         shader.UseProgram();
         atlas.Bind();
 
-        shader.SetUniform("uView", Camera.Instance.RelativeViewMatrix);
-        shader.SetUniform("uProjection", Camera.Instance.ProjectionMatrix);
+        shader.SetUniform("uView", Game.Instance.Camera.RelativeViewMatrix);
+        shader.SetUniform("uProjection", Game.Instance.Camera.ProjectionMatrix);
         shader.SetUniform("fRenderMode", (int) RenderingMode);
         shader.SetUniform("fTexture", 1);
 
@@ -172,11 +172,11 @@ internal unsafe class Renderer : IDisposable
     private void DrawChunk(Chunk chunk)
     {
         if (chunk.Mesh == null || chunk.Mesh.vao == null) return;
-        if (!IsInFrustum(chunk, Camera.Instance.Frustum)) return;
+        if (!IsInFrustum(chunk, Game.Instance.Camera.Frustum)) return;
 
         VertexCount += chunk.Mesh.VertexCount;
         chunk.Mesh.vao.Bind();
-        shader.SetUniform("uModel", Matrix4x4.CreateScale(chunk.Scale) * Matrix4x4.CreateTranslation(Camera.Instance.RelativePosition(chunk.Position)));
+        shader.SetUniform("uModel", Matrix4x4.CreateScale(chunk.Scale) * Matrix4x4.CreateTranslation(Game.Instance.Camera.RelativePosition(chunk.Position)));
         Graphics.DrawElements(PrimitiveType.Triangles, chunk.Mesh.IndexCount, DrawElementsType.UnsignedInt, (void*) 0);
     }
 

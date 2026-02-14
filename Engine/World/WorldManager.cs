@@ -14,7 +14,7 @@ internal class WorldManager : IDisposable
     private static readonly Lazy<WorldManager> _instance = new Lazy<WorldManager>(() => new WorldManager());
     public static WorldManager Instance => _instance.Value;
 
-    internal static Vector3 CenterPos => PlayerController.ChunkPos;
+    internal static Vector3 CenterPos => Game.Instance.Camera.Transform.ChunkPos;
 
     public int MaxLOD = 0;
     public int RenderDistance = 5;
@@ -109,7 +109,7 @@ internal class WorldManager : IDisposable
             {
                 try
                 {
-                    if (MathUtils.OutOfDistance(chunkPos, CenterPos, RenderDistance * Chunk.SIZE))
+                    if (MathUtils.OutOfDistance(chunkPos, CenterPos, RenderDistance * WorldConstants.CHUNK_SIZE))
                     {
                         _chunksInProgress.TryRemove(chunkPos, out _);
                         continue;
@@ -183,7 +183,7 @@ internal class WorldManager : IDisposable
             for (int z = -RenderDistance; z < RenderDistance; z++)
                 for (int x = -RenderDistance; x < RenderDistance; x++)
                 {
-                    Vector3 pos = CenterPos + new Vector3(x, y, z) * Chunk.SIZE;
+                    Vector3 pos = CenterPos + new Vector3(x, y, z) * WorldConstants.CHUNK_SIZE;
                     positions.Add(pos);
                 }
 
@@ -237,7 +237,7 @@ internal class WorldManager : IDisposable
         if (!IsWorldLoaded) return Voxel.AIR.ID;
 
         int scale = 1 << lodLevel;
-        int chunkSize = Chunk.SIZE * (1 << lodLevel);
+        int chunkSize = WorldConstants.CHUNK_SIZE * (1 << lodLevel);
 
         Vector3 worldTilePos = new Vector3(x, y, z);
         Vector3 localTilePos = MathUtils.WorldToTilePosition(worldTilePos / scale);

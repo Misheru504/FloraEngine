@@ -1,4 +1,5 @@
 ﻿using FloraEngine.Core;
+using FloraEngine.Core.Components;
 using System.Numerics;
 
 namespace FloraEngine.Rendering;
@@ -8,48 +9,27 @@ namespace FloraEngine.Rendering;
 /// </summary>
 public sealed class Camera
 {
-    private static readonly Lazy<Camera> _instance = new Lazy<Camera>(() => new Camera());
-    public static Camera Instance => _instance.Value;
-
-    public Vector3 Position;
-    public Vector3 Up;
-    public Vector3 Forward;
-    public Vector3 Direction;
-
     public float NearPlane;
     public float FarPlane;
 
-    public float Yaw, Pitch, FoV;
+    public float FoV;
 
-    /// <summary>
-    /// Uses absolute coordinates for rendering (may cause issues with floating point errors for large distances)
-    /// </summary>
-    internal Matrix4x4 ViewMatrix => Matrix4x4.CreateLookAt(Position, Position + Vector3.Normalize(Direction), Up);
+    public Transform Transform;
 
-    /// <summary>
-    /// Uses the position relative to the camera for rendering 
-    /// </summary>
-    /// <remarks>
-    /// (every rendered objects position needs to be sustracted with Camera.Position)
-    /// </remarks>
-    internal Matrix4x4 RelativeViewMatrix => Matrix4x4.CreateLookAt(Vector3.Zero, Vector3.Normalize(Direction), Up);
+    internal Matrix4x4 ViewMatrix => Matrix4x4.CreateLookAt(Transform.Position, Transform.Position + Vector3.Normalize(Transform.Direction), Transform.Up);
+    internal Matrix4x4 RelativeViewMatrix => Matrix4x4.CreateLookAt(Vector3.Zero, Vector3.Normalize(Transform.Direction), Transform.Up);
+
     internal Matrix4x4 ProjectionMatrix => Matrix4x4.CreatePerspectiveFieldOfView(MathUtils.DegreesToRadians(FoV), Program.AspectRatio, NearPlane, FarPlane);
     internal Frustum Frustum => new Frustum(ViewMatrix * ProjectionMatrix);
 
-    private Camera()
+    public Camera(Transform transform)
     {
-        Position = Vector3.Zero;
-        Up = Vector3.UnitY;
-        Forward = -Vector3.UnitZ;
-        Direction = Vector3.Zero;
-
-        Yaw = 0;
-        Pitch = 0;
+        Transform = transform;
         FoV = 100;
 
         NearPlane = 0.1f;
-        FarPlane = 5000.0f;
+        FarPlane = 1000.0f;
     }
 
-    public Vector3 RelativePosition(Vector3 absolutePosition) => absolutePosition - Position;
+    public Vector3 RelativePosition(Vector3 absolutePosition) => absolutePosition - Transform.Position;
 }
