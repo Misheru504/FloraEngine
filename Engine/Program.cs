@@ -17,8 +17,6 @@ public static class Program
     internal static Vector2D<int> WindowResolution = new Vector2D<int>(1280, 720);
     private static readonly string appName = $"{NAME}@{VERSION}";
 
-    internal static bool IsWireframe = false;
-
     public static float AspectRatio => (float)WindowResolution.X / WindowResolution.Y;
 
     public static GL Graphics { get; private set; } = null!;
@@ -78,7 +76,6 @@ public static class Program
         if (_inputContext.Keyboards.Count != 0)
         {
             _keyboard = _inputContext.Keyboards[0];
-            _keyboard.KeyDown += KeyDown;
         }
 
         // Graphics settings
@@ -114,22 +111,8 @@ public static class Program
     public static void Render(double deltaTime)
     {
         Graphics.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-        Renderer.Instance.Draw();
 
         Game.Instance.Draw(deltaTime);
-    }
-
-    public static void KeyDown(IKeyboard keyboard, Key key, int keyCode)
-    {
-        switch (key)
-        {
-            case Key.Escape:
-                EngineWindow.Close();
-                break;
-            case Key.T:
-                //PlayerControllerOld.Instance.IsFreecamMovement = !PlayerControllerOld.Instance.IsFreecamMovement;
-                break;
-        }
     }
 
     public static void FrameBufferResize(Vector2D<int> newSize)
@@ -156,8 +139,6 @@ public static class Program
     public static void Closing()
     {
         Logger.Print("Closing...");
-
-        Renderer.Instance.Dispose();
 
         WorldManager.Instance.Dispose();
 

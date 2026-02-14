@@ -1,4 +1,6 @@
-﻿using FloraEngine.Diagnostics;
+﻿using FloraEngine.Core;
+using FloraEngine.Core.Components;
+using FloraEngine.Diagnostics;
 using FloraEngine.Rendering.Shaders;
 using FloraEngine.Rendering.Textures;
 using FloraEngine.World;
@@ -7,20 +9,15 @@ using System.Numerics;
 
 namespace FloraEngine.Rendering;
 
-internal unsafe class Renderer : IDisposable
+public unsafe class Renderer : IDisposable
 {
-    private static readonly Lazy<Renderer> _instance = new Lazy<Renderer>(() => new Renderer());
-    public static Renderer Instance => _instance.Value;
-    private static GL Graphics => Program.Graphics;
+    private static GL _graphics = null!;
 
-    // Vertex stride: 3 (position) + 3 (normal) + 2 (uv) = 8 floats
-    public const int VertexStride = 8;
+    // Vertex stride: 3 (position) + 3 (normal) + 2 (uv) + 2 (aos) = 10 floats
+    public const int VertexStride = 10;
     private readonly FragVertShader shader;
     private readonly Texture2D texture;
-    internal RenderMode RenderingMode;
-
-    public long VertexCount;
-    public static bool IsGeneratingAOs = true;
+    private readonly RenderConfig _renderConfig;
 
     // Storing shader code for simplicity, there are methods in Shader class to read them from files
     private const string VERTEX_SHADER = @"
@@ -126,30 +123,23 @@ internal unsafe class Renderer : IDisposable
         }
     ";
 
-    public enum RenderMode
-    {
-        Default = 0,
-        Depth = 1,
-        Normals = 2,
-        UV = 3,
-        AO = 4,
-        Layer = 5,
-    }
+    private readonly TextureArray atlas;
 
-    private TextureArray atlas;
-
-    private Renderer()
+    public Renderer(GL graphics, RenderConfig renderConfig)
     {
         Logger.Render("Loading renderer...");
+        _graphics = graphics;
+        _renderConfig = renderConfig;
 
-        shader = new FragVertShader(VERTEX_SHADER, FRAGMENT_SHADER);
-        texture = Texture2D.FromFile("Assets/block.png", TextureUnit.Texture0);
+        shader = new FragVertShader(_graphics, VERTEX_SHADER, FRAGMENT_SHADER);
+        texture = Texture2D.FromFile(_graphics, "Assets/block.png", TextureUnit.Texture0);
         texture.SetDefaultParameters();
 
-        atlas = new TextureArray("Assets/atlas.png", TextureUnit.Texture1, 16);
+        atlas = new TextureArray(_graphics, "Assets/atlas.png", TextureUnit.Texture1, 16);
         atlas.SetDefaultParameters();
 
-        RenderingMode = RenderMode.Default;
+        Mesh.RenderConfig = _renderConfig;
+        Mesh.Graphics = _graphics;
 
         Logger.Render("Successfully loaded!");
     }
@@ -161,10 +151,10 @@ internal unsafe class Renderer : IDisposable
 
         shader.SetUniform("uView", Game.Instance.Camera.RelativeViewMatrix);
         shader.SetUniform("uProjection", Game.Instance.Camera.ProjectionMatrix);
-        shader.SetUniform("fRenderMode", (int) RenderingMode);
+        shader.SetUniform("fRenderMode", (int) _renderConfig.RenderMode);
         shader.SetUniform("fTexture", 1);
 
-        VertexCount = 0;
+        _renderConfig.VertexCount = 0;
         foreach(Chunk chunk in WorldManager.Instance.RenderedChunks.Values)
             DrawChunk(chunk);
     }
@@ -174,10 +164,10 @@ internal unsafe class Renderer : IDisposable
         if (chunk.Mesh == null || chunk.Mesh.vao == null) return;
         if (!IsInFrustum(chunk, Game.Instance.Camera.Frustum)) return;
 
-        VertexCount += chunk.Mesh.VertexCount;
+        _renderConfig.VertexCount += chunk.Mesh.VertexCount;
         chunk.Mesh.vao.Bind();
         shader.SetUniform("uModel", Matrix4x4.CreateScale(chunk.Scale) * Matrix4x4.CreateTranslation(Game.Instance.Camera.RelativePosition(chunk.Position)));
-        Graphics.DrawElements(PrimitiveType.Triangles, chunk.Mesh.IndexCount, DrawElementsType.UnsignedInt, (void*) 0);
+        _graphics.DrawElements(PrimitiveType.Triangles, chunk.Mesh.IndexCount, DrawElementsType.UnsignedInt, (void*) 0);
     }
 
     public void Dispose()

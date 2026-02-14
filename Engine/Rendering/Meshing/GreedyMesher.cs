@@ -1,4 +1,5 @@
 ﻿using FloraEngine.Core;
+using FloraEngine.Core.Components;
 using FloraEngine.World;
 using System.Numerics;
 
@@ -64,7 +65,7 @@ public static class GreedyMesher
         };
     }
 
-    internal static void CreateGreedyMesh(Chunk currentChunk, List<float> vertices, List<uint> indices)
+    internal static void CreateGreedyMesh(Chunk currentChunk, List<float> vertices, List<uint> indices, RenderConfig config)
     {
         uint vertexOffset = 0;
 
@@ -118,7 +119,7 @@ public static class GreedyMesher
                                     int faceX = pos[0] + q[0];
                                     int faceY = pos[1] + q[1];
                                     int faceZ = pos[2] + q[2];
-                                    float[] aos = ComputeFaceAOs(currentChunk, faceX, faceY, faceZ, face);
+                                    float[] aos = ComputeFaceAOs(currentChunk, faceX, faceY, faceZ, face, config.IsGeneratingAOs);
                                     mask[maskIndex] = new FaceMask { VoxelId = compare, AO0 = aos[0], AO1 = aos[1], AO2 = aos[2], AO3 = aos[3] };
                                 }
                                 else
@@ -128,7 +129,7 @@ public static class GreedyMesher
                             {
                                 if (current != Voxel.AIR.ID && compare == Voxel.AIR.ID)
                                 {
-                                    float[] aos = ComputeFaceAOs(currentChunk, pos[0], pos[1], pos[2], face);
+                                    float[] aos = ComputeFaceAOs(currentChunk, pos[0], pos[1], pos[2], face, config.IsGeneratingAOs);
                                     mask[maskIndex] = new FaceMask { VoxelId = current, AO0 = aos[0], AO1 = aos[1], AO2 = aos[2], AO3 = aos[3] };
                                 }
                                 else
@@ -248,9 +249,9 @@ public static class GreedyMesher
         return ao / 3.0f;
     }
 
-    private static float[] ComputeFaceAOs(Chunk currentChunk, int x, int y, int z, Face face)
+    private static float[] ComputeFaceAOs(Chunk currentChunk, int x, int y, int z, Face face, bool ao)
     {
-        if (!Renderer.IsGeneratingAOs)
+        if (!ao)
         {
             return [1f, 1f, 1f, 1f];
         }

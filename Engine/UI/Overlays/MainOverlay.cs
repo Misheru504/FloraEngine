@@ -1,5 +1,4 @@
 ﻿using FloraEngine.Core.Components;
-using FloraEngine.Rendering;
 using FloraEngine.World;
 using ImGuiNET;
 using System.Numerics;
@@ -10,10 +9,13 @@ internal class MainOverlay : IImGuiOverlay
 {
     public int ZOrder => 100;
 
-    private Transform _transform;
-    public MainOverlay(Transform transform)
+    private readonly Transform _transform;
+    private readonly RenderConfig _renderConfig;
+
+    public MainOverlay(Transform transform, RenderConfig renderConfig)
     {
         _transform = transform;
+        _renderConfig = renderConfig;
     }
 
     public void Draw(double deltaTime)
@@ -34,7 +36,7 @@ internal class MainOverlay : IImGuiOverlay
             ImGui.Text($"Camera pos: {_transform.Position:F2}");
             ImGui.Text($"Camera rot: <{_transform.Yaw:F2}, {_transform.Pitch:F2}>");
             //ImGui.Text($"Camera speed: {PlayerControllerOld.Instance.Speed:F2}");
-            ImGui.Text($"Vertex count: {Renderer.Instance.VertexCount}");
+            ImGui.Text($"Vertex count: {_renderConfig.VertexCount}");
             ImGui.Spacing();
             ImGui.Text($"Seed: {WorldManager.Instance.Noise.Seed}");
             ImGui.Text($"Chunks count (rendered): {WorldManager.Instance.RenderedChunks.Count}");

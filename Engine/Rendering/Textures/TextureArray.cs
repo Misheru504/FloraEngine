@@ -11,8 +11,9 @@ internal unsafe class TextureArray : Texture, IDisposable
     public int LayerCount { get; }
     public int TilesPerRow { get; }
 
-    public TextureArray(string path, TextureUnit unit, int tileSize = 16)
+    public TextureArray(GL graphics, string path, TextureUnit unit, int tileSize = 16)
     {
+        _graphics = graphics;
         TileSize = tileSize;
 
         ImageResult image;
@@ -30,13 +31,13 @@ internal unsafe class TextureArray : Texture, IDisposable
         LayerCount = TilesPerRow * tilesPerCol;
 
         // Create the texture array
-        handle = Graphics.GenTexture();
+        handle = _graphics.GenTexture();
         this.unit = unit;
         target = TextureTarget.Texture2DArray;
         Bind();
 
         // Allocate storage for all layers
-        Graphics.TexImage3D(
+        _graphics.TexImage3D(
             target: target,
             level: 0,
             internalformat: InternalFormat.Rgba8,
@@ -64,7 +65,7 @@ internal unsafe class TextureArray : Texture, IDisposable
                 // Upload to the specific layer
                 fixed (byte* ptr = tileData)
                 {
-                    Graphics.TexSubImage3D(
+                    _graphics.TexSubImage3D(
                         target: TextureTarget.Texture2DArray,
                         level: 0,
                         xoffset: 0,
@@ -81,7 +82,7 @@ internal unsafe class TextureArray : Texture, IDisposable
             }
         }
 
-        var error = Graphics.GetError();
+        var error = _graphics.GetError();
         if (error != GLEnum.NoError)
         {
             Logger.Print($"OpenGL Error: {error}", Logger.LogLevel.ERROR);
@@ -110,12 +111,12 @@ internal unsafe class TextureArray : Texture, IDisposable
     public override void SetDefaultParameters()
     {
         Bind();
-        Graphics.GenerateMipmap(TextureTarget.Texture2DArray);
-        Graphics.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.NearestMipmapLinear);
-        Graphics.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
-        Graphics.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
-        Graphics.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
-        Graphics.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureWrapR, (int)TextureWrapMode.Repeat);
+        _graphics.GenerateMipmap(TextureTarget.Texture2DArray);
+        _graphics.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.NearestMipmapLinear);
+        _graphics.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+        _graphics.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
+        _graphics.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
+        _graphics.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureWrapR, (int)TextureWrapMode.Repeat);
         Unbind();
     }
 }

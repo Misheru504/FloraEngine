@@ -16,11 +16,11 @@ public class PlayerController
     private Vector2 _mousePosition;
     private float _speed;
 
-    private bool _isFreecam = false;
-
-    public bool IsFreecam {  get { return _isFreecam; } set { _isFreecam = value; } }
+    public bool IsFreecam { get; set; }
 
     public float Speed { get { return _speed; } set { _speed = value < 0 ? 0 : value; } }
+
+    public Vector3 SpawnPosition { get; set; }
 
     public PlayerController(InputManager inputManager, IMouse mouse, Transform transform)
     {
@@ -31,9 +31,7 @@ public class PlayerController
         _transform = transform;
 
         _rigidbody = new Rigidbody(Vector3.Zero, 1.0f, size);
-        _speed = 2.0f;
-
-        SetPosition(Vector3.UnitY * 100 - size * 0.5f);
+        _speed = 5.0f;
 
         _mouse = mouse;
         _cursor = mouse.Cursor;
@@ -41,6 +39,13 @@ public class PlayerController
 
         _mouse.MouseMove += MouseMove;
         _mouse.Scroll += MouseWheel;
+
+        SpawnPosition = new Vector3(0.5f, 15, 0.5f);
+        SetPosition(SpawnPosition);
+
+        _inputManager.RegisterKeyPress(Key.Escape, Program.EngineWindow.Close);
+        _inputManager.RegisterKeyPress(Key.T,  () => IsFreecam = !IsFreecam);
+        _inputManager.RegisterKeyPress(Key.R, () => SetPosition(SpawnPosition));
     }
 
     public void SetPosition(Vector3 position)
@@ -57,9 +62,10 @@ public class PlayerController
         else
             _cursor.CursorMode = CursorMode.Raw;
 
-        if (_isFreecam)
+        if (IsFreecam)
         {
             _rigidbody.Position += FreecamMovement.GetVelocity(deltaTime, _inputManager, _speed, _transform);
+            _rigidbody.Velocity = Vector3.Zero;
         }
         else
         {

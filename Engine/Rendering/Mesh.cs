@@ -1,4 +1,5 @@
-﻿using FloraEngine.Rendering.Meshing;
+﻿using FloraEngine.Core.Components;
+using FloraEngine.Rendering.Meshing;
 using FloraEngine.World;
 using Silk.NET.OpenGL;
 
@@ -6,7 +7,8 @@ namespace FloraEngine.Rendering;
 
 public class Mesh : IDisposable
 {
-    public static bool IsUsingGreedyMeshing = true;
+    public static GL Graphics { get; set; } = null!;
+    public static RenderConfig RenderConfig { get; set; } = null!;
 
     public VertexArrayObject? vao;
     private BufferObject<float>? vbo;
@@ -34,8 +36,8 @@ public class Mesh : IDisposable
         List<float> vertices = new List<float>();
         List<uint> indices = new List<uint>();
 
-        if(IsUsingGreedyMeshing) GreedyMesher.CreateGreedyMesh(currentChunk, vertices, indices);
-        else CulledMesher.CreateCulledMesh(currentChunk, vertices, indices);
+        if(RenderConfig.IsUsingGreedyMeshing) GreedyMesher.CreateGreedyMesh(currentChunk, vertices, indices, RenderConfig);
+        else CulledMesher.CreateCulledMesh(currentChunk, vertices, indices, RenderConfig);
 
         VertexCount = vertices.Count / Renderer.VertexStride;
         IndexCount = (uint)indices.Count;
@@ -51,10 +53,10 @@ public class Mesh : IDisposable
     {
         if (meshData == null) return;
 
-        vao = new VertexArrayObject();
+        vao = new VertexArrayObject(Graphics);
 
-        vbo = new BufferObject<float>(meshData?.Vertices.ToArray(), BufferTargetARB.ArrayBuffer, BufferUsageARB.StaticDraw);
-        ebo = new BufferObject<uint>(meshData?.Indices.ToArray(), BufferTargetARB.ElementArrayBuffer, BufferUsageARB.StaticDraw);
+        vbo = new BufferObject<float>(Graphics, meshData?.Vertices.ToArray(), BufferTargetARB.ArrayBuffer, BufferUsageARB.StaticDraw);
+        ebo = new BufferObject<uint>(Graphics, meshData?.Indices.ToArray(), BufferTargetARB.ElementArrayBuffer, BufferUsageARB.StaticDraw);
 
         VertexArrayObject.VertexAttributePointer<float>(0, 3, VertexAttribPointerType.Float, 10, 0); // Position
         VertexArrayObject.VertexAttributePointer<float>(1, 3, VertexAttribPointerType.Float, 10, 3); // Normals

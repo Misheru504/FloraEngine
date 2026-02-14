@@ -9,34 +9,35 @@ namespace FloraEngine.Rendering;
 internal unsafe class BufferObject<DataType> : IDisposable
     where DataType : unmanaged
 {
-    private static GL Graphics => Program.Graphics;
+    private static GL _graphics = null!;
     private readonly BufferTargetARB target;
     private readonly uint handle;
 
-    public BufferObject(Span<DataType> data, BufferTargetARB target, BufferUsageARB usage)
+    public BufferObject(GL graphics, Span<DataType> data, BufferTargetARB target, BufferUsageARB usage)
     {
+        _graphics = graphics;
         this.target = target;
-        handle = Graphics.GenBuffer();
+        handle = _graphics.GenBuffer();
         Bind();
 
         fixed (DataType* ptr = data)
         {
-            Graphics.BufferData(target, (nuint)(data.Length * sizeof(DataType)), ptr, usage);
+            _graphics.BufferData(target, (nuint)(data.Length * sizeof(DataType)), ptr, usage);
         }
     }
 
     /// <summary>
     /// Binds this buffer in the GPU
     /// </summary>
-    public void Bind() => Graphics.BindBuffer(target, handle);
+    public void Bind() => _graphics.BindBuffer(target, handle);
 
     /// <summary>
     /// Unbinds this buffer
     /// </summary>
-    public void Unbind() => Graphics.BindBuffer(target, 0);
+    public void Unbind() => _graphics.BindBuffer(target, 0);
 
     /// <summary>
     /// Delete this buffer
     /// </summary>
-    public void Dispose() => Graphics.DeleteBuffer(handle);
+    public void Dispose() => _graphics.DeleteBuffer(handle);
 }

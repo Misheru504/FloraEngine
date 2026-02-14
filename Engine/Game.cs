@@ -1,3 +1,4 @@
+using FloraEngine.Core;
 using FloraEngine.Core.Components;
 using FloraEngine.Player;
 using FloraEngine.Rendering;
@@ -16,17 +17,21 @@ public class Game
     private static Game _instance = null!;
     public static Game Instance => _instance;
 
+    public RenderMode RenderingMode;
+
     private readonly GL _graphics;
     private readonly InputManager _inputManager;
     private readonly PlayerController _playerController;
     private readonly Camera _camera;
+    private readonly Renderer _renderer;
+
+    // UI Related
     private readonly ImGuiController _imGuiController;
     private readonly WindowManager _windowManager;
     private readonly OverlayManager _overlayManager;
     private readonly MainMenuBar _mainMenuBar;
 
     public Camera Camera => _camera;
-
 
     public static void Initialize(GL graphics, IWindow window, IInputContext inputContext, IKeyboard keyboard, IMouse mouse)
     {
@@ -49,14 +54,25 @@ public class Game
             Pitch = 0,
         };
 
+        RenderConfig config = new RenderConfig()
+        {
+            RenderMode = RenderMode.Default,
+            IsUsingGreedyMeshing = true,
+            IsGeneratingAOs = true,
+            VertexCount = 0
+        };
+
         _camera = new Camera(transform);
         _playerController = new PlayerController(_inputManager, mouse, transform);
+
+        _renderer = new Renderer(_graphics, config);
+
 
         _imGuiController = new ImGuiController(_graphics, window, inputContext);
         _windowManager = new WindowManager();
         _overlayManager = new OverlayManager();
-        _overlayManager.AddWindow(new MainOverlay(transform));
-        _mainMenuBar = new MainMenuBar(_windowManager);
+        _overlayManager.AddWindow(new MainOverlay(transform, config));
+        _mainMenuBar = new MainMenuBar(_graphics, _windowManager, config, _playerController);
     }
 
     public void Update(double deltaTime)
@@ -68,6 +84,8 @@ public class Game
 
     public void Draw(double deltaTime)
     {
+        _renderer.Draw();
+
         _mainMenuBar.DrawBar(deltaTime);
         _windowManager.DrawAll(deltaTime);
         _overlayManager.DrawAll(deltaTime);
@@ -76,6 +94,6 @@ public class Game
 
     public void Closing()
     {
-
+        _renderer.Dispose();
     }
 }

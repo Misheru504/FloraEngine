@@ -7,14 +7,15 @@ namespace FloraEngine.Rendering.Textures;
 /// </summary>
 internal unsafe class Texture3D : Texture, IDisposable
 {
-    public Texture3D(void* data, uint width, uint height, uint depth, InternalFormat format, PixelFormat pixel, PixelType type, TextureUnit unit)
+    public Texture3D(GL graphics, void* data, uint width, uint height, uint depth, InternalFormat format, PixelFormat pixel, PixelType type, TextureUnit unit)
     {
-        handle = Graphics.GenTexture();
+        _graphics = graphics;
+        handle = _graphics.GenTexture();
         this.unit = unit;
         target = TextureTarget.Texture3D;
         Bind();
 
-        Graphics.TexImage3D(
+        _graphics.TexImage3D(
             target,
             0,
             format,
@@ -34,11 +35,11 @@ internal unsafe class Texture3D : Texture, IDisposable
     override public void SetDefaultParameters()
     {
         Bind();
-        Graphics.TexParameter(target, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
-        Graphics.TexParameter(target, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
-        Graphics.TexParameter(target, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
-        Graphics.TexParameter(target, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
-        Graphics.TexParameter(target, TextureParameterName.TextureWrapR, (int)TextureWrapMode.ClampToEdge);
+        _graphics.TexParameter(target, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
+        _graphics.TexParameter(target, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+        _graphics.TexParameter(target, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
+        _graphics.TexParameter(target, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+        _graphics.TexParameter(target, TextureParameterName.TextureWrapR, (int)TextureWrapMode.ClampToEdge);
         Unbind();
     }
 }

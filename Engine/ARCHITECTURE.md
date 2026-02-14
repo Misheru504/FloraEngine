@@ -2,7 +2,7 @@
 
 > Pourquoi faire simple quand on peut faire compliquer ?
 
-Cette documentation sert à expliquer la structure du projet ainsi d'autres choses nécessaire à la compréhension du projet. Ce document va de pair avec le document `DECISIONS.md`, qui contient des explications sur des décisions de design.
+Cette documentation sert à expliquer la structure du projet ainsi d'autres choses nécessaire à la compréhension du projet.
 
 Il est utile à mon moi du futur et à quiconque s'intéresse à projet.
 
@@ -12,7 +12,16 @@ Dernière mise-à-jour du document : `08/02/2026 - Michel-Ange (Misheru504)`
 
 ---
 
-TODO: Commencer la restructuration
+```
+Engine
+├── Core
+├── Diagnostics -> Dépend de Core
+├── Physics -> Dépend de Core et World
+├── World -> Dépend de Core
+├── Rendering -> Dépend de Core et World
+├── Player -> Dépend de Core et Physics
+└── UI -> Dépend de Core et Diagnostics
+```
 
 ---
 

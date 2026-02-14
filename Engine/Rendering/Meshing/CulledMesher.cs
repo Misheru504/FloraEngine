@@ -1,4 +1,5 @@
 ﻿using FloraEngine.Core;
+using FloraEngine.Core.Components;
 using FloraEngine.World;
 using System.Numerics;
 
@@ -6,7 +7,7 @@ namespace FloraEngine.Rendering.Meshing;
 
 public static class CulledMesher
 {
-    internal static void CreateCulledMesh(Chunk currentChunk, List<float> vertices, List<uint> indices)
+    internal static void CreateCulledMesh(Chunk currentChunk, List<float> vertices, List<uint> indices, RenderConfig config)
     {
         uint vertexOffset = 0;
         int sideSize = WorldConstants.CHUNK_SIZE;
@@ -29,7 +30,7 @@ public static class CulledMesher
                             ComputeVertexAO(!IsFaceVisible(currentChunk, x-1, y-1, z), !IsFaceVisible(currentChunk, x, y-1, z+1), !IsFaceVisible(currentChunk, x-1, y-1, z+1))
                         ];
 
-                        if (!Renderer.IsGeneratingAOs)
+                        if (!config.IsGeneratingAOs)
                         {
                             aos[0] = 1f;
                             aos[1] = 1f;
@@ -56,7 +57,7 @@ public static class CulledMesher
                             ComputeVertexAO(!IsFaceVisible(currentChunk, x+1, y+1, z), !IsFaceVisible(currentChunk, x, y+1, z+1), !IsFaceVisible(currentChunk, x+1, y+1, z+1))
                         ];
 
-                        if (!Renderer.IsGeneratingAOs)
+                        if (!config.IsGeneratingAOs)
                         {
                             aos[0] = 1f;
                             aos[1] = 1f;
@@ -83,7 +84,7 @@ public static class CulledMesher
                             ComputeVertexAO(!IsFaceVisible(currentChunk, x-1, y+1, z), !IsFaceVisible(currentChunk, x-1, y, z+1), !IsFaceVisible(currentChunk, x-1, y+1, z+1))
                         ];
 
-                        if (!Renderer.IsGeneratingAOs)
+                        if (!config.IsGeneratingAOs)
                         {
                             aos[0] = 1f;
                             aos[1] = 1f;
@@ -110,7 +111,7 @@ public static class CulledMesher
                             ComputeVertexAO(!IsFaceVisible(currentChunk, x+1, y+1, z), !IsFaceVisible(currentChunk, x+1, y, z-1), !IsFaceVisible(currentChunk, x+1, y+1, z-1))
                         ];
 
-                        if (!Renderer.IsGeneratingAOs)
+                        if (!config.IsGeneratingAOs)
                         {
                             aos[0] = 1f;
                             aos[1] = 1f;
@@ -137,7 +138,7 @@ public static class CulledMesher
                             ComputeVertexAO(!IsFaceVisible(currentChunk, x+1, y, z+1), !IsFaceVisible(currentChunk, x, y+1, z+1), !IsFaceVisible(currentChunk, x+1, y+1, z+1))
                         ];
 
-                        if (!Renderer.IsGeneratingAOs)
+                        if (!config.IsGeneratingAOs)
                         {
                             aos[0] = 1f;
                             aos[1] = 1f;
@@ -164,7 +165,7 @@ public static class CulledMesher
                             ComputeVertexAO(!IsFaceVisible(currentChunk, x-1, y, z-1), !IsFaceVisible(currentChunk, x, y+1, z-1), !IsFaceVisible(currentChunk, x-1, y+1, z-1))
                         ];
 
-                        if (!Renderer.IsGeneratingAOs)
+                        if (!config.IsGeneratingAOs)
                         {
                             aos[0] = 1f;
                             aos[1] = 1f;

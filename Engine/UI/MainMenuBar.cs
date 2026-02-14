@@ -1,18 +1,25 @@
-﻿using FloraEngine.Diagnostics;
-using FloraEngine.Rendering;
+﻿using FloraEngine.Core.Components;
+using FloraEngine.Diagnostics;
+using FloraEngine.Player;
+using FloraEngine.World;
 using ImGuiNET;
 using Silk.NET.OpenGL;
-using FloraEngine.World;
 
 namespace FloraEngine.UI;
 
 internal class MainMenuBar : IMainMenuBar
 {
-    private readonly WindowManager windowManager;
+    private readonly WindowManager _windowManager;
+    private readonly RenderConfig _renderConfig;
+    private readonly PlayerController _playerController;
+    private readonly GL _graphics;
 
-    public MainMenuBar(WindowManager windowManager)
+    public MainMenuBar(GL graphics, WindowManager windowManager, RenderConfig renderConfig, PlayerController playerController)
     {
-        this.windowManager = windowManager;
+        _graphics = graphics;
+        _windowManager = windowManager;
+        _renderConfig = renderConfig;
+        _playerController = playerController;
     }
 
     public void DrawBar(double deltaTime)
@@ -26,7 +33,7 @@ internal class MainMenuBar : IMainMenuBar
 
         if (ImGui.BeginMenu("Window"))
         {
-            foreach(IImGuiWindow window in windowManager.windows)
+            foreach(IImGuiWindow window in _windowManager.windows)
             {
                 bool isOpen = window.IsOpen;
                 if (ImGui.MenuItem(window.Title, null, ref isOpen)) window.IsOpen = !isOpen;
@@ -36,21 +43,21 @@ internal class MainMenuBar : IMainMenuBar
         ImGui.EndMainMenuBar();
     }
 
-    private static void ShowGameMenu()
+    private void ShowGameMenu()
     {
         if (!ImGui.BeginMenu("Game")) return;
 
         if (ImGui.MenuItem("Delete logs folder")) Logger.ClearLogFolder();
-        if (ImGui.MenuItem("Wireframe view", null, ref Program.IsWireframe)) Program.Graphics.PolygonMode(GLEnum.FrontAndBack, Program.IsWireframe ? GLEnum.Line : GLEnum.Fill);
+        if (ImGui.MenuItem("Wireframe view", null, ref _renderConfig.IsWireframe)) Program.Graphics.PolygonMode(GLEnum.FrontAndBack, _renderConfig.IsWireframe ? GLEnum.Line : GLEnum.Fill);
         if (ImGui.MenuItem("Test console colors")) Logger.TestColors();
         if (ImGui.BeginMenu("Rendering mode"))
         {
-            if (ImGui.MenuItem("Default")) Renderer.Instance.RenderingMode = Renderer.RenderMode.Default;
-            if (ImGui.MenuItem("Depth")) Renderer.Instance.RenderingMode = Renderer.RenderMode.Depth;
-            if (ImGui.MenuItem("Normals")) Renderer.Instance.RenderingMode = Renderer.RenderMode.Normals;
-            if (ImGui.MenuItem("UVs")) Renderer.Instance.RenderingMode = Renderer.RenderMode.UV;
-            if (ImGui.MenuItem("AOs")) Renderer.Instance.RenderingMode = Renderer.RenderMode.AO;
-            if (ImGui.MenuItem("Layer")) Renderer.Instance.RenderingMode = Renderer.RenderMode.Layer;
+            if (ImGui.MenuItem("Default")) _renderConfig.RenderMode = RenderMode.Default;
+            if (ImGui.MenuItem("Depth")) _renderConfig.RenderMode = RenderMode.Depth;
+            if (ImGui.MenuItem("Normals")) _renderConfig.RenderMode = RenderMode.Normals;
+            if (ImGui.MenuItem("UVs")) _renderConfig.RenderMode = RenderMode.UV;
+            if (ImGui.MenuItem("AOs")) _renderConfig.RenderMode = RenderMode.AO;
+            if (ImGui.MenuItem("Layer")) _renderConfig.RenderMode = RenderMode.Layer;
             ImGui.EndMenu();
         }
         ImGui.Separator();
@@ -59,28 +66,29 @@ internal class MainMenuBar : IMainMenuBar
         ImGui.EndMenu();
     }
 
-    private static void ShowPlayerMenu()
+    private void ShowPlayerMenu()
     {
         if (!ImGui.BeginMenu("Player")) return;
 
-        // ImGui.MenuItem("Freecam", "T", ref PlayerControllerOld.Instance.IsFreecamMovement);
+        if(ImGui.MenuItem("Freecam", "T", _playerController.IsFreecam)) _playerController.IsFreecam = !_playerController.IsFreecam;
+        if (ImGui.MenuItem("Respawn", "R", _playerController.IsFreecam)) _playerController.SetPosition(_playerController.SpawnPosition);
 
         ImGui.EndMenu();
     }
 
-    private static void ShowWorldMenu()
+    private void ShowWorldMenu()
     {
         if (!ImGui.BeginMenu("World")) return;
 
         if (ImGui.BeginMenu("Mesher"))
         {
-            if (ImGui.MenuItem("Generate AOs", null, ref Renderer.IsGeneratingAOs)) WorldManager.Instance.UpdateChunksMeshes();
+            if (ImGui.MenuItem("Generate AOs", null, ref _renderConfig.IsGeneratingAOs)) WorldManager.Instance.UpdateChunksMeshes();
             ImGui.Separator();
-            if (ImGui.MenuItem("Greedy", null, ref Mesh.IsUsingGreedyMeshing)) WorldManager.Instance.UpdateChunksMeshes();
-            bool notGreedy = !Mesh.IsUsingGreedyMeshing;
+            if (ImGui.MenuItem("Greedy", null, ref _renderConfig.IsUsingGreedyMeshing)) WorldManager.Instance.UpdateChunksMeshes();
+            bool notGreedy = !_renderConfig.IsUsingGreedyMeshing;
             if (ImGui.MenuItem("Culled", null, ref notGreedy))
             {
-                Mesh.IsUsingGreedyMeshing = !Mesh.IsUsingGreedyMeshing;
+                _renderConfig.IsUsingGreedyMeshing = !_renderConfig.IsUsingGreedyMeshing;
                 WorldManager.Instance.UpdateChunksMeshes();
             }
             ImGui.EndMenu();
