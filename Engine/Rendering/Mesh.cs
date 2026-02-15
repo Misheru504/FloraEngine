@@ -1,4 +1,4 @@
-﻿using FloraEngine.Core.Components;
+﻿using FloraEngine.Core;
 using FloraEngine.Rendering.Meshing;
 using FloraEngine.World;
 using Silk.NET.OpenGL;

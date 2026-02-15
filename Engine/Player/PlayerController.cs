@@ -1,5 +1,4 @@
 ﻿using FloraEngine.Core;
-using FloraEngine.Core.Components;
 using FloraEngine.Physics;
 using Silk.NET.Input;
 using System.Numerics;

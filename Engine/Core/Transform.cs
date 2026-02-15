@@ -1,6 +1,6 @@
 using System.Numerics;
 
-namespace FloraEngine.Core.Components;
+namespace FloraEngine.Core;
 
 public class Transform
 {

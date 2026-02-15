@@ -3,7 +3,6 @@ using System.Numerics;
 using FloraEngine.Core.Noise;
 using FloraEngine.Core.Data;
 using FloraEngine.Core;
-using FloraEngine.Core.Components;
 using FloraEngine.Core.Logging;
 
 namespace FloraEngine.World;

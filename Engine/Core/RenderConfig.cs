@@ -1,4 +1,4 @@
-﻿namespace FloraEngine.Core.Components;
+﻿namespace FloraEngine.Core;
 
 public enum RenderMode
 {

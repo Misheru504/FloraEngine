@@ -1,5 +1,4 @@
 ﻿using FloraEngine.Core;
-using FloraEngine.Core.Components;
 using System.Numerics;
 
 namespace FloraEngine.Rendering;

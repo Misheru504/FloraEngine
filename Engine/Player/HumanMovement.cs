@@ -2,7 +2,6 @@
 using System.Numerics;
 using FloraEngine.Physics;
 using FloraEngine.Core;
-using FloraEngine.Core.Components;
 
 namespace FloraEngine.Player;
 

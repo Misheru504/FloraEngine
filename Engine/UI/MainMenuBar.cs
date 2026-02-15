@@ -1,4 +1,4 @@
-﻿using FloraEngine.Core.Components;
+﻿using FloraEngine.Core;
 using FloraEngine.Core.Logging;
 using ImGuiNET;
 using Silk.NET.OpenGL;
