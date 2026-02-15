@@ -19,20 +19,10 @@ internal class Voxel
 
     public VoxelData GetDefaultData()
     {
-        return new VoxelData(ID, "");
+        return new VoxelData(ID, 0);
     }
 
-    public static Voxel GetVoxelByID(ushort id)
-    {
-        int indice = 0;
-
-        while (Voxels[indice].ID != id && indice < Voxels.Count - 1)
-            indice++;
-
-        Voxel voxel = Voxels[indice].ID == id ? Voxels[indice] : AIR;
-
-        return voxel;
-    }
+    public static Voxel GetVoxelByID(ushort id) => Voxels[id];
 
     public static Voxel AIR = new Voxel(0, "air", false);
     public static Voxel GRASS = new Voxel(1, "grass", true);

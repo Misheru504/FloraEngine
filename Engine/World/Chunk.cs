@@ -9,8 +9,6 @@ public class Chunk : IDisposable
 {
     public const int VOLUME = WorldConstants.CHUNK_SIZE * WorldConstants.CHUNK_SIZE * WorldConstants.CHUNK_SIZE;
 
-    private static FastNoise Noise = null!;
-
     public Vector3 Position { get; }
     public byte LodLevel { get; }
     public int Scale { get; }
@@ -19,9 +17,8 @@ public class Chunk : IDisposable
 
     private readonly VoxelData[] voxels;
 
-    public Chunk(Vector3 position, byte level, FastNoise noise)
+    public Chunk(Vector3 position, byte level)
     {
-        Noise ??= noise;
         Position = position;
         LodLevel = level;
         Scale = 1 << LodLevel;
@@ -40,10 +37,10 @@ public class Chunk : IDisposable
         voxels = data.voxels;
     }
 
-    public void CreateTerrain()
+    public void CreateTerrain(FastNoise noise)
     {
         float[] noiseMap = new float[WorldSize * WorldSize];
-        Noise.GenUniformGrid2D(noiseMap, (int)Position.X, (int)Position.Z, WorldSize, WorldSize, FastNoise.FREQUENCY, Noise.Seed);
+        noise.GenUniformGrid2D(noiseMap, (int)Position.X, (int)Position.Z, WorldSize, WorldSize, FastNoise.FREQUENCY, noise.Seed);
 
         for (int x = 0; x < WorldConstants.CHUNK_SIZE; x++)
         {
@@ -73,17 +70,17 @@ public class Chunk : IDisposable
             }
         }
 
-        CreateFeatures();
+        CreateFeatures(noise);
     }
-    private void CreateFeatures()
+    private void CreateFeatures(FastNoise noise)
     {
         // TODO: TERRAIN FEATURES
     }
 
-    public void UpdateMesh()
+    public void UpdateMesh(WorldManager worldManager)
     {
         Mesh?.Dispose();
-        Mesh = new Mesh(this);
+        Mesh = new Mesh(this, worldManager);
     }
 
     public void UpdateBuffers()

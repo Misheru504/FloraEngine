@@ -31,13 +31,13 @@ public class Mesh : IDisposable
     /// Creates a new mesh for a chunk
     /// </summary>
     /// <param name="currentChunk">Chunk to mesh</param>
-    public Mesh(Chunk currentChunk)
+    public Mesh(Chunk currentChunk, WorldManager worldManager)
     {
         List<float> vertices = new List<float>();
         List<uint> indices = new List<uint>();
 
-        if(RenderConfig.IsUsingGreedyMeshing) GreedyMesher.CreateGreedyMesh(currentChunk, vertices, indices, RenderConfig);
-        else CulledMesher.CreateCulledMesh(currentChunk, vertices, indices, RenderConfig);
+        if(RenderConfig.IsUsingGreedyMeshing) GreedyMesher.CreateGreedyMesh(worldManager, currentChunk, vertices, indices, RenderConfig);
+        else CulledMesher.CreateCulledMesh(worldManager, currentChunk, vertices, indices, RenderConfig);
 
         VertexCount = vertices.Count / Renderer.VertexStride;
         IndexCount = (uint)indices.Count;

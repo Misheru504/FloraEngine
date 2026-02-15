@@ -147,6 +147,8 @@ public unsafe class Renderer : IDisposable
 
     internal void Draw()
     {
+        _graphics.PolygonMode(GLEnum.FrontAndBack, _renderConfig.IsWireframe ? GLEnum.Line : GLEnum.Fill);
+
         shader.UseProgram();
         atlas.Bind();
 

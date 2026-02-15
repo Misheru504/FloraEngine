@@ -17,7 +17,7 @@ Engine
 ├── Core
 ├── Diagnostics -> Dépend de Core
 ├── Physics -> Dépend de Core et World
-├── World -> Dépend de Core
+├── World -> Dépend de Core et Rendering
 ├── Rendering -> Dépend de Core et World
 ├── Player -> Dépend de Core et Physics
 └── UI -> Dépend de Core et Diagnostics

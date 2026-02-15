@@ -3,24 +3,19 @@
 [Serializable]
 public struct VoxelData
 {
-    public ushort id;
-    public string data;
+    public ushort Id { get; }
+    public byte Data { get; set; }
 
     public VoxelData()
     {
-        id = 0;
-        data = "";
+        Id = 0;
+        Data = 0;
     }
 
-    public VoxelData(ushort id, string data)
+    public VoxelData(ushort id, byte data)
     {
-        this.id = id;
-        this.data = data;
-    }
-
-    public void SetData(string data)
-    {
-        this.data = data;
+        Id = id;
+        Data = data;
     }
 }
 

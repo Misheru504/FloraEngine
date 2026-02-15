@@ -60,10 +60,12 @@ public class Game
 
         RenderConfig renderConfig = new RenderConfig()
         {
-            RenderMode = RenderMode.Default,
-            IsUsingGreedyMeshing = true,
             IsGeneratingAOs = true,
-            VertexCount = 0
+            IsUsingGreedyMeshing = true,
+            IsWireframe = false,
+            IsFreecam = false,
+            VertexCount = 0,
+            RenderMode = RenderMode.Default
         };
 
         _diagnosticsData = new DiagnosticsData()
@@ -76,7 +78,7 @@ public class Game
         _worldManager.LoadWorld(new WorldData { name = "DevWorld", seed = 1444320271, chunks = [] });
 
         _camera = new Camera(transform);
-        _playerController = new PlayerController(_inputManager, inputContext.Mice[0], transform, _diagnosticsData);
+        _playerController = new PlayerController(_inputManager, inputContext.Mice[0], transform, _diagnosticsData, _worldManager);
 
         _renderer = new Renderer(_graphics, renderConfig, _camera, _worldManager);
         _profiler = new Profiler(_diagnosticsData);
@@ -85,11 +87,7 @@ public class Game
         _windowManager = new WindowManager();
         _overlayManager = new OverlayManager();
         _overlayManager.AddWindow(new MainOverlay(_diagnosticsData));
-        _mainMenuBar = new MainMenuBar(_graphics, _windowManager, _overlayManager, renderConfig, _diagnosticsData, _worldManager.UpdateChunksMeshes, _worldManager.SaveActiveWorld, _playerController.SetPosition);
-    
-        CulledMesher.WorldManager = _worldManager;
-        GreedyMesher.WorldManager = _worldManager;
-        Rigidbody.WorldManager = _worldManager;
+        _mainMenuBar = new MainMenuBar(_windowManager, _overlayManager, renderConfig, _diagnosticsData, _worldManager.UpdateChunksMeshes, _worldManager.SaveActiveWorld, _playerController.SetPosition);
     }
 
     public void Update(double deltaTime)

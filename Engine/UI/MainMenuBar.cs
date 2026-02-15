@@ -1,7 +1,6 @@
 ﻿using FloraEngine.Core;
 using FloraEngine.Core.Logging;
 using ImGuiNET;
-using Silk.NET.OpenGL;
 using System.Numerics;
 
 namespace FloraEngine.UI;
@@ -12,13 +11,11 @@ internal class MainMenuBar : IMainMenuBar
     private readonly OverlayManager _overlayManager;
     private readonly RenderConfig _renderConfig;
     private readonly DiagnosticsData _diagnosticsData;
-    private readonly GL _graphics;
     private readonly Action _refreshChunks, _saveWorld;
     private readonly Action<Vector3> _resetPlayer;
 
-    public MainMenuBar(GL graphics, WindowManager windowManager, OverlayManager overlayManager, RenderConfig renderConfig, DiagnosticsData diagnosticsData, Action refreshChunks, Action saveWorld, Action<Vector3> resetPlayer)
+    public MainMenuBar(WindowManager windowManager, OverlayManager overlayManager, RenderConfig renderConfig, DiagnosticsData diagnosticsData, Action refreshChunks, Action saveWorld, Action<Vector3> resetPlayer)
     {
-        _graphics = graphics;
         _windowManager = windowManager;
         _overlayManager = overlayManager;
         _renderConfig = renderConfig;
@@ -70,7 +67,6 @@ internal class MainMenuBar : IMainMenuBar
         if (ImGui.MenuItem("Wireframe view", null, ref isWireframe))
         {
             _renderConfig.IsWireframe = isWireframe;
-            _graphics.PolygonMode(GLEnum.FrontAndBack, _renderConfig.IsWireframe ? GLEnum.Line : GLEnum.Fill);
         }
         if (ImGui.BeginMenu("Rendering mode"))
         {

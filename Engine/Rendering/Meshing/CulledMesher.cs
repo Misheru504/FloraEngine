@@ -6,9 +6,7 @@ namespace FloraEngine.Rendering.Meshing;
 
 public static class CulledMesher
 {
-    public static WorldManager WorldManager { get; set; } = null!;
-
-    internal static void CreateCulledMesh(Chunk currentChunk, List<float> vertices, List<uint> indices, RenderConfig config)
+    internal static void CreateCulledMesh(WorldManager worldManager, Chunk currentChunk, List<float> vertices, List<uint> indices, RenderConfig config)
     {
         uint vertexOffset = 0;
         int sideSize = WorldConstants.CHUNK_SIZE;
@@ -19,16 +17,16 @@ public static class CulledMesher
             {
                 for (int z = 0; z < sideSize; z++)
                 {
-                    if (currentChunk.GetVoxelAt(x, y, z).id == Voxel.AIR.ID) continue;
-                    Voxel v = Voxel.GetVoxelByID(currentChunk.GetVoxelAt(x, y, z).id);
+                    if (currentChunk.GetVoxelAt(x, y, z).Id == Voxel.AIR.ID) continue;
+                    Voxel v = Voxel.GetVoxelByID(currentChunk.GetVoxelAt(x, y, z).Id);
 
-                    if (IsFaceVisible(currentChunk, x, y - 1, z))
+                    if (IsFaceVisible(worldManager, currentChunk, x, y - 1, z))
                     {
                         float[] aos = [
-                            ComputeVertexAO(!IsFaceVisible(currentChunk, x+1, y-1, z), !IsFaceVisible(currentChunk, x, y-1, z+1), !IsFaceVisible(currentChunk, x+1, y-1, z+1)),
-                            ComputeVertexAO(!IsFaceVisible(currentChunk, x+1, y-1, z), !IsFaceVisible(currentChunk, x, y-1, z-1), !IsFaceVisible(currentChunk, x+1, y-1, z-1)),
-                            ComputeVertexAO(!IsFaceVisible(currentChunk, x-1, y-1, z), !IsFaceVisible(currentChunk, x, y-1, z-1), !IsFaceVisible(currentChunk, x-1, y-1, z-1)),
-                            ComputeVertexAO(!IsFaceVisible(currentChunk, x-1, y-1, z), !IsFaceVisible(currentChunk, x, y-1, z+1), !IsFaceVisible(currentChunk, x-1, y-1, z+1))
+                            ComputeVertexAO(!IsFaceVisible(worldManager, currentChunk, x+1, y-1, z), !IsFaceVisible(worldManager, currentChunk, x, y-1, z+1), !IsFaceVisible(worldManager, currentChunk, x+1, y-1, z+1)),
+                            ComputeVertexAO(!IsFaceVisible(worldManager, currentChunk, x+1, y-1, z), !IsFaceVisible(worldManager, currentChunk, x, y-1, z-1), !IsFaceVisible(worldManager, currentChunk, x+1, y-1, z-1)),
+                            ComputeVertexAO(!IsFaceVisible(worldManager, currentChunk, x-1, y-1, z), !IsFaceVisible(worldManager, currentChunk, x, y-1, z-1), !IsFaceVisible(worldManager, currentChunk, x-1, y-1, z-1)),
+                            ComputeVertexAO(!IsFaceVisible(worldManager, currentChunk, x-1, y-1, z), !IsFaceVisible(worldManager, currentChunk, x, y-1, z+1), !IsFaceVisible(worldManager, currentChunk, x-1, y-1, z+1))
                         ];
 
                         if (!config.IsGeneratingAOs)
@@ -49,13 +47,13 @@ public static class CulledMesher
 
                         AddIndices(indices, ref vertexOffset, aos[0] + aos[2] > aos[1] + aos[3]);
                     }
-                    if (IsFaceVisible(currentChunk, x, y + 1, z))
+                    if (IsFaceVisible(worldManager, currentChunk, x, y + 1, z))
                     {
                         float[] aos = [
-                            ComputeVertexAO(!IsFaceVisible(currentChunk, x-1, y+1, z), !IsFaceVisible(currentChunk, x, y+1, z+1), !IsFaceVisible(currentChunk, x-1, y+1, z+1)),
-                            ComputeVertexAO(!IsFaceVisible(currentChunk, x-1, y+1, z), !IsFaceVisible(currentChunk, x, y+1, z-1), !IsFaceVisible(currentChunk, x-1, y+1, z-1)),
-                            ComputeVertexAO(!IsFaceVisible(currentChunk, x+1, y+1, z), !IsFaceVisible(currentChunk, x, y+1, z-1), !IsFaceVisible(currentChunk, x+1, y+1, z-1)),
-                            ComputeVertexAO(!IsFaceVisible(currentChunk, x+1, y+1, z), !IsFaceVisible(currentChunk, x, y+1, z+1), !IsFaceVisible(currentChunk, x+1, y+1, z+1))
+                            ComputeVertexAO(!IsFaceVisible(worldManager, currentChunk, x-1, y+1, z), !IsFaceVisible(worldManager, currentChunk, x, y+1, z+1), !IsFaceVisible(worldManager, currentChunk, x-1, y+1, z+1)),
+                            ComputeVertexAO(!IsFaceVisible(worldManager, currentChunk, x-1, y+1, z), !IsFaceVisible(worldManager, currentChunk, x, y+1, z-1), !IsFaceVisible(worldManager, currentChunk, x-1, y+1, z-1)),
+                            ComputeVertexAO(!IsFaceVisible(worldManager, currentChunk, x+1, y+1, z), !IsFaceVisible(worldManager,   currentChunk, x, y+1, z-1), !IsFaceVisible(worldManager, currentChunk, x+1, y+1, z-1)),
+                            ComputeVertexAO(!IsFaceVisible(worldManager, currentChunk, x+1, y+1, z), !IsFaceVisible(worldManager, currentChunk, x, y+1, z+1), !IsFaceVisible(worldManager, currentChunk, x+1, y+1, z+1))
                         ];
 
                         if (!config.IsGeneratingAOs)
@@ -76,13 +74,13 @@ public static class CulledMesher
 
                         AddIndices(indices, ref vertexOffset, aos[0] + aos[2] > aos[1] + aos[3]);
                     }
-                    if (IsFaceVisible(currentChunk, x - 1, y, z))
+                    if (IsFaceVisible(worldManager, currentChunk, x - 1, y, z))
                     {
                         float[] aos = [
-                            ComputeVertexAO(!IsFaceVisible(currentChunk, x-1, y-1, z), !IsFaceVisible(currentChunk, x-1, y, z+1), !IsFaceVisible(currentChunk, x-1, y-1, z+1)),
-                            ComputeVertexAO(!IsFaceVisible(currentChunk, x-1, y-1, z), !IsFaceVisible(currentChunk, x-1, y, z-1), !IsFaceVisible(currentChunk, x-1, y-1, z-1)),
-                            ComputeVertexAO(!IsFaceVisible(currentChunk, x-1, y+1, z), !IsFaceVisible(currentChunk, x-1, y, z-1), !IsFaceVisible(currentChunk, x-1, y+1, z-1)),
-                            ComputeVertexAO(!IsFaceVisible(currentChunk, x-1, y+1, z), !IsFaceVisible(currentChunk, x-1, y, z+1), !IsFaceVisible(currentChunk, x-1, y+1, z+1))
+                            ComputeVertexAO(!IsFaceVisible(worldManager, currentChunk, x-1, y-1, z), !IsFaceVisible(worldManager, currentChunk, x-1, y, z+1), !IsFaceVisible(worldManager, currentChunk, x-1, y-1, z+1)),
+                            ComputeVertexAO(!IsFaceVisible(worldManager, currentChunk, x-1, y-1, z), !IsFaceVisible(worldManager, currentChunk, x-1, y, z-1), !IsFaceVisible(worldManager, currentChunk, x-1, y-1, z-1)),
+                            ComputeVertexAO(!IsFaceVisible(worldManager, currentChunk, x-1, y+1, z), !IsFaceVisible(worldManager, currentChunk, x-1, y, z-1), !IsFaceVisible(worldManager, currentChunk, x-1, y+1, z-1)),
+                            ComputeVertexAO(!IsFaceVisible(worldManager, currentChunk, x-1, y+1, z), !IsFaceVisible(worldManager, currentChunk, x-1, y, z+1), !IsFaceVisible(worldManager, currentChunk, x-1, y+1, z+1))
                         ];
 
                         if (!config.IsGeneratingAOs)
@@ -103,13 +101,13 @@ public static class CulledMesher
 
                         AddIndices(indices, ref vertexOffset, aos[0] + aos[2] > aos[1] + aos[3]);
                     }
-                    if (IsFaceVisible(currentChunk, x + 1, y, z))
+                    if (IsFaceVisible(worldManager, currentChunk, x + 1, y, z))
                     {
                         float[] aos = [
-                            ComputeVertexAO(!IsFaceVisible(currentChunk, x+1, y-1, z), !IsFaceVisible(currentChunk, x+1, y, z-1), !IsFaceVisible(currentChunk, x+1, y-1, z-1)),
-                            ComputeVertexAO(!IsFaceVisible(currentChunk, x+1, y-1, z), !IsFaceVisible(currentChunk, x+1, y, z+1), !IsFaceVisible(currentChunk, x+1, y-1, z+1)),
-                            ComputeVertexAO(!IsFaceVisible(currentChunk, x+1, y+1, z), !IsFaceVisible(currentChunk, x+1, y, z+1), !IsFaceVisible(currentChunk, x+1, y+1, z+1)),
-                            ComputeVertexAO(!IsFaceVisible(currentChunk, x+1, y+1, z), !IsFaceVisible(currentChunk, x+1, y, z-1), !IsFaceVisible(currentChunk, x+1, y+1, z-1))
+                            ComputeVertexAO(!IsFaceVisible(worldManager, currentChunk, x+1, y-1, z), !IsFaceVisible(worldManager, currentChunk, x+1, y, z-1), !IsFaceVisible(worldManager, currentChunk, x+1, y-1, z-1)),
+                            ComputeVertexAO(!IsFaceVisible(worldManager, currentChunk, x+1, y-1, z), !IsFaceVisible(worldManager, currentChunk, x+1, y, z+1), !IsFaceVisible(worldManager, currentChunk, x+1, y-1, z+1)),
+                            ComputeVertexAO(!IsFaceVisible(worldManager, currentChunk, x+1, y+1, z), !IsFaceVisible(worldManager, currentChunk, x+1, y, z+1), !IsFaceVisible(worldManager, currentChunk, x+1, y+1, z+1)),
+                            ComputeVertexAO(!IsFaceVisible(worldManager, currentChunk, x+1, y+1, z), !IsFaceVisible(worldManager, currentChunk, x+1, y, z-1), !IsFaceVisible(worldManager, currentChunk, x+1, y+1, z-1))
                         ];
 
                         if (!config.IsGeneratingAOs)
@@ -130,13 +128,13 @@ public static class CulledMesher
 
                         AddIndices(indices, ref vertexOffset, aos[0] + aos[2] > aos[1] + aos[3]);
                     }
-                    if (IsFaceVisible(currentChunk, x, y, z + 1))
+                    if (IsFaceVisible(worldManager, currentChunk, x, y, z + 1))
                     {
                         float[] aos = [
-                            ComputeVertexAO(!IsFaceVisible(currentChunk, x+1, y, z+1), !IsFaceVisible(currentChunk, x, y-1, z+1), !IsFaceVisible(currentChunk, x+1, y-1, z+1)),
-                            ComputeVertexAO(!IsFaceVisible(currentChunk, x-1, y, z+1), !IsFaceVisible(currentChunk, x, y-1, z+1), !IsFaceVisible(currentChunk, x-1, y-1, z+1)),
-                            ComputeVertexAO(!IsFaceVisible(currentChunk, x-1, y, z+1), !IsFaceVisible(currentChunk, x, y+1, z+1), !IsFaceVisible(currentChunk, x-1, y+1, z+1)),
-                            ComputeVertexAO(!IsFaceVisible(currentChunk, x+1, y, z+1), !IsFaceVisible(currentChunk, x, y+1, z+1), !IsFaceVisible(currentChunk, x+1, y+1, z+1))
+                            ComputeVertexAO(!IsFaceVisible(worldManager, currentChunk, x+1, y, z+1), !IsFaceVisible(worldManager, currentChunk, x, y-1, z+1), !IsFaceVisible(worldManager, currentChunk, x+1, y-1, z+1)),
+                            ComputeVertexAO(!IsFaceVisible(worldManager, currentChunk, x-1, y, z+1), !IsFaceVisible(worldManager, currentChunk, x, y-1, z+1), !IsFaceVisible(worldManager, currentChunk, x-1, y-1, z+1)),
+                            ComputeVertexAO(!IsFaceVisible(worldManager, currentChunk, x-1, y, z+1), !IsFaceVisible(worldManager, currentChunk, x, y+1, z+1), !IsFaceVisible(worldManager, currentChunk, x-1, y+1, z+1)),
+                            ComputeVertexAO(!IsFaceVisible(worldManager, currentChunk, x+1, y, z+1), !IsFaceVisible(worldManager, currentChunk, x, y+1, z+1), !IsFaceVisible(worldManager, currentChunk, x+1, y+1, z+1))
                         ];
 
                         if (!config.IsGeneratingAOs)
@@ -157,13 +155,13 @@ public static class CulledMesher
 
                         AddIndices(indices, ref vertexOffset, aos[0] + aos[2] > aos[1] + aos[3]);
                     }
-                    if (IsFaceVisible(currentChunk, x, y, z - 1))
+                    if (IsFaceVisible(worldManager, currentChunk, x, y, z - 1))
                     {
                         float[] aos = [
-                            ComputeVertexAO(!IsFaceVisible(currentChunk, x-1, y, z-1), !IsFaceVisible(currentChunk, x, y-1, z-1), !IsFaceVisible(currentChunk, x-1, y-1, z-1)),
-                            ComputeVertexAO(!IsFaceVisible(currentChunk, x+1, y, z-1), !IsFaceVisible(currentChunk, x, y-1, z-1), !IsFaceVisible(currentChunk, x+1, y-1, z-1)),
-                            ComputeVertexAO(!IsFaceVisible(currentChunk, x+1, y, z-1), !IsFaceVisible(currentChunk, x, y+1, z-1), !IsFaceVisible(currentChunk, x+1, y+1, z-1)),
-                            ComputeVertexAO(!IsFaceVisible(currentChunk, x-1, y, z-1), !IsFaceVisible(currentChunk, x, y+1, z-1), !IsFaceVisible(currentChunk, x-1, y+1, z-1))
+                            ComputeVertexAO(!IsFaceVisible(worldManager, currentChunk, x-1, y, z-1), !IsFaceVisible(worldManager, currentChunk, x, y-1, z-1), !IsFaceVisible(worldManager, currentChunk, x-1, y-1, z-1)),
+                            ComputeVertexAO(!IsFaceVisible(worldManager, currentChunk, x+1, y, z-1), !IsFaceVisible(worldManager, currentChunk, x, y-1, z-1), !IsFaceVisible(worldManager, currentChunk, x+1, y-1, z-1)),
+                            ComputeVertexAO(!IsFaceVisible(worldManager, currentChunk, x+1, y, z-1), !IsFaceVisible(worldManager, currentChunk, x, y+1, z-1), !IsFaceVisible(worldManager, currentChunk, x+1, y+1, z-1)),
+                            ComputeVertexAO(!IsFaceVisible(worldManager, currentChunk, x-1, y, z-1), !IsFaceVisible(worldManager, currentChunk, x, y+1, z-1), !IsFaceVisible(worldManager, currentChunk, x-1, y+1, z-1))
                         ];
 
                         if (!config.IsGeneratingAOs)
@@ -217,24 +215,24 @@ public static class CulledMesher
         indices.AddRange(indicesToAdd);
     }
 
-    private static bool TryGetVoxelOut(Chunk currentChunk, int voxelX, int voxelY, int voxelZ, out ushort voxel)
+    private static bool TryGetVoxelOut(WorldManager worldManager, Chunk currentChunk, int voxelX, int voxelY, int voxelZ, out ushort voxel)
     {
         if (voxelX < 0 || voxelX >= WorldConstants.CHUNK_SIZE || voxelY < 0 || voxelY >= WorldConstants.CHUNK_SIZE || voxelZ < 0 || voxelZ >= WorldConstants.CHUNK_SIZE)
         {
             // Voxel out of bounds
             Vector3 voxelPos = new Vector3(voxelX, voxelY, voxelZ);
             Vector3 worldTilePos = currentChunk.Position + voxelPos * currentChunk.Scale;
-            voxel = WorldManager.GetVoxelIdAtWorldPos((int)worldTilePos.X, (int)worldTilePos.Y, (int)worldTilePos.Z, currentChunk.LodLevel);
+            voxel = worldManager.GetVoxelIdAtWorldPos((int)worldTilePos.X, (int)worldTilePos.Y, (int)worldTilePos.Z, currentChunk.LodLevel);
             return true;
         }
 
-        voxel = currentChunk.GetVoxelAt(voxelX, voxelY, voxelZ).id;
+        voxel = currentChunk.GetVoxelAt(voxelX, voxelY, voxelZ).Id;
         return false;
     }
 
-    private static bool IsFaceVisible(Chunk currentChunk, int voxelX, int voxelY, int voxelZ)
+    private static bool IsFaceVisible(WorldManager worldManager, Chunk currentChunk, int voxelX, int voxelY, int voxelZ)
     {
-        TryGetVoxelOut(currentChunk, voxelX, voxelY, voxelZ, out ushort voxel);
+        TryGetVoxelOut(worldManager, currentChunk, voxelX, voxelY, voxelZ, out ushort voxel);
         return voxel == Voxel.AIR.ID;
     }
 

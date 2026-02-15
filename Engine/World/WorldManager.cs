@@ -11,12 +11,11 @@ public class WorldManager : IDisposable
 {
     private readonly DiagnosticsData _diagnosticsData;
     private readonly Transform _transform;
+    private int MaxLOD = 0;
+    private int RenderDistance = 5;
 
     private Vector3 CenterPos => _transform.ChunkPos;
-
-    public int MaxLOD = 0;
-    public int RenderDistance = 5;
-    public bool IsWorldLoaded => World != null;
+    private bool IsWorldLoaded => World != null;
     public World? World { get; private set; }
 
     #region Multi-threading
@@ -117,8 +116,8 @@ public class WorldManager : IDisposable
                         continue;
                     }
 
-                    Chunk chunk = new Chunk(chunkPos, 0, Noise);
-                    chunk.CreateTerrain();
+                    Chunk chunk = new Chunk(chunkPos, 0);
+                    chunk.CreateTerrain(Noise);
 
                     _chunksToMesh.Enqueue(chunk);
                 }
@@ -151,7 +150,7 @@ public class WorldManager : IDisposable
                         continue;
                     }
 
-                    chunk.UpdateMesh();
+                    chunk.UpdateMesh(this);
 
                     _chunksReadyForBuffers.Enqueue(chunk);
                 }
@@ -242,6 +241,8 @@ public class WorldManager : IDisposable
     {
         if (!IsWorldLoaded) return Voxel.AIR.ID;
 
+        const bool DO_CHUNK_NEIGHBORING = true; // True uses less memory, but have some visual artifacts (especially underground) / False uses more memory, but better visuals
+
         int scale = 1 << lodLevel;
         int chunkSize = WorldConstants.CHUNK_SIZE * (1 << lodLevel);
 
@@ -249,17 +250,17 @@ public class WorldManager : IDisposable
         Vector3 localTilePos = MathUtils.WorldToTilePosition(worldTilePos / scale);
         Vector3 chunkPos = MathUtils.WorldToChunkCoord(worldTilePos, chunkSize);
 
-        RenderedChunks.TryGetValue(chunkPos, out Chunk? c);
-
-        if (c == null)
+        if (!RenderedChunks.TryGetValue(chunkPos, out Chunk? c))
         {
-            c = new Chunk(chunkPos, lodLevel, Noise);
-            c.CreateTerrain();
+            if (!DO_CHUNK_NEIGHBORING) return Voxel.AIR.ID;
+
+            c = new Chunk(chunkPos, lodLevel);
+            c.CreateTerrain(Noise);
             RenderedChunks[chunkPos] = c;
             _chunksToMesh.Enqueue(c);
         }
         
-        return c.GetVoxelAt((int)localTilePos.X, (int)localTilePos.Y, (int)localTilePos.Z).id;
+        return c.GetVoxelAt((int)localTilePos.X, (int)localTilePos.Y, (int)localTilePos.Z).Id;
     }
 
     public void Dispose()
@@ -283,7 +284,7 @@ public class WorldManager : IDisposable
         {
             if(chunk.Mesh != null)
             {
-                chunk.UpdateMesh();
+                chunk.UpdateMesh(this);
                 chunk.UpdateBuffers();
             }
         }

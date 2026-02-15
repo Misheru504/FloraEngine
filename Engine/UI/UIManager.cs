@@ -19,11 +19,15 @@ public class OverlayManager
 {
     public List<IImGuiOverlay> overlays { get; } = new List<IImGuiOverlay>();
 
-    public void AddWindow(IImGuiOverlay overlay) => overlays.Add(overlay);
+    public void AddWindow(IImGuiOverlay overlay)
+    {
+        overlays.Add(overlay);
+        overlays.OrderBy(ov => ov.ZOrder);
+    }
 
     public void DrawAll(double deltaTime)
     {
-        foreach (IImGuiOverlay overlay in overlays.OrderBy(ov => ov.ZOrder))
+        foreach (IImGuiOverlay overlay in overlays)
         {
             if(overlay.IsEnabled) overlay.Draw(deltaTime);
         }

@@ -17,8 +17,9 @@ public class Profiler
 
     public void Update(double deltaTime)
     {
-        _diagnosticsData.FrameTimeMs = (float) deltaTime * 1000f;
-        _lastFrames[_sampleIndex++ % SAMPLES_NUMBER] = (float) deltaTime;
-        _diagnosticsData.FPS = (int) (1f / _lastFrames.Average());
+        _lastFrames[_sampleIndex % SAMPLES_NUMBER] = (float)deltaTime;
+        _sampleIndex++;
+        int count = Math.Min(_sampleIndex, SAMPLES_NUMBER);
+        _diagnosticsData.FPS = (int)(1f / _lastFrames.Take(count).Average());
     }
 }

@@ -6,7 +6,7 @@ namespace FloraEngine.Physics;
 public class Rigidbody
 {
     private static readonly Vector3 Gravity = new Vector3(0, -20f, 0);
-    public static WorldManager WorldManager { get; set; } = null!;
+    private readonly WorldManager _worldManager = null!;
 
     public Vector3 Position { get; set; }
 
@@ -20,8 +20,9 @@ public class Rigidbody
     public Vector3 Size { get; set; }
     public bool IsGrounded { get; private set; }
 
-    public Rigidbody(Vector3 position, float mass, Vector3 size)
+    public Rigidbody(WorldManager worldManager, Vector3 position, float mass, Vector3 size)
     {
+        _worldManager = worldManager;
         Position = position;
         Velocity = Vector3.Zero;
         Acceleration = Vector3.Zero;
@@ -97,7 +98,7 @@ public class Rigidbody
             for (int y = minY; y <= maxY; y++)
                 for (int z = minZ; z <= maxZ; z++)
                 {
-                    if (Voxel.GetVoxelByID(WorldManager.GetVoxelIdAtWorldPos(x, y, z, 0)).IsSolid)
+                    if (Voxel.GetVoxelByID(_worldManager.GetVoxelIdAtWorldPos(x, y, z, 0)).IsSolid)
                         return true;
                 }
 

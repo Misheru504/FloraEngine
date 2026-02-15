@@ -6,7 +6,6 @@ namespace FloraEngine.Rendering.Meshing;
 
 public static class GreedyMesher
 {
-    public static WorldManager WorldManager { get; set; } = null!;
     enum Face
     {
         Left,
@@ -65,7 +64,7 @@ public static class GreedyMesher
         };
     }
 
-    internal static void CreateGreedyMesh(Chunk currentChunk, List<float> vertices, List<uint> indices, RenderConfig config)
+    internal static void CreateGreedyMesh(WorldManager worldManager, Chunk currentChunk, List<float> vertices, List<uint> indices, RenderConfig config)
     {
         uint vertexOffset = 0;
 
@@ -106,11 +105,11 @@ public static class GreedyMesher
                             Vector3 worldVoxelPos = currentChunk.Position + voxelPos * currentChunk.Scale;
                             Vector3 worldComparePos = currentChunk.Position + comparePos * currentChunk.Scale;
 
-                            if (pos[d] >= 0) current = currentChunk.GetVoxelAt(pos[0], pos[1], pos[2]).id;
-                            else current = WorldManager.GetVoxelIdAtWorldPos((int)worldVoxelPos.X, (int)worldVoxelPos.Y, (int)worldVoxelPos.Z, currentChunk.LodLevel);
+                            if (pos[d] >= 0) current = currentChunk.GetVoxelAt(pos[0], pos[1], pos[2]).Id;
+                            else current = worldManager.GetVoxelIdAtWorldPos((int)worldVoxelPos.X, (int)worldVoxelPos.Y, (int)worldVoxelPos.Z, currentChunk.LodLevel);
 
-                            if (pos[d] < WorldConstants.CHUNK_SIZE - 1) compare = currentChunk.GetVoxelAt(pos[0] + q[0], pos[1] + q[1], pos[2] + q[2]).id;
-                            else compare = WorldManager.GetVoxelIdAtWorldPos((int)worldComparePos.X, (int)worldComparePos.Y, (int)worldComparePos.Z, currentChunk.LodLevel);
+                            if (pos[d] < WorldConstants.CHUNK_SIZE - 1) compare = currentChunk.GetVoxelAt(pos[0] + q[0], pos[1] + q[1], pos[2] + q[2]).Id;
+                            else compare = worldManager.GetVoxelIdAtWorldPos((int)worldComparePos.X, (int)worldComparePos.Y, (int)worldComparePos.Z, currentChunk.LodLevel);
 
                             if (b == 0)
                             {
@@ -119,7 +118,7 @@ public static class GreedyMesher
                                     int faceX = pos[0] + q[0];
                                     int faceY = pos[1] + q[1];
                                     int faceZ = pos[2] + q[2];
-                                    float[] aos = ComputeFaceAOs(currentChunk, faceX, faceY, faceZ, face, config.IsGeneratingAOs);
+                                    float[] aos = ComputeFaceAOs(worldManager, currentChunk, faceX, faceY, faceZ, face, config.IsGeneratingAOs);
                                     mask[maskIndex] = new FaceMask { VoxelId = compare, AO0 = aos[0], AO1 = aos[1], AO2 = aos[2], AO3 = aos[3] };
                                 }
                                 else
@@ -129,7 +128,7 @@ public static class GreedyMesher
                             {
                                 if (current != Voxel.AIR.ID && compare == Voxel.AIR.ID)
                                 {
-                                    float[] aos = ComputeFaceAOs(currentChunk, pos[0], pos[1], pos[2], face, config.IsGeneratingAOs);
+                                    float[] aos = ComputeFaceAOs(worldManager, currentChunk, pos[0], pos[1], pos[2], face, config.IsGeneratingAOs);
                                     mask[maskIndex] = new FaceMask { VoxelId = current, AO0 = aos[0], AO1 = aos[1], AO2 = aos[2], AO3 = aos[3] };
                                 }
                                 else
@@ -228,16 +227,16 @@ public static class GreedyMesher
         AddIndices(indices, ref vertexOffset, windingFlip, aoFlip);
     }
 
-    private static bool IsFaceVisible(Chunk currentChunk, int voxelX, int voxelY, int voxelZ)
+    private static bool IsFaceVisible(WorldManager worldManager, Chunk currentChunk, int voxelX, int voxelY, int voxelZ)
     {
         if (voxelX < 0 || voxelX >= WorldConstants.CHUNK_SIZE || voxelY < 0 || voxelY >= WorldConstants.CHUNK_SIZE || voxelZ < 0 || voxelZ >= WorldConstants.CHUNK_SIZE)
         {
             Vector3 voxelPos = new Vector3(voxelX, voxelY, voxelZ);
             Vector3 worldTilePos = currentChunk.Position + voxelPos * currentChunk.Scale;
-            return WorldManager.GetVoxelIdAtWorldPos((int)worldTilePos.X, (int)worldTilePos.Y, (int)worldTilePos.Z, currentChunk.LodLevel) == Voxel.AIR.ID;
+            return worldManager.GetVoxelIdAtWorldPos((int)worldTilePos.X, (int)worldTilePos.Y, (int)worldTilePos.Z, currentChunk.LodLevel) == Voxel.AIR.ID;
         }
 
-        return currentChunk.GetVoxelAt(voxelX, voxelY, voxelZ).id == Voxel.AIR.ID;
+        return currentChunk.GetVoxelAt(voxelX, voxelY, voxelZ).Id == Voxel.AIR.ID;
     }
 
     private static float ComputeVertexAO(bool side1, bool side2, bool corner)
@@ -249,7 +248,7 @@ public static class GreedyMesher
         return ao / 3.0f;
     }
 
-    private static float[] ComputeFaceAOs(Chunk currentChunk, int x, int y, int z, Face face, bool ao)
+    private static float[] ComputeFaceAOs(WorldManager worldManager, Chunk currentChunk, int x, int y, int z, Face face, bool ao)
     {
         if (!ao)
         {
@@ -262,50 +261,50 @@ public static class GreedyMesher
         {
             case Face.Bottom: // -Y, d=1, u=Z, v=X
                 // Vertices: V0(x+1,y,z+1), V1(x,y,z+1), V2(x,y,z), V3(x+1,y,z)
-                aos[0] = ComputeVertexAO(!IsFaceVisible(currentChunk, x + 1, y - 1, z), !IsFaceVisible(currentChunk, x, y - 1, z + 1), !IsFaceVisible(currentChunk, x + 1, y - 1, z + 1));
-                aos[1] = ComputeVertexAO(!IsFaceVisible(currentChunk, x - 1, y - 1, z), !IsFaceVisible(currentChunk, x, y - 1, z + 1), !IsFaceVisible(currentChunk, x - 1, y - 1, z + 1));
-                aos[2] = ComputeVertexAO(!IsFaceVisible(currentChunk, x - 1, y - 1, z), !IsFaceVisible(currentChunk, x, y - 1, z - 1), !IsFaceVisible(currentChunk, x - 1, y - 1, z - 1));
-                aos[3] = ComputeVertexAO(!IsFaceVisible(currentChunk, x + 1, y - 1, z), !IsFaceVisible(currentChunk, x, y - 1, z - 1), !IsFaceVisible(currentChunk, x + 1, y - 1, z - 1));
+                aos[0] = ComputeVertexAO(!IsFaceVisible(worldManager, currentChunk, x + 1, y - 1, z), !IsFaceVisible(worldManager, currentChunk, x, y - 1, z + 1), !IsFaceVisible(worldManager, currentChunk, x + 1, y - 1, z + 1));
+                aos[1] = ComputeVertexAO(!IsFaceVisible(worldManager, currentChunk, x - 1, y - 1, z), !IsFaceVisible(worldManager, currentChunk, x, y - 1, z + 1), !IsFaceVisible(worldManager, currentChunk, x - 1, y - 1, z + 1));
+                aos[2] = ComputeVertexAO(!IsFaceVisible(worldManager, currentChunk, x - 1, y - 1, z), !IsFaceVisible(worldManager, currentChunk, x, y - 1, z - 1), !IsFaceVisible(worldManager, currentChunk, x - 1, y - 1, z - 1));
+                aos[3] = ComputeVertexAO(!IsFaceVisible(worldManager, currentChunk, x + 1, y - 1, z), !IsFaceVisible(worldManager, currentChunk, x, y - 1, z - 1), !IsFaceVisible(worldManager, currentChunk, x + 1, y - 1, z - 1));
                 break;
 
             case Face.Top: // +Y, d=1, u=Z, v=X
                 // Vertices: V0(x+1,y+1,z+1), V1(x,y+1,z+1), V2(x,y+1,z), V3(x+1,y+1,z)
-                aos[0] = ComputeVertexAO(!IsFaceVisible(currentChunk, x + 1, y + 1, z), !IsFaceVisible(currentChunk, x, y + 1, z + 1), !IsFaceVisible(currentChunk, x + 1, y + 1, z + 1));
-                aos[1] = ComputeVertexAO(!IsFaceVisible(currentChunk, x - 1, y + 1, z), !IsFaceVisible(currentChunk, x, y + 1, z + 1), !IsFaceVisible(currentChunk, x - 1, y + 1, z + 1));
-                aos[2] = ComputeVertexAO(!IsFaceVisible(currentChunk, x - 1, y + 1, z), !IsFaceVisible(currentChunk, x, y + 1, z - 1), !IsFaceVisible(currentChunk, x - 1, y + 1, z - 1));
-                aos[3] = ComputeVertexAO(!IsFaceVisible(currentChunk, x + 1, y + 1, z), !IsFaceVisible(currentChunk, x, y + 1, z - 1), !IsFaceVisible(currentChunk, x + 1, y + 1, z - 1));
+                aos[0] = ComputeVertexAO(!IsFaceVisible(worldManager, currentChunk, x + 1, y + 1, z), !IsFaceVisible(worldManager, currentChunk, x, y + 1, z + 1), !IsFaceVisible(worldManager, currentChunk, x + 1, y + 1, z + 1));
+                aos[1] = ComputeVertexAO(!IsFaceVisible(worldManager, currentChunk, x - 1, y + 1, z), !IsFaceVisible(worldManager, currentChunk, x, y + 1, z + 1), !IsFaceVisible(worldManager, currentChunk, x - 1, y + 1, z + 1));
+                aos[2] = ComputeVertexAO(!IsFaceVisible(worldManager, currentChunk, x - 1, y + 1, z), !IsFaceVisible(worldManager, currentChunk, x, y + 1, z - 1), !IsFaceVisible(worldManager, currentChunk, x - 1, y + 1, z - 1));
+                aos[3] = ComputeVertexAO(!IsFaceVisible(worldManager, currentChunk, x + 1, y + 1, z), !IsFaceVisible(worldManager, currentChunk, x, y + 1, z - 1), !IsFaceVisible(worldManager, currentChunk, x + 1, y + 1, z - 1));
                 break;
 
             case Face.Left: // -X, d=0, u=Y, v=Z
                 // Vertices: V0(x,y+1,z+1), V1(x,y+1,z), V2(x,y,z), V3(x,y,z+1)
-                aos[0] = ComputeVertexAO(!IsFaceVisible(currentChunk, x - 1, y + 1, z), !IsFaceVisible(currentChunk, x - 1, y, z + 1), !IsFaceVisible(currentChunk, x - 1, y + 1, z + 1));
-                aos[1] = ComputeVertexAO(!IsFaceVisible(currentChunk, x - 1, y + 1, z), !IsFaceVisible(currentChunk, x - 1, y, z - 1), !IsFaceVisible(currentChunk, x - 1, y + 1, z - 1));
-                aos[2] = ComputeVertexAO(!IsFaceVisible(currentChunk, x - 1, y - 1, z), !IsFaceVisible(currentChunk, x - 1, y, z - 1), !IsFaceVisible(currentChunk, x - 1, y - 1, z - 1));
-                aos[3] = ComputeVertexAO(!IsFaceVisible(currentChunk, x - 1, y - 1, z), !IsFaceVisible(currentChunk, x - 1, y, z + 1), !IsFaceVisible(currentChunk, x - 1, y - 1, z + 1));
+                aos[0] = ComputeVertexAO(!IsFaceVisible(worldManager, currentChunk, x - 1, y + 1, z), !IsFaceVisible(worldManager, currentChunk, x - 1, y, z + 1), !IsFaceVisible(worldManager, currentChunk, x - 1, y + 1, z + 1));
+                aos[1] = ComputeVertexAO(!IsFaceVisible(worldManager, currentChunk, x - 1, y + 1, z), !IsFaceVisible(worldManager, currentChunk, x - 1, y, z - 1), !IsFaceVisible(worldManager, currentChunk, x - 1, y + 1, z - 1));
+                aos[2] = ComputeVertexAO(!IsFaceVisible(worldManager, currentChunk, x - 1, y - 1, z), !IsFaceVisible(worldManager, currentChunk, x - 1, y, z - 1), !IsFaceVisible(worldManager, currentChunk, x - 1, y - 1, z - 1));
+                aos[3] = ComputeVertexAO(!IsFaceVisible(worldManager, currentChunk, x - 1, y - 1, z), !IsFaceVisible(worldManager, currentChunk, x - 1, y, z + 1), !IsFaceVisible(worldManager, currentChunk, x - 1, y - 1, z + 1));
                 break;
 
             case Face.Right: // +X, d=0, u=Y, v=Z
                 // Vertices: V0(x+1,y+1,z+1), V1(x+1,y+1,z), V2(x+1,y,z), V3(x+1,y,z+1)
-                aos[0] = ComputeVertexAO(!IsFaceVisible(currentChunk, x + 1, y + 1, z), !IsFaceVisible(currentChunk, x + 1, y, z + 1), !IsFaceVisible(currentChunk, x + 1, y + 1, z + 1));
-                aos[1] = ComputeVertexAO(!IsFaceVisible(currentChunk, x + 1, y + 1, z), !IsFaceVisible(currentChunk, x + 1, y, z - 1), !IsFaceVisible(currentChunk, x + 1, y + 1, z - 1));
-                aos[2] = ComputeVertexAO(!IsFaceVisible(currentChunk, x + 1, y - 1, z), !IsFaceVisible(currentChunk, x + 1, y, z - 1), !IsFaceVisible(currentChunk, x + 1, y - 1, z - 1));
-                aos[3] = ComputeVertexAO(!IsFaceVisible(currentChunk, x + 1, y - 1, z), !IsFaceVisible(currentChunk, x + 1, y, z + 1), !IsFaceVisible(currentChunk, x + 1, y - 1, z + 1));
+                aos[0] = ComputeVertexAO(!IsFaceVisible(worldManager, currentChunk, x + 1, y + 1, z), !IsFaceVisible(worldManager, currentChunk, x + 1, y, z + 1), !IsFaceVisible(worldManager, currentChunk, x + 1, y + 1, z + 1));
+                aos[1] = ComputeVertexAO(!IsFaceVisible(worldManager, currentChunk, x + 1, y + 1, z), !IsFaceVisible(worldManager, currentChunk, x + 1, y, z - 1), !IsFaceVisible(worldManager, currentChunk, x + 1, y + 1, z - 1));
+                aos[2] = ComputeVertexAO(!IsFaceVisible(worldManager, currentChunk, x + 1, y - 1, z), !IsFaceVisible(worldManager, currentChunk, x + 1, y, z - 1), !IsFaceVisible(worldManager, currentChunk, x + 1, y - 1, z - 1));
+                aos[3] = ComputeVertexAO(!IsFaceVisible(worldManager, currentChunk, x + 1, y - 1, z), !IsFaceVisible(worldManager, currentChunk, x + 1, y, z + 1), !IsFaceVisible(worldManager, currentChunk, x + 1, y - 1, z + 1));
                 break;
 
             case Face.Back: // -Z, d=2, u=X, v=Y
                 // Vertices: V0(x+1,y+1,z), V1(x+1,y,z), V2(x,y,z), V3(x,y+1,z)
-                aos[0] = ComputeVertexAO(!IsFaceVisible(currentChunk, x + 1, y, z - 1), !IsFaceVisible(currentChunk, x, y + 1, z - 1), !IsFaceVisible(currentChunk, x + 1, y + 1, z - 1));
-                aos[1] = ComputeVertexAO(!IsFaceVisible(currentChunk, x + 1, y, z - 1), !IsFaceVisible(currentChunk, x, y - 1, z - 1), !IsFaceVisible(currentChunk, x + 1, y - 1, z - 1));
-                aos[2] = ComputeVertexAO(!IsFaceVisible(currentChunk, x - 1, y, z - 1), !IsFaceVisible(currentChunk, x, y - 1, z - 1), !IsFaceVisible(currentChunk, x - 1, y - 1, z - 1));
-                aos[3] = ComputeVertexAO(!IsFaceVisible(currentChunk, x - 1, y, z - 1), !IsFaceVisible(currentChunk, x, y + 1, z - 1), !IsFaceVisible(currentChunk, x - 1, y + 1, z - 1));
+                aos[0] = ComputeVertexAO(!IsFaceVisible(worldManager, currentChunk, x + 1, y, z - 1), !IsFaceVisible(worldManager, currentChunk, x, y + 1, z - 1), !IsFaceVisible(worldManager, currentChunk, x + 1, y + 1, z - 1));
+                aos[1] = ComputeVertexAO(!IsFaceVisible(worldManager, currentChunk, x + 1, y, z - 1), !IsFaceVisible(worldManager, currentChunk, x, y - 1, z - 1), !IsFaceVisible(worldManager, currentChunk, x + 1, y - 1, z - 1));
+                aos[2] = ComputeVertexAO(!IsFaceVisible(worldManager, currentChunk, x - 1, y, z - 1), !IsFaceVisible(worldManager, currentChunk, x, y - 1, z - 1), !IsFaceVisible(worldManager, currentChunk, x - 1, y - 1, z - 1));
+                aos[3] = ComputeVertexAO(!IsFaceVisible(worldManager, currentChunk, x - 1, y, z - 1), !IsFaceVisible(worldManager, currentChunk, x, y + 1, z - 1), !IsFaceVisible(worldManager, currentChunk, x - 1, y + 1, z - 1));
                 break;
 
             case Face.Front: // +Z, d=2, u=X, v=Y
                 // Vertices: V0(x+1,y+1,z+1), V1(x+1,y,z+1), V2(x,y,z+1), V3(x,y+1,z+1)
-                aos[0] = ComputeVertexAO(!IsFaceVisible(currentChunk, x + 1, y, z + 1), !IsFaceVisible(currentChunk, x, y + 1, z + 1), !IsFaceVisible(currentChunk, x + 1, y + 1, z + 1));
-                aos[1] = ComputeVertexAO(!IsFaceVisible(currentChunk, x + 1, y, z + 1), !IsFaceVisible(currentChunk, x, y - 1, z + 1), !IsFaceVisible(currentChunk, x + 1, y - 1, z + 1));
-                aos[2] = ComputeVertexAO(!IsFaceVisible(currentChunk, x - 1, y, z + 1), !IsFaceVisible(currentChunk, x, y - 1, z + 1), !IsFaceVisible(currentChunk, x - 1, y - 1, z + 1));
-                aos[3] = ComputeVertexAO(!IsFaceVisible(currentChunk, x - 1, y, z + 1), !IsFaceVisible(currentChunk, x, y + 1, z + 1), !IsFaceVisible(currentChunk, x - 1, y + 1, z + 1));
+                aos[0] = ComputeVertexAO(!IsFaceVisible(worldManager, currentChunk, x + 1, y, z + 1), !IsFaceVisible(worldManager, currentChunk, x, y + 1, z + 1), !IsFaceVisible(worldManager, currentChunk, x + 1, y + 1, z + 1));
+                aos[1] = ComputeVertexAO(!IsFaceVisible(worldManager, currentChunk, x + 1, y, z + 1), !IsFaceVisible(worldManager, currentChunk, x, y - 1, z + 1), !IsFaceVisible(worldManager, currentChunk, x + 1, y - 1, z + 1));
+                aos[2] = ComputeVertexAO(!IsFaceVisible(worldManager, currentChunk, x - 1, y, z + 1), !IsFaceVisible(worldManager, currentChunk, x, y - 1, z + 1), !IsFaceVisible(worldManager, currentChunk, x - 1, y - 1, z + 1));
+                aos[3] = ComputeVertexAO(!IsFaceVisible(worldManager, currentChunk, x - 1, y, z + 1), !IsFaceVisible(worldManager, currentChunk, x, y + 1, z + 1), !IsFaceVisible(worldManager, currentChunk, x - 1, y + 1, z + 1));
                 break;
         }
 

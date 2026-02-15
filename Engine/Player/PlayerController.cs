@@ -1,5 +1,6 @@
 ﻿using FloraEngine.Core;
 using FloraEngine.Physics;
+using FloraEngine.World;
 using Silk.NET.Input;
 using System.Numerics;
 
@@ -22,7 +23,7 @@ public class PlayerController
 
     public Vector3 SpawnPosition { get; set; }
 
-    public PlayerController(InputManager inputManager, IMouse mouse, Transform transform, DiagnosticsData diagnosticsData)
+    public PlayerController(InputManager inputManager, IMouse mouse, Transform transform, DiagnosticsData diagnosticsData, WorldManager worldManager)
     {
         Vector3 size = new Vector3(0.7f, 2f, 0.7f);
 
@@ -33,13 +34,13 @@ public class PlayerController
         _cursor.CursorMode = CursorMode.Raw;
         _diagnosticsData = diagnosticsData;
 
-        _rigidbody = new Rigidbody(Vector3.Zero, 1.0f, size);
+        _rigidbody = new Rigidbody(worldManager, Vector3.Zero, 1.0f, size);
         _speed = 5.0f;
 
         _mouse.MouseMove += MouseMove;
         _mouse.Scroll += MouseWheel;
 
-        SpawnPosition = new Vector3(0.5f, 15, 0.5f);
+        SpawnPosition = new Vector3(0.5f, 25, 0.5f);
         SetPosition(SpawnPosition);
         _diagnosticsData.RespawnPosition = SpawnPosition;
 

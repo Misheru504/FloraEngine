@@ -10,6 +10,7 @@ public static class Logger
 
     private static readonly string LogFile = Path.Combine(LOG_FOLDER, $"{DateTime.Now:dd-MM-yyyy_HH-mm}.log");
     private static readonly StringBuilder _logLines = new StringBuilder();
+    private static readonly object _lock = new object();
 
     public static void Info(string message, [CallerFilePath] string filename = "")
         => Log("INFO", message, filename, ConsoleColor.Green);
@@ -31,15 +32,18 @@ public static class Logger
 
     private static void Log(string level, string message, string filename, ConsoleColor consoleColor)
     {
-        filename = Path.GetFileNameWithoutExtension(filename);
+        lock (_lock)
+        {
+            filename = Path.GetFileNameWithoutExtension(filename);
 
-        Console.Write("[ ");
-        Console.ForegroundColor = consoleColor;
-        Console.Write(level);
-        Console.ResetColor();
-        Console.WriteLine($" ] {filename}{(string.IsNullOrWhiteSpace(filename) ? "" : ": ")}{message}");
+            Console.Write("[ ");
+            Console.ForegroundColor = consoleColor;
+            Console.Write(level);
+            Console.ResetColor();
+            Console.WriteLine($" ] {filename}{(string.IsNullOrWhiteSpace(filename) ? "" : ": ")}{message}");
 
-        _logLines.Append($"[ {level} ] {filename}{(string.IsNullOrWhiteSpace(filename) ? "" : ": ")}{message}");
+            _logLines.AppendLine($"[ {level} ] {filename}{(string.IsNullOrWhiteSpace(filename) ? "" : ": ")}{message}");
+        }
     }
 
     public static void SaveLogFile()
