@@ -30,4 +30,4 @@ Engine
 |-----------|----------|------------------------------------------|
 | α-1       | [Pyrite](https://github.com/Misheru504/FloraEngine/releases/tag/alpha1) | Fondations (voir release) |
 | α-2       | [Euclase](https://github.com/Misheru504/FloraEngine/releases/tag/alpha2) | Refactor de la structure |
-| α-3       | [Rutile](https://github.com/Misheru504/FloraEngine/releases/tag/alpha3) | 🤫 |
+| α-3       | [Rutile](https://github.com/Misheru504/FloraEngine/releases/tag/alpha3) | Skybox, cycle jour-nuit, lumières |
