@@ -5,9 +5,10 @@ namespace FloraEngine.Core.Noise;
 public class FastNoise
 {
     private const string FASTNOISE_PATH = "Assets/lib/FastNoise";
+
     public const float FREQUENCY = 0.0005f;
     public const string TREE_METADATA = "GwAkAAIAAAANAAkAAAAAAABACwABAAAAAAAAAAEAAAAAAAAAAAAAgD8AAAAAPwAAAAAAAAAA+kQ=";
-    public int Seed;
+    public int Seed { get; set; }
 
     public struct OutputMinMax
     {

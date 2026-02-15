@@ -1,4 +1,4 @@
-﻿using FloraEngine.Diagnostics;
+﻿using FloraEngine.Core.Logging;
 
 namespace FloraEngine.Core.Data;
 
@@ -22,7 +22,7 @@ public static class TextParser
         }
         catch (Exception e)
         {
-            Logger.Print($"Error when reading the file at {filePath} : {e}", Logger.LogLevel.ERROR);
+            Logger.Error($"Error when reading the file at {filePath} : {e}");
             return string.Empty;
         }
     }
@@ -43,7 +43,7 @@ public static class TextParser
         }
         catch (Exception e)
         {
-            Logger.Print($"Error when appending the file at {filePath} : {e}", Logger.LogLevel.ERROR);
+            Logger.Error($"Error when appending the file at {filePath} : {e}");
         }
     }
 
@@ -66,7 +66,7 @@ public static class TextParser
         }
         catch (Exception e)
         {
-            Logger.Print($"Error when writing the file at {filePath} : {e}", Logger.LogLevel.ERROR);
+            Logger.Error($"Error when writing the file at {filePath} : {e}");
         }
     }
 }

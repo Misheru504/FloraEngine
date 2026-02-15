@@ -7,10 +7,12 @@ public class DiagnosticsData
     // Rendering
     public RenderConfig RenderConfig { get; set; } = null!;
     public float RenderTimeMs { get; set; }
+    public int ChunksRendered { get; set; }
 
     // World
     public int WorldSeed { get; set; }
-    public int ChunksLoaded { get; set; }
+    public int MaxLod { get; set; }
+    public int RenderDistance { get; set; }
 
     // Player
     public Transform PlayerTransform { get; set; } = null!;

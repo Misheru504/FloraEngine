@@ -14,7 +14,7 @@
 		<PackageReference Include="Utf8Json" Version="1.3.7" />
 	</ItemGroup>
 	<ItemGroup>
-		<None Include="assets\**\*" Recurse="true">
+		<None Include="Assets\**\*" Recurse="true">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>

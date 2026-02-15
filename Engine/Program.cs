@@ -1,4 +1,5 @@
-﻿using FloraEngine.Diagnostics;
+﻿using FloraEngine.Core.Logging;
+using FloraEngine.Diagnostics;
 using FloraEngine.World;
 using Silk.NET.Input;
 using Silk.NET.Maths;
@@ -26,8 +27,8 @@ public static class Program
     {
         AppDomain.CurrentDomain.UnhandledException += Reporter.OnUnhandledException;
 
-        Logger.Print($"=== {APP_NAME} - {DateTime.Now} ===", Logger.LogLevel.INFO, true, "");
-        Logger.Print("Creating window...");
+        Logger.Info($"=== {APP_NAME} - {DateTime.Now} ===", "");
+        Logger.Info("Creating window...");
 
         // Intializing the game window
         WindowOptions options = WindowOptions.Default;
@@ -41,7 +42,7 @@ public static class Program
          * Window.FramesPerSecond = 180;
          */
 
-        Logger.Print("Window created successfully!");
+        Logger.Info("Window created successfully!");
 
         _engineWindow.Load += Load;
         _engineWindow.Closing += Closing;
@@ -64,7 +65,7 @@ public static class Program
     }
     private static void GraphicsLoad()
     {
-        Logger.Print("Loading OpenGL...");
+        Logger.Info("Loading OpenGL...");
         if (_engineWindow == null) throw new NullReferenceException("GLWindow is null!");
         _graphics = _engineWindow.CreateOpenGL();
 
@@ -83,7 +84,7 @@ public static class Program
         _graphics.DepthMask(true);
         _graphics.ColorMask(true, true, true, true);
 
-        Logger.Print("OpenGL loaded correctly");
+        Logger.Info("OpenGL loaded correctly");
     }
 
     public static void ChangeResolution(Vector2D<int> newSize)
@@ -94,11 +95,11 @@ public static class Program
 
     private static void Closing()
     {
-        Logger.Print("Closing...");
+        Logger.Info("Closing...");
 
         Game.Instance.Closing();
 
-        Logger.Print("See ya!");
+        Logger.Info("See ya!");
         Logger.SaveLogFile();
     }
 

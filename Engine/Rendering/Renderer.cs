@@ -1,6 +1,6 @@
 ﻿using FloraEngine.Core;
 using FloraEngine.Core.Components;
-using FloraEngine.Diagnostics;
+using FloraEngine.Core.Logging;
 using FloraEngine.Rendering.Shaders;
 using FloraEngine.Rendering.Textures;
 using FloraEngine.World;
@@ -17,7 +17,6 @@ public unsafe class Renderer : IDisposable
 
     private readonly GL _graphics = null!;
     private readonly FragVertShader shader;
-    private readonly Texture2D texture;
     private readonly RenderConfig _renderConfig;
     private readonly Camera _camera;
     private readonly WorldManager _worldManager;
@@ -137,8 +136,6 @@ public unsafe class Renderer : IDisposable
         _worldManager = worldManager;
 
         shader = new FragVertShader(_graphics, VERTEX_SHADER, FRAGMENT_SHADER);
-        texture = Texture2D.FromFile(_graphics, "Assets/block.png", TextureUnit.Texture0);
-        texture.SetDefaultParameters();
 
         atlas = new TextureArray(_graphics, "Assets/atlas.png", TextureUnit.Texture1, 16);
         atlas.SetDefaultParameters();

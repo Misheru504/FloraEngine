@@ -1,4 +1,4 @@
-﻿using FloraEngine.Diagnostics;
+﻿using FloraEngine.Core.Logging;
 using Silk.NET.OpenGL;
 using StbImageSharp;
 using Buffer = System.Buffer;
@@ -85,7 +85,7 @@ internal unsafe class TextureArray : Texture, IDisposable
         var error = _graphics.GetError();
         if (error != GLEnum.NoError)
         {
-            Logger.Print($"OpenGL Error: {error}", Logger.LogLevel.ERROR);
+            Logger.Error($"OpenGL Error: {error}");
         }
 
         Unbind();

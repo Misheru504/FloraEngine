@@ -22,7 +22,9 @@ public interface IImGuiWindow : IImGuiDrawable
 /// </summary>
 public interface IImGuiOverlay : IImGuiDrawable
 {
+    public string Title { get; }
     public int ZOrder { get; } // Draw order
+    public bool IsEnabled { get; set; }
 }
 
 /// <summary>

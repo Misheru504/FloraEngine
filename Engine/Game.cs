@@ -86,7 +86,7 @@ public class Game
         _windowManager = new WindowManager();
         _overlayManager = new OverlayManager();
         _overlayManager.AddWindow(new MainOverlay(_diagnosticsData));
-        _mainMenuBar = new MainMenuBar(_graphics, _windowManager, renderConfig, _diagnosticsData, _worldManager.UpdateChunksMeshes, _worldManager.SaveActiveWorld, _playerController.SetPosition);
+        _mainMenuBar = new MainMenuBar(_graphics, _windowManager, _overlayManager, renderConfig, _diagnosticsData, _worldManager.UpdateChunksMeshes, _worldManager.SaveActiveWorld, _playerController.SetPosition);
     
         CulledMesher.WorldManager = _worldManager;
         GreedyMesher.WorldManager = _worldManager;

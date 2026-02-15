@@ -12,10 +12,10 @@ public enum RenderMode
 
 public class RenderConfig
 {
-    public bool IsGeneratingAOs;
-    public bool IsUsingGreedyMeshing;
-    public bool IsWireframe;
-    public bool IsFreecam;
+    public bool IsGeneratingAOs { get; set; }
+    public bool IsUsingGreedyMeshing { get; set; }
+    public bool IsWireframe { get; set; }
+    public bool IsFreecam { get; set; }
     public int VertexCount { get; set; }
     public RenderMode RenderMode { get; set; }
 }

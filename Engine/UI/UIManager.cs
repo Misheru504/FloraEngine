@@ -2,13 +2,13 @@
 
 public class WindowManager
 {
-    internal readonly List<IImGuiWindow> windows = new List<IImGuiWindow>();
+    public List<IImGuiWindow> Windows { get; } = new List<IImGuiWindow>();
 
-    public void AddWindow(IImGuiWindow window) => windows.Add(window);
+    public void AddWindow(IImGuiWindow window) => Windows.Add(window);
 
     public void DrawAll(double deltaTime)
     {
-        foreach(IImGuiWindow window in windows)
+        foreach(IImGuiWindow window in Windows)
         {
             if(window.IsOpen) window.Draw(deltaTime);
         }
@@ -17,7 +17,7 @@ public class WindowManager
 
 public class OverlayManager
 {
-    private readonly List<IImGuiOverlay> overlays = new List<IImGuiOverlay>();
+    public List<IImGuiOverlay> overlays { get; } = new List<IImGuiOverlay>();
 
     public void AddWindow(IImGuiOverlay overlay) => overlays.Add(overlay);
 
@@ -25,7 +25,7 @@ public class OverlayManager
     {
         foreach (IImGuiOverlay overlay in overlays.OrderBy(ov => ov.ZOrder))
         {
-            overlay.Draw(deltaTime);
+            if(overlay.IsEnabled) overlay.Draw(deltaTime);
         }
     }
 }

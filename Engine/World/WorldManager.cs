@@ -1,10 +1,10 @@
-﻿using FloraEngine.Diagnostics;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Numerics;
 using FloraEngine.Core.Noise;
 using FloraEngine.Core.Data;
 using FloraEngine.Core;
 using FloraEngine.Core.Components;
+using FloraEngine.Core.Logging;
 
 namespace FloraEngine.World;
 
@@ -12,6 +12,7 @@ public class WorldManager : IDisposable
 {
     private readonly DiagnosticsData _diagnosticsData;
     private readonly Transform _transform;
+
     private Vector3 CenterPos => _transform.ChunkPos;
 
     public int MaxLOD = 0;
@@ -65,7 +66,7 @@ public class WorldManager : IDisposable
         Noise.Seed = world.Seed;
         _diagnosticsData.WorldSeed = world.Seed;
 
-        Logger.Print($"Loaded world '{world.Name}'. Seed: {world.Seed}");
+        Logger.Info($"Loaded world '{world.Name}'. Seed: {world.Seed}");
 
         StartTasks();
     }
@@ -124,7 +125,7 @@ public class WorldManager : IDisposable
                 }
                 catch (Exception ex)
                 {
-                    Logger.Print($"Error generating chunk at {chunkPos}: {ex.Message}");
+                    Logger.Warning($"Error generating chunk at {chunkPos}: {ex.Message}");
                     _chunksInProgress.TryRemove(chunkPos, out _);
                 }
             }
@@ -157,7 +158,7 @@ public class WorldManager : IDisposable
                 }
                 catch (Exception ex)
                 {
-                    Logger.Print($"Error meshing chunk at {chunk.Position}: {ex.Message}");
+                    Logger.Warning($"Error meshing chunk at {chunk.Position}: {ex.Message}");
                     _chunksInProgress.TryRemove(chunk.Position, out _);
                 }
             }
@@ -176,7 +177,9 @@ public class WorldManager : IDisposable
         ProcessReadyChunks();
         UnloadFarChunks();
 
-        _diagnosticsData.ChunksLoaded = RenderedChunks.Count;
+        _diagnosticsData.ChunksRendered = RenderedChunks.Count;
+        _diagnosticsData.MaxLod = MaxLOD;
+        _diagnosticsData.RenderDistance = RenderDistance;
     }
 
     private void QueueChunksForGeneration()

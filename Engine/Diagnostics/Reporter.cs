@@ -1,4 +1,5 @@
 ﻿using FloraEngine.Core.Data;
+using FloraEngine.Core.Logging;
 using System.Text;
 
 namespace FloraEngine.Diagnostics;
@@ -19,7 +20,7 @@ public static class Reporter
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="args"></param>
-    internal static void OnUnhandledException(object sender, UnhandledExceptionEventArgs args)
+    public static void OnUnhandledException(object sender, UnhandledExceptionEventArgs args)
     {
         bool isTerminating = args.IsTerminating;
 
@@ -62,13 +63,13 @@ public static class Reporter
 
         if (isTerminating)
         {
-            Logger.Print(crashReport.ToString(), Logger.LogLevel.FATAL, true, "");
+            Logger.Fatal(crashReport.ToString(), "");
             Logger.SaveLogFile();
             Environment.Exit(1);
         }
         else
         {
-            Logger.Print(crashReport.ToString(), Logger.LogLevel.ERROR, true, "");
+            Logger.Error(crashReport.ToString(), "");
         }
     }
 

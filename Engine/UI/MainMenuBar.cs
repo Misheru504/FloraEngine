@@ -1,5 +1,5 @@
 ﻿using FloraEngine.Core.Components;
-using FloraEngine.Diagnostics;
+using FloraEngine.Core.Logging;
 using ImGuiNET;
 using Silk.NET.OpenGL;
 using System.Numerics;
@@ -9,16 +9,18 @@ namespace FloraEngine.UI;
 internal class MainMenuBar : IMainMenuBar
 {
     private readonly WindowManager _windowManager;
+    private readonly OverlayManager _overlayManager;
     private readonly RenderConfig _renderConfig;
     private readonly DiagnosticsData _diagnosticsData;
     private readonly GL _graphics;
     private readonly Action _refreshChunks, _saveWorld;
     private readonly Action<Vector3> _resetPlayer;
 
-    public MainMenuBar(GL graphics, WindowManager windowManager, RenderConfig renderConfig, DiagnosticsData diagnosticsData, Action refreshChunks, Action saveWorld, Action<Vector3> resetPlayer)
+    public MainMenuBar(GL graphics, WindowManager windowManager, OverlayManager overlayManager, RenderConfig renderConfig, DiagnosticsData diagnosticsData, Action refreshChunks, Action saveWorld, Action<Vector3> resetPlayer)
     {
         _graphics = graphics;
         _windowManager = windowManager;
+        _overlayManager = overlayManager;
         _renderConfig = renderConfig;
         _diagnosticsData = diagnosticsData;
         _refreshChunks = refreshChunks;
@@ -35,12 +37,24 @@ internal class MainMenuBar : IMainMenuBar
         ShowWorldMenu();
 
 
-        if (ImGui.BeginMenu("Window"))
+        if (ImGui.BeginMenu("Windows"))
         {
-            foreach(IImGuiWindow window in _windowManager.windows)
+            foreach(IImGuiWindow window in _windowManager.Windows)
             {
                 bool isOpen = window.IsOpen;
-                if (ImGui.MenuItem(window.Title, null, ref isOpen)) window.IsOpen = !isOpen;
+                if (ImGui.MenuItem(window.Title, null, ref isOpen)) 
+                    window.IsOpen = isOpen;
+            }
+            ImGui.EndMenu();
+        }
+
+        if (ImGui.BeginMenu("Overlays"))
+        {
+            foreach (IImGuiOverlay overlay in _overlayManager.overlays)
+            {
+                bool isOpen = overlay.IsEnabled;
+                if (ImGui.MenuItem(overlay.Title, null, ref isOpen)) 
+                    overlay.IsEnabled = isOpen;
             }
             ImGui.EndMenu();
         }
@@ -52,8 +66,12 @@ internal class MainMenuBar : IMainMenuBar
         if (!ImGui.BeginMenu("Game")) return;
 
         if (ImGui.MenuItem("Delete logs folder")) Logger.ClearLogFolder();
-        if (ImGui.MenuItem("Wireframe view", null, ref _renderConfig.IsWireframe)) _graphics.PolygonMode(GLEnum.FrontAndBack, _renderConfig.IsWireframe ? GLEnum.Line : GLEnum.Fill);
-        if (ImGui.MenuItem("Test console colors")) Logger.TestColors();
+        bool isWireframe = _renderConfig.IsWireframe;
+        if (ImGui.MenuItem("Wireframe view", null, ref isWireframe))
+        {
+            _renderConfig.IsWireframe = isWireframe;
+            _graphics.PolygonMode(GLEnum.FrontAndBack, _renderConfig.IsWireframe ? GLEnum.Line : GLEnum.Fill);
+        }
         if (ImGui.BeginMenu("Rendering mode"))
         {
             if (ImGui.MenuItem("Default")) _renderConfig.RenderMode = RenderMode.Default;
@@ -86,9 +104,19 @@ internal class MainMenuBar : IMainMenuBar
 
         if (ImGui.BeginMenu("Mesher"))
         {
-            if (ImGui.MenuItem("Generate AOs", null, ref _renderConfig.IsGeneratingAOs)) _refreshChunks();
+            bool isGenAo = _renderConfig.IsGeneratingAOs;
+            if (ImGui.MenuItem("Generate AOs", null, ref isGenAo))
+            {
+                _renderConfig.IsGeneratingAOs = isGenAo;
+                _refreshChunks();
+            }
             ImGui.Separator();
-            if (ImGui.MenuItem("Greedy", null, ref _renderConfig.IsUsingGreedyMeshing)) _refreshChunks();
+            bool isGreedy = _renderConfig.IsUsingGreedyMeshing;
+            if (ImGui.MenuItem("Greedy", null, ref isGreedy))
+            {
+                _renderConfig.IsUsingGreedyMeshing = isGreedy;
+                _refreshChunks();
+            }
             bool notGreedy = !_renderConfig.IsUsingGreedyMeshing;
             if (ImGui.MenuItem("Culled", null, ref notGreedy))
             {

@@ -1,4 +1,4 @@
-using FloraEngine.Diagnostics;
+using FloraEngine.Core.Logging;
 using Utf8Json;
 
 namespace FloraEngine.Core.Data;
@@ -11,7 +11,7 @@ public static class JsonMapper
         string? directory = Path.GetDirectoryName(path);
         if (directory != null) Directory.CreateDirectory(directory);
         File.WriteAllBytes(path, jsonBytes);
-        Logger.Print($"Saved data of type '{data.GetType()}' at '{path}'");
+        Logger.Info($"Saved data of type '{data.GetType()}' at '{path}'");
     }
 
     public static void PrettySerialize(object data, string path)
@@ -20,7 +20,7 @@ public static class JsonMapper
         string? directory = Path.GetDirectoryName(path);
         if(directory != null) Directory.CreateDirectory(directory);
         File.WriteAllBytes(path, jsonBytes);
-        Logger.Print($"Saved pretty data of type '{data.GetType()}' at '{path}'");
+        Logger.Info($"Saved pretty data of type '{data.GetType()}' at '{path}'");
     }
 
     public static T Parse<T>(string path)
@@ -33,7 +33,7 @@ public static class JsonMapper
         }
         catch (Exception ex)
         {
-            Logger.Print($"Cannot parse JSON file at '{path}': {ex}", Logger.LogLevel.ERROR);
+            Logger.Error($"Cannot parse JSON file at '{path}': {ex}");
             throw;
         }
     }
