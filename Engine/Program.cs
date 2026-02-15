@@ -76,6 +76,7 @@ public static class Program
         _graphics.Enable(EnableCap.Blend); // Transparency
         _graphics.Enable(EnableCap.CullFace); // Only renders one face of a vertex
         _graphics.Enable(EnableCap.DepthTest); // Hides objects behind others
+        _graphics.Enable(EnableCap.Multisample); // MSAA
         _graphics.CullFace(GLEnum.Back); // Face to show when culling
         _graphics.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
         _graphics.DepthFunc(DepthFunction.Less);
