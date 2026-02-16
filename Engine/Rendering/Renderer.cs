@@ -66,30 +66,31 @@ public unsafe class Renderer : IDisposable
 
         uniform sampler2DArray fTexture;
         uniform int fRenderMode;
-        out vec4 fragColor;
+        uniform float fAmbientLight;
+        uniform vec3 fSunDir;
 
-        vec3 lightPos = vec3(0.3, 1.0, 0.7);
+        out vec4 fragColor;
 
         vec3 hashColor(float n) {
             // Pseudo-random hash that gives consistent colors per layer
             vec3 p = vec3(n * 0.1031, n * 0.1030, n * 0.0973);
             p = fract(p * vec3(127.1, 311.7, 74.7));
             p += dot(p, p.yzx + 33.33);
-            return fract((p.xxy + p.yzz) * p.zyx);
+            vec3 color = fract((p.xxy + p.yzz) * p.zyx);
+            return mix(color, vec3(1.0), 0.5); // Ajuste 0.5 pour contrôler la pâleur
         }
 
         void main()
         {
             vec3 normal = normalize(fNormal);
-            vec3 light = normalize(lightPos);
+            vec3 light = normalize(fSunDir);
             float diff = max(dot(normal, light), 0.0);
 
-            float ambient = 0.3;
-            float directional = (1.0 - ambient) * diff;
+            float directional = (1.0 - fAmbientLight) * diff;
         
             // Apply AO to both ambient and slightly to directional lighting
             float aoFactor = fAO;
-            float aoAmbient = ambient * (0.5 + 0.5 * aoFactor);  // AO affects ambient more
+            float aoAmbient = fAmbientLight * (0.5 + 0.5 * aoFactor);  // AO affects ambient more
             float aoDirectional = directional * (0.7 + 0.3 * aoFactor);  // AO affects directional less
         
             float lighting = aoAmbient + aoDirectional;
@@ -124,9 +125,10 @@ public unsafe class Renderer : IDisposable
         }
     ";
 
-    private readonly TextureArray atlas;
+    private readonly TextureArray _atlas;
+    private readonly Skybox _skybox;
 
-    public Renderer(GL graphics, RenderConfig renderConfig, Camera camera, WorldManager worldManager)
+    public Renderer(GL graphics, RenderConfig renderConfig, SkyboxConfig skyboxConfig, Camera camera, WorldManager worldManager)
     {
         Logger.Render("Loading renderer...");
         _graphics = graphics;
@@ -136,30 +138,36 @@ public unsafe class Renderer : IDisposable
 
         shader = new FragVertShader(_graphics, VERTEX_SHADER, FRAGMENT_SHADER);
 
-        atlas = new TextureArray(_graphics, "Assets/atlas.png", TextureUnit.Texture1, 16);
-        atlas.SetDefaultParameters();
+        _atlas = new TextureArray(_graphics, "Assets/atlas.png", TextureUnit.Texture1, 16);
+        _atlas.SetDefaultParameters();
 
         Mesh.RenderConfig = _renderConfig;
         Mesh.Graphics = _graphics;
 
+        _skybox = new Skybox(_graphics, skyboxConfig);
+
         Logger.Render("Successfully loaded!");
     }
 
-    internal void Draw()
+    internal void Draw(double deltaTime)
     {
         _graphics.PolygonMode(GLEnum.FrontAndBack, _renderConfig.IsWireframe ? GLEnum.Line : GLEnum.Fill);
 
         shader.UseProgram();
-        atlas.Bind();
+        _atlas.Bind();
 
         shader.SetUniform("uView", _camera.RelativeViewMatrix);
         shader.SetUniform("uProjection", _camera.ProjectionMatrix);
         shader.SetUniform("fRenderMode", (int) _renderConfig.RenderMode);
         shader.SetUniform("fTexture", 1);
+        shader.SetUniform("fAmbientLight", _renderConfig.IsFullbright ? 1f : 0.3f);
+        shader.SetUniform("fSunDir", _skybox.SunDirection);
 
         _renderConfig.VertexCount = 0;
         foreach(Chunk chunk in _worldManager.RenderedChunks.Values)
             DrawChunk(chunk);
+
+        _skybox.Render(deltaTime, _camera.RelativeViewMatrix, _camera.ProjectionMatrix);
     }
 
     private void DrawChunk(Chunk chunk)

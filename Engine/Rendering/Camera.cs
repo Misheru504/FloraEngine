@@ -24,7 +24,7 @@ public sealed class Camera
     public Camera(Transform transform)
     {
         Transform = transform;
-        FoV = 100;
+        FoV = 75;
 
         NearPlane = 0.1f;
         FarPlane = 1000.0f;

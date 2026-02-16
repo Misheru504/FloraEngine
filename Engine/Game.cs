@@ -51,8 +51,8 @@ public class Game
         {
             Position = Vector3.Zero,
             Up = Vector3.UnitY,
-            Forward = -Vector3.UnitZ,
-            Direction = Vector3.Zero,
+            Forward = Vector3.UnitX,
+            Direction = Vector3.UnitX,
 
             Yaw = 0,
             Pitch = 0,
@@ -63,9 +63,15 @@ public class Game
             IsGeneratingAOs = true,
             IsUsingGreedyMeshing = true,
             IsWireframe = false,
+            IsFullbright = true,
             IsFreecam = false,
             VertexCount = 0,
             RenderMode = RenderMode.Default
+        };
+
+        SkyboxConfig skyboxConfig = new SkyboxConfig()
+        {
+            SkyboxMode = SkyboxMode.Default,
         };
 
         _diagnosticsData = new DiagnosticsData()
@@ -80,14 +86,14 @@ public class Game
         _camera = new Camera(transform);
         _playerController = new PlayerController(_inputManager, inputContext.Mice[0], transform, _diagnosticsData, _worldManager);
 
-        _renderer = new Renderer(_graphics, renderConfig, _camera, _worldManager);
+        _renderer = new Renderer(_graphics, renderConfig, skyboxConfig, _camera, _worldManager);
         _profiler = new Profiler(_diagnosticsData);
 
         _imGuiController = new ImGuiController(_graphics, window, inputContext);
         _windowManager = new WindowManager();
         _overlayManager = new OverlayManager();
         _overlayManager.AddWindow(new MainOverlay(_diagnosticsData));
-        _mainMenuBar = new MainMenuBar(_windowManager, _overlayManager, renderConfig, _diagnosticsData, _worldManager.UpdateChunksMeshes, _worldManager.SaveActiveWorld, _playerController.SetPosition);
+        _mainMenuBar = new MainMenuBar(_windowManager, _overlayManager, renderConfig, skyboxConfig, _diagnosticsData, _worldManager.UpdateChunksMeshes, _worldManager.SaveActiveWorld, _playerController.SetPosition);
     }
 
     public void Update(double deltaTime)
@@ -103,7 +109,7 @@ public class Game
     {
         _graphics.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-        _renderer.Draw();
+        _renderer.Draw(deltaTime);
 
         _mainMenuBar.DrawBar(deltaTime);
         _windowManager.DrawAll(deltaTime);

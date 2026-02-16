@@ -33,6 +33,7 @@ public class PlayerController
         _cursor = mouse.Cursor;
         _cursor.CursorMode = CursorMode.Raw;
         _diagnosticsData = diagnosticsData;
+        _mousePosition = Vector2.Zero;
 
         _rigidbody = new Rigidbody(worldManager, Vector3.Zero, 1.0f, size);
         _speed = 5.0f;

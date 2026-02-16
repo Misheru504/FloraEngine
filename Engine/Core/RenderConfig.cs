@@ -16,6 +16,8 @@ public class RenderConfig
     public bool IsUsingGreedyMeshing { get; set; }
     public bool IsWireframe { get; set; }
     public bool IsFreecam { get; set; }
+    public bool IsFullbright { get; set; }
+
     public int VertexCount { get; set; }
     public RenderMode RenderMode { get; set; }
 }

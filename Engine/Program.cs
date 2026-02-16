@@ -1,6 +1,5 @@
 ﻿using FloraEngine.Core.Logging;
 using FloraEngine.Diagnostics;
-using FloraEngine.World;
 using Silk.NET.Input;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
@@ -12,7 +11,7 @@ namespace FloraEngine;
 public static class Program
 {
     public const string NAME = "Flora-Engine";
-    public const string VERSION = "alpha-2";
+    public const string VERSION = "alpha-3";
     private const string APP_NAME = $"{NAME}@{VERSION}";
 
     internal static Vector2D<int> WindowResolution { get; private set; } = new Vector2D<int>(1280, 720);
@@ -72,7 +71,7 @@ public static class Program
         _inputContext = _engineWindow.CreateInput();
 
         // Graphics settings
-        _graphics.ClearColor(Color.CornflowerBlue); // Background color of the window
+        _graphics.ClearColor(Color.Black); // Background color of the window
         _graphics.Enable(EnableCap.Blend); // Transparency
         _graphics.Enable(EnableCap.CullFace); // Only renders one face of a vertex
         _graphics.Enable(EnableCap.DepthTest); // Hides objects behind others

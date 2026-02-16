@@ -10,15 +10,17 @@ internal class MainMenuBar : IMainMenuBar
     private readonly WindowManager _windowManager;
     private readonly OverlayManager _overlayManager;
     private readonly RenderConfig _renderConfig;
+    private readonly SkyboxConfig _skyboxConfig;
     private readonly DiagnosticsData _diagnosticsData;
     private readonly Action _refreshChunks, _saveWorld;
     private readonly Action<Vector3> _resetPlayer;
 
-    public MainMenuBar(WindowManager windowManager, OverlayManager overlayManager, RenderConfig renderConfig, DiagnosticsData diagnosticsData, Action refreshChunks, Action saveWorld, Action<Vector3> resetPlayer)
+    public MainMenuBar(WindowManager windowManager, OverlayManager overlayManager, RenderConfig renderConfig, SkyboxConfig skyboxConfig, DiagnosticsData diagnosticsData, Action refreshChunks, Action saveWorld, Action<Vector3> resetPlayer)
     {
         _windowManager = windowManager;
         _overlayManager = overlayManager;
         _renderConfig = renderConfig;
+        _skyboxConfig = skyboxConfig;
         _diagnosticsData = diagnosticsData;
         _refreshChunks = refreshChunks;
         _saveWorld = saveWorld;
@@ -63,21 +65,29 @@ internal class MainMenuBar : IMainMenuBar
         if (!ImGui.BeginMenu("Game")) return;
 
         if (ImGui.MenuItem("Delete logs folder")) Logger.ClearLogFolder();
-        bool isWireframe = _renderConfig.IsWireframe;
-        if (ImGui.MenuItem("Wireframe view", null, ref isWireframe))
-        {
-            _renderConfig.IsWireframe = isWireframe;
-        }
+        if (ImGui.MenuItem("Wireframe view", null, _renderConfig.IsWireframe)) _renderConfig.IsWireframe = !_renderConfig.IsWireframe;
+        if (ImGui.MenuItem("Fullbrigth", null, _renderConfig.IsFullbright)) _renderConfig.IsFullbright = !_renderConfig.IsFullbright;
+
         if (ImGui.BeginMenu("Rendering mode"))
         {
-            if (ImGui.MenuItem("Default")) _renderConfig.RenderMode = RenderMode.Default;
-            if (ImGui.MenuItem("Depth")) _renderConfig.RenderMode = RenderMode.Depth;
-            if (ImGui.MenuItem("Normals")) _renderConfig.RenderMode = RenderMode.Normals;
-            if (ImGui.MenuItem("UVs")) _renderConfig.RenderMode = RenderMode.UV;
-            if (ImGui.MenuItem("AOs")) _renderConfig.RenderMode = RenderMode.AO;
-            if (ImGui.MenuItem("Layer")) _renderConfig.RenderMode = RenderMode.Layer;
+            if (ImGui.MenuItem("Default", null, _renderConfig.RenderMode == RenderMode.Default)) _renderConfig.RenderMode = RenderMode.Default;
+            if (ImGui.MenuItem("Depth", null, _renderConfig.RenderMode == RenderMode.Depth)) _renderConfig.RenderMode = RenderMode.Depth;
+            if (ImGui.MenuItem("Normals", null, _renderConfig.RenderMode == RenderMode.Normals)) _renderConfig.RenderMode = RenderMode.Normals;
+            if (ImGui.MenuItem("UVs", null, _renderConfig.RenderMode == RenderMode.UV)) _renderConfig.RenderMode = RenderMode.UV;
+            if (ImGui.MenuItem("AOs", null, _renderConfig.RenderMode == RenderMode.AO)) _renderConfig.RenderMode = RenderMode.AO;
+            if (ImGui.MenuItem("Layer", null, _renderConfig.RenderMode == RenderMode.Layer)) _renderConfig.RenderMode = RenderMode.Layer;
             ImGui.EndMenu();
         }
+
+        if (ImGui.BeginMenu("Skybox mode"))
+        {
+            if (ImGui.MenuItem("Default", null, _skyboxConfig.SkyboxMode == SkyboxMode.Default)) _skyboxConfig.SkyboxMode = SkyboxMode.Default;
+            if (ImGui.MenuItem("Position", null, _skyboxConfig.SkyboxMode == SkyboxMode.Position)) _skyboxConfig.SkyboxMode = SkyboxMode.Position;
+            if (ImGui.MenuItem("Sky mask", null, _skyboxConfig.SkyboxMode == SkyboxMode.SkyMask)) _skyboxConfig.SkyboxMode = SkyboxMode.SkyMask;
+            if (ImGui.MenuItem("Sun mask", null, _skyboxConfig.SkyboxMode == SkyboxMode.SunMask)) _skyboxConfig.SkyboxMode = SkyboxMode.SunMask;
+            ImGui.EndMenu();
+        }
+
         ImGui.Separator();
         if (ImGui.MenuItem("/!\\ Crash game /!\\")) { throw new Exception("You crashed the game on purpose!"); }
         if (ImGui.MenuItem("Quit", "ALT+F4")) { Program.CloseGame(); }
