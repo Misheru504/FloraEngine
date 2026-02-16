@@ -6,6 +6,7 @@ public enum SkyboxMode
     Position = 1,
     SkyMask = 2,
     SunMask = 3,
+    HorizonMask = 4,
 }
 
 public class SkyboxConfig

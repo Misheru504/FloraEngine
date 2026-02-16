@@ -5,7 +5,7 @@ using System.Numerics;
 
 namespace FloraEngine.Rendering;
 
-public class Skybox
+public class Skybox : IDisposable
 {
     private readonly GL _graphics;
 
@@ -13,6 +13,10 @@ public class Skybox
     private BufferObject<float> _vbo = null!;
     private readonly SkyboxConfig _skyboxConfig;
     private readonly FragVertShader _shader = null!;
+    private float _time = 12;
+    private float _sunAngle = 0;
+
+    public Vector3 SunDirection { get; private set; } = Vector3.Zero;
 
     private const string VERTEX_SHADER = @"
 #version 330 core
@@ -41,6 +45,7 @@ const int DEFAULT = 0;
 const int POSITION = 1;
 const int SKY_MASK = 2;
 const int SUN_MASK = 3;
+const int HORIZON_MASK = 4;
 
 in vec3 fPos;
 in vec3 fViewDir;
@@ -51,35 +56,50 @@ uniform int fSkyboxMode;
 
 uniform float sunSize;
 uniform vec3 sunDir;
+uniform vec3 sunColor;
+uniform vec3 moonColor;
 uniform vec3 dayColor;
 uniform vec3 nightColor;
+uniform vec3 horizonColor;
 
-bool isCelestialBody(vec3 bodyDir, float bodySize)
-{
-    float angle = step(bodySize, acos(dot(normalize(fViewDir), normalize(bodyDir))));
-    return angle < bodySize;
+float getCelestialBodyMask(vec3 bodyDir, float bodySize, float edgeSoftness) {
+    vec3 viewDir = normalize(fViewDir);
+    vec3 bodyDirNorm = normalize(bodyDir);
+    
+    float cosAngle = dot(viewDir, bodyDirNorm);
+    float angle = acos(clamp(cosAngle, -1.0, 1.0));
+
+    float mask = smoothstep(bodySize + edgeSoftness, bodySize - edgeSoftness, angle);
+    
+    return mask;
 }
+
+float computeHorizonActivation(vec3 dir)
+{
+    return (-smoothstep(0, 0.2, dir.y) + smoothstep(-0.2, 0, dir.y));
+}
+
 void main() {
     vec3 viewDir = normalize(fViewDir);
     fColor = vec4(vec3(0), 1.0);
 
     float skyMask = smoothstep(-0.1, 0.1, sunDir.y);
     float sunMask = smoothstep(0, 0.05, viewDir.y); // hides sun below horizon
+    float horizonActivation = computeHorizonActivation(sunDir);
+    float horizonMask = pow(smoothstep(0.3, 0.0, viewDir.y),2);
     
     fColor = mix(vec4(nightColor, 1), vec4(dayColor, 1), skyMask);
+    fColor = mix(fColor, vec4(horizonColor, 1), horizonMask * horizonActivation);
+    
+    float sunCelestialMask = getCelestialBodyMask(sunDir, sunSize, sunSize * 0.15);
+    fColor = mix(fColor, vec4(sunColor, 1), sunCelestialMask * sunMask);
 
-    if (isCelestialBody(sunDir, sunSize)){
-        fColor = mix(fColor, vec4(vec3(1, 1, 0), 1), sunMask);
-    }
+    float moonCelestialMask = getCelestialBodyMask(-sunDir, sunSize, sunSize * 0.15);
+    fColor = mix(fColor, vec4(moonColor, 1), moonCelestialMask * sunMask);
 
-    if (isCelestialBody(-sunDir, sunSize)){
-        fColor = mix(fColor, vec4(1), sunMask);
-    }
+    if(fSkyboxMode == DEFAULT) return;
 
     switch(fSkyboxMode){
-        default:
-        case DEFAULT:
-            break;
         case POSITION:
             fColor = vec4(vec3(viewDir), 1.0);
             break;
@@ -90,6 +110,20 @@ void main() {
         case SUN_MASK:
             fColor = vec4(vec3(sunMask), 1.0);
             break;
+        case HORIZON_MASK:
+            horizonActivation = computeHorizonActivation(viewDir);
+            fColor = vec4(vec3(horizonMask), 1.0);
+            break;
+    }
+    
+    if(viewDir.y < 0.001 && viewDir.y > -0.001){
+        fColor = vec4(vec3(1,0,0),1); 
+    }
+    if(viewDir.z < 0.001 && viewDir.z > -0.001){
+        fColor = vec4(vec3(0,1,0),1); 
+    }
+    if(viewDir.x < 0.001 && viewDir.x > -0.001){
+        fColor = vec4(vec3(0,0,1),1); 
     }
 }
 ";
@@ -155,25 +189,24 @@ void main() {
         _graphics.BindVertexArray(0);
     }
 
-    private float time = 12;
-    private float sunAngle = 0;
-
-    public Vector3 SunDirection { get; private set; } = Vector3.Zero;
-
     public void Render(double deltaTime, Matrix4x4 viewMatrix, Matrix4x4 projectionMatrix)
     {
         const float SUN_SIZE = 0.05f;
+        Vector3 sunColor = new Vector3(255f, 255f, 179f) / 255f;
+        Vector3 moonColor = new Vector3(204f) / 255f;
+
         Vector3 dayColor = new Vector3(100f, 149f, 237f) / 255f;
         Vector3 nightColor = new Vector3(17f, 24f, 38f) / 255f;
+        Vector3 horizonColor = new Vector3(230f, 76f, 0) / 255f;
 
-        sunAngle = (time / 24.0f) * MathF.PI * 2.0f - MathF.PI / 2.0f;
+        _sunAngle = (_time / 24.0f) * MathF.PI * 2.0f - MathF.PI / 2.0f;
         SunDirection = new Vector3(
             0.0f,
-            MathF.Sin(sunAngle),
-            MathF.Cos(sunAngle)
+            MathF.Sin(_sunAngle),
+            MathF.Cos(_sunAngle)
         );
-        time += (float)deltaTime;
-        time = time % 24;
+        _time += (float)deltaTime;
+        _time = _time % 24;
 
         _graphics.DepthFunc(DepthFunction.Lequal);
         _vao.Bind();
@@ -185,11 +218,21 @@ void main() {
 
         _shader.SetUniform("sunSize", SUN_SIZE);
         _shader.SetUniform("sunDir", SunDirection);
+        _shader.SetUniform("sunColor", sunColor);
+        _shader.SetUniform("moonColor", moonColor);
         _shader.SetUniform("dayColor", dayColor);
         _shader.SetUniform("nightColor", nightColor);
+        _shader.SetUniform("horizonColor", horizonColor);
 
         _graphics.DrawArrays(PrimitiveType.Triangles, 0, 36);
         _graphics.BindVertexArray(0);
         _graphics.DepthFunc(DepthFunction.Less);
+    }
+
+    public void Dispose()
+    {
+        _vbo.Dispose();
+        _vao.Dispose();
+        _shader.Dispose();
     }
 }

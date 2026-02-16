@@ -183,7 +183,8 @@ public unsafe class Renderer : IDisposable
 
     public void Dispose()
     {
-        shader?.Dispose();
+        shader.Dispose();
+        _skybox.Dispose();
     }
 
     private static bool IsInFrustum(Chunk c, Frustum frustum)

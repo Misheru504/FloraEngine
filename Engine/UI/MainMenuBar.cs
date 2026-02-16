@@ -85,6 +85,7 @@ internal class MainMenuBar : IMainMenuBar
             if (ImGui.MenuItem("Position", null, _skyboxConfig.SkyboxMode == SkyboxMode.Position)) _skyboxConfig.SkyboxMode = SkyboxMode.Position;
             if (ImGui.MenuItem("Sky mask", null, _skyboxConfig.SkyboxMode == SkyboxMode.SkyMask)) _skyboxConfig.SkyboxMode = SkyboxMode.SkyMask;
             if (ImGui.MenuItem("Sun mask", null, _skyboxConfig.SkyboxMode == SkyboxMode.SunMask)) _skyboxConfig.SkyboxMode = SkyboxMode.SunMask;
+            if (ImGui.MenuItem("Horizon mask", null, _skyboxConfig.SkyboxMode == SkyboxMode.HorizonMask)) _skyboxConfig.SkyboxMode = SkyboxMode.HorizonMask;
             ImGui.EndMenu();
         }
 
