@@ -8,7 +8,6 @@
         <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 		<PublishSingleFile>true</PublishSingleFile>
 		<SelfContained>true</SelfContained>
-		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
     </PropertyGroup>
 	<ItemGroup>
 		<PackageReference Include="Silk.NET" Version="2.22.0" />
