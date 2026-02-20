@@ -1,4 +1,6 @@
-﻿using FloraEngine.Core.Data;
+﻿using System;
+using System.IO;
+using FloraEngine.Core.Data;
 using FloraEngine.Core.Logging;
 using System.Text;
 
@@ -58,7 +60,7 @@ public static class Reporter
 
         crashReport.AppendLine("====================");
 
-        string crashFile = Path.Combine(Logger.LOG_FOLDER, $"{DateTime.Now:dd-MM-yyyy_HH-mm-ss}.crash");
+        string crashFile = Path.Combine(AppContext.BaseDirectory, Logger.LOG_FOLDER, $"{DateTime.Now:dd-MM-yyyy_HH-mm-ss}.crash");
         TextParser.WriteFile(crashFile, crashReport.ToString());
 
         if (isTerminating)

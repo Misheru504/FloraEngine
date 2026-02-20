@@ -1,4 +1,7 @@
-﻿namespace FloraEngine.UI;
+﻿using System.Collections.Generic;
+using System.Linq;
+
+namespace FloraEngine.UI;
 
 public class WindowManager
 {

@@ -1,4 +1,5 @@
-﻿using FloraEngine.Core.Logging;
+﻿using System;
+using FloraEngine.Core.Logging;
 using FloraEngine.Diagnostics;
 using Silk.NET.Input;
 using Silk.NET.Maths;
@@ -13,6 +14,7 @@ public static class Program
     public const string NAME = "Flora-Engine";
     public const string VERSION = "alpha-3";
     private const string APP_NAME = $"{NAME}@{VERSION}";
+    public const string ASSETS_FOLDER = "Assets";
 
     internal static Vector2D<int> WindowResolution { get; private set; } = new Vector2D<int>(1280, 720);
 
@@ -49,8 +51,6 @@ public static class Program
 
         _engineWindow.Run();
         _engineWindow.Dispose();
-
-        Console.ReadKey();
     }
 
     private static void Load()
@@ -83,7 +83,7 @@ public static class Program
 
         _graphics.DepthMask(true);
         _graphics.ColorMask(true, true, true, true);
-
+        
         Logger.Info("OpenGL loaded correctly");
     }
 

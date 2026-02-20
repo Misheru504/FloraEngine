@@ -1,4 +1,6 @@
-﻿namespace FloraEngine.World;
+﻿using System;
+
+namespace FloraEngine.World;
 
 [Serializable]
 public struct VoxelData

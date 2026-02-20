@@ -1,11 +1,13 @@
-﻿using System.Runtime.InteropServices;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
+using System.Runtime.InteropServices;
 
 namespace FloraEngine.Core.Noise;
 
 public class FastNoise
 {
-    private const string FASTNOISE_PATH = "Assets/lib/FastNoise";
-
     public const float FREQUENCY = 0.0005f;
     public const string TREE_METADATA = "GwAkAAIAAAANAAkAAAAAAABACwABAAAAAAAAAAEAAAAAAAAAAAAAgD8AAAAAPwAAAAAAAAAA+kQ=";
     public int Seed { get; set; }
@@ -287,6 +289,8 @@ public class FastNoise
 
     static FastNoise()
     {
+        NativeLibrary.SetDllImportResolver(typeof(FastNoise).Assembly, ResolveFastNoiseLibrary);        
+        
         int metadataCount = fnGetMetadataCount();
 
         nodeMetadata = new Metadata[metadataCount];
@@ -386,128 +390,146 @@ public class FastNoise
     static private Dictionary<string, int> metadataNameLookup;
     static private Metadata[] nodeMetadata;
 
-    [DllImport(FASTNOISE_PATH)]
+    [DllImport("FastNoise", CallingConvention = CallingConvention.Cdecl)]
     private static extern nint fnNewFromMetadata(int id, uint simdLevel = 0);
 
-    [DllImport(FASTNOISE_PATH)]
+    [DllImport("FastNoise", CallingConvention = CallingConvention.Cdecl)]
     private static extern nint fnNewFromEncodedNodeTree([MarshalAs(UnmanagedType.LPStr)] string encodedNodeTree, uint simdLevel = 0);
 
-    [DllImport(FASTNOISE_PATH)]
+    [DllImport("FastNoise", CallingConvention = CallingConvention.Cdecl)]
     private static extern void fnDeleteNodeRef(nint nodeHandle);
 
-    [DllImport(FASTNOISE_PATH)]
+    [DllImport("FastNoise", CallingConvention = CallingConvention.Cdecl)]
     private static extern uint fnGetSIMDLevel(nint nodeHandle);
 
-    [DllImport(FASTNOISE_PATH)]
+    [DllImport("FastNoise", CallingConvention = CallingConvention.Cdecl)]
     private static extern int fnGetMetadataID(nint nodeHandle);
 
-    [DllImport(FASTNOISE_PATH)]
+    [DllImport("FastNoise", CallingConvention = CallingConvention.Cdecl)]
     private static extern uint fnGenUniformGrid2D(nint nodeHandle, float[] noiseOut,
                                    int xStart, int yStart,
                                    int xSize, int ySize,
                                    float frequency, int seed, float[] outputMinMax);
 
-    [DllImport(FASTNOISE_PATH)]
+    [DllImport("FastNoise", CallingConvention = CallingConvention.Cdecl)]
     private static extern uint fnGenUniformGrid3D(nint nodeHandle, float[] noiseOut,
                                    int xStart, int yStart, int zStart,
                                    int xSize, int ySize, int zSize,
                                    float frequency, int seed, float[] outputMinMax);
 
-    [DllImport(FASTNOISE_PATH)]
+    [DllImport("FastNoise", CallingConvention = CallingConvention.Cdecl)]
     private static extern uint fnGenUniformGrid4D(nint nodeHandle, float[] noiseOut,
                                    int xStart, int yStart, int zStart, int wStart,
                                    int xSize, int ySize, int zSize, int wSize,
                                    float frequency, int seed, float[] outputMinMax);
 
-    [DllImport(FASTNOISE_PATH)]
+    [DllImport("FastNoise", CallingConvention = CallingConvention.Cdecl)]
     private static extern void fnGenTileable2D(nint node, float[] noiseOut,
                                     int xSize, int ySize,
                                     float frequency, int seed, float[] outputMinMax);
 
-    [DllImport(FASTNOISE_PATH)]
+    [DllImport("FastNoise", CallingConvention = CallingConvention.Cdecl)]
     private static extern void fnGenPositionArray2D(nint node, float[] noiseOut, int count,
                                          float[] xPosArray, float[] yPosArray,
                                          float xOffset, float yOffset,
                                          int seed, float[] outputMinMax);
 
-    [DllImport(FASTNOISE_PATH)]
+    [DllImport("FastNoise", CallingConvention = CallingConvention.Cdecl)]
     private static extern void fnGenPositionArray3D(nint node, float[] noiseOut, int count,
                                          float[] xPosArray, float[] yPosArray, float[] zPosArray,
                                          float xOffset, float yOffset, float zOffset,
                                          int seed, float[] outputMinMax);
 
-    [DllImport(FASTNOISE_PATH)]
+    [DllImport("FastNoise", CallingConvention = CallingConvention.Cdecl)]
     private static extern void fnGenPositionArray4D(nint node, float[] noiseOut, int count,
                                          float[] xPosArray, float[] yPosArray, float[] zPosArray, float[] wPosArray,
                                          float xOffset, float yOffset, float zOffset, float wOffset,
                                          int seed, float[] outputMinMax);
 
-    [DllImport(FASTNOISE_PATH)]
+    [DllImport("FastNoise", CallingConvention = CallingConvention.Cdecl)]
     private static extern float fnGenSingle2D(nint node, float x, float y, int seed);
 
-    [DllImport(FASTNOISE_PATH)]
+    [DllImport("FastNoise", CallingConvention = CallingConvention.Cdecl)]
     private static extern float fnGenSingle3D(nint node, float x, float y, float z, int seed);
 
-    [DllImport(FASTNOISE_PATH)]
+    [DllImport("FastNoise", CallingConvention = CallingConvention.Cdecl)]
     private static extern float fnGenSingle4D(nint node, float x, float y, float z, float w, int seed);
 
-    [DllImport(FASTNOISE_PATH)]
+    [DllImport("FastNoise", CallingConvention = CallingConvention.Cdecl)]
     private static extern int fnGetMetadataCount();
 
-    [DllImport(FASTNOISE_PATH)]
+    [DllImport("FastNoise", CallingConvention = CallingConvention.Cdecl)]
     private static extern nint fnGetMetadataName(int id);
 
     // Variable
-    [DllImport(FASTNOISE_PATH)]
+    [DllImport("FastNoise", CallingConvention = CallingConvention.Cdecl)]
     private static extern int fnGetMetadataVariableCount(int id);
 
-    [DllImport(FASTNOISE_PATH)]
+    [DllImport("FastNoise", CallingConvention = CallingConvention.Cdecl)]
     private static extern nint fnGetMetadataVariableName(int id, int variableIndex);
 
-    [DllImport(FASTNOISE_PATH)]
+    [DllImport("FastNoise", CallingConvention = CallingConvention.Cdecl)]
     private static extern int fnGetMetadataVariableType(int id, int variableIndex);
 
-    [DllImport(FASTNOISE_PATH)]
+    [DllImport("FastNoise", CallingConvention = CallingConvention.Cdecl)]
     private static extern int fnGetMetadataVariableDimensionIdx(int id, int variableIndex);
 
-    [DllImport(FASTNOISE_PATH)]
+    [DllImport("FastNoise", CallingConvention = CallingConvention.Cdecl)]
     private static extern int fnGetMetadataEnumCount(int id, int variableIndex);
 
-    [DllImport(FASTNOISE_PATH)]
+    [DllImport("FastNoise", CallingConvention = CallingConvention.Cdecl)]
     private static extern nint fnGetMetadataEnumName(int id, int variableIndex, int enumIndex);
 
-    [DllImport(FASTNOISE_PATH)]
+    [DllImport("FastNoise", CallingConvention = CallingConvention.Cdecl)]
     private static extern bool fnSetVariableFloat(nint nodeHandle, int variableIndex, float value);
 
-    [DllImport(FASTNOISE_PATH)]
+    [DllImport("FastNoise", CallingConvention = CallingConvention.Cdecl)]
     private static extern bool fnSetVariableIntEnum(nint nodeHandle, int variableIndex, int value);
 
     // Node Lookup
-    [DllImport(FASTNOISE_PATH)]
+    [DllImport("FastNoise", CallingConvention = CallingConvention.Cdecl)]
     private static extern int fnGetMetadataNodeLookupCount(int id);
 
-    [DllImport(FASTNOISE_PATH)]
+    [DllImport("FastNoise", CallingConvention = CallingConvention.Cdecl)]
     private static extern nint fnGetMetadataNodeLookupName(int id, int nodeLookupIndex);
 
-    [DllImport(FASTNOISE_PATH)]
+    [DllImport("FastNoise", CallingConvention = CallingConvention.Cdecl)]
     private static extern int fnGetMetadataNodeLookupDimensionIdx(int id, int nodeLookupIndex);
 
-    [DllImport(FASTNOISE_PATH)]
+    [DllImport("FastNoise", CallingConvention = CallingConvention.Cdecl)]
     private static extern bool fnSetNodeLookup(nint nodeHandle, int nodeLookupIndex, nint nodeLookupHandle);
 
     // Hybrid
-    [DllImport(FASTNOISE_PATH)]
+    [DllImport("FastNoise", CallingConvention = CallingConvention.Cdecl)]
     private static extern int fnGetMetadataHybridCount(int id);
 
-    [DllImport(FASTNOISE_PATH)]
+    [DllImport("FastNoise", CallingConvention = CallingConvention.Cdecl)]
     private static extern nint fnGetMetadataHybridName(int id, int nodeLookupIndex);
 
-    [DllImport(FASTNOISE_PATH)]
+    [DllImport("FastNoise", CallingConvention = CallingConvention.Cdecl)]
     private static extern int fnGetMetadataHybridDimensionIdx(int id, int nodeLookupIndex);
 
-    [DllImport(FASTNOISE_PATH)]
+    [DllImport("FastNoise", CallingConvention = CallingConvention.Cdecl)]
     private static extern bool fnSetHybridNodeLookup(nint nodeHandle, int nodeLookupIndex, nint nodeLookupHandle);
 
-    [DllImport(FASTNOISE_PATH)]
+    [DllImport("FastNoise", CallingConvention = CallingConvention.Cdecl)]
     private static extern bool fnSetHybridFloat(nint nodeHandle, int nodeLookupIndex, float value);
+    
+    private static IntPtr ResolveFastNoiseLibrary(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)
+    {
+        if (libraryName != "FastNoise")
+            return IntPtr.Zero;
+
+        string basePath = Path.Combine(AppContext.BaseDirectory, Program.ASSETS_FOLDER, "lib");
+
+        string fileName =
+            RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "FastNoise.dll" :
+            RuntimeInformation.IsOSPlatform(OSPlatform.Linux)   ? "libFastNoise.so" :
+            RuntimeInformation.IsOSPlatform(OSPlatform.OSX)     ? "libFastNoise.dylib" :
+            throw new PlatformNotSupportedException();
+
+        string fullPath = Path.Combine(basePath, fileName);
+
+        return NativeLibrary.Load(fullPath);
+    }
 }

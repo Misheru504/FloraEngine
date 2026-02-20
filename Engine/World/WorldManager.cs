@@ -1,5 +1,11 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Numerics;
+using System.Threading;
+using System.Threading.Tasks;
 using FloraEngine.Core.Noise;
 using FloraEngine.Core.Data;
 using FloraEngine.Core;
@@ -71,10 +77,12 @@ public class WorldManager : IDisposable
 
     public void SaveActiveWorld()
     {
+        const string WORLD_FOLDER = "worlds";
+        
         if (World == null) return;
 
         WorldData data = WorldData.FromWorld(World);
-        JsonMapper.PrettySerialize(data, $"./worlds/{data.name}.json");
+        JsonMapper.PrettySerialize(data, Path.Combine(AppContext.BaseDirectory, WORLD_FOLDER, $"{data.name}.json"));
     }
 
     private void StartTasks()

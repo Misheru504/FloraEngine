@@ -1,4 +1,5 @@
-﻿using Silk.NET.OpenGL;
+﻿using System;
+using Silk.NET.OpenGL;
 
 namespace FloraEngine.Rendering.Textures;
 

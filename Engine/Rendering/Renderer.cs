@@ -1,4 +1,5 @@
-﻿using FloraEngine.Core;
+﻿using System;
+using FloraEngine.Core;
 using FloraEngine.Core.Logging;
 using FloraEngine.Rendering.Shaders;
 using FloraEngine.Rendering.Textures;
@@ -138,7 +139,7 @@ public unsafe class Renderer : IDisposable
 
         shader = new FragVertShader(_graphics, VERTEX_SHADER, FRAGMENT_SHADER);
 
-        _atlas = new TextureArray(_graphics, "Assets/atlas.png", TextureUnit.Texture1, 16);
+        _atlas = new TextureArray(_graphics, "atlas.png", TextureUnit.Texture1, 16);
         _atlas.SetDefaultParameters();
 
         Mesh.RenderConfig = _renderConfig;

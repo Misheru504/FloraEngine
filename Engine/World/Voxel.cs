@@ -1,4 +1,6 @@
-﻿namespace FloraEngine.World;
+﻿using System.Collections.Generic;
+
+namespace FloraEngine.World;
 
 internal class Voxel
 {

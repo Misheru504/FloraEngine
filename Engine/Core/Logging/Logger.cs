@@ -1,4 +1,6 @@
-﻿using FloraEngine.Core.Data;
+﻿using System;
+using System.IO;
+using FloraEngine.Core.Data;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -6,9 +8,9 @@ namespace FloraEngine.Core.Logging;
 
 public static class Logger
 {
-    public const string LOG_FOLDER = @".\logs";
+    public const string LOG_FOLDER = @"logs";
 
-    private static readonly string LogFile = Path.Combine(LOG_FOLDER, $"{DateTime.Now:dd-MM-yyyy_HH-mm}.log");
+    private static readonly string LogFile = Path.Combine(AppContext.BaseDirectory, LOG_FOLDER, $"{DateTime.Now:dd-MM-yyyy_HH-mm}.log");
     private static readonly StringBuilder _logLines = new StringBuilder();
     private static readonly object _lock = new object();
 

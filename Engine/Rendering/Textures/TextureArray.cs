@@ -1,4 +1,6 @@
-﻿using FloraEngine.Core.Logging;
+﻿using System;
+using System.IO;
+using FloraEngine.Core.Logging;
 using Silk.NET.OpenGL;
 using StbImageSharp;
 using Buffer = System.Buffer;
@@ -17,7 +19,7 @@ internal unsafe class TextureArray : Texture, IDisposable
         TileSize = tileSize;
 
         ImageResult image;
-        using (var stream = File.OpenRead(path))
+        using (var stream = File.OpenRead(Path.Combine(AppContext.BaseDirectory, Program.ASSETS_FOLDER, path)))
         {
             image = ImageResult.FromStream(stream, ColorComponents.RedGreenBlueAlpha);
         }

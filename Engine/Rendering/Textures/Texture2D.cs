@@ -1,4 +1,6 @@
-﻿using Silk.NET.OpenGL;
+﻿using System;
+using System.IO;
+using Silk.NET.OpenGL;
 using StbImageSharp;
 
 namespace FloraEngine.Rendering.Textures;
@@ -12,7 +14,7 @@ internal unsafe class Texture2D : Texture, IDisposable
     {
         if (!File.Exists(path)) throw new FileNotFoundException($"Texture was not found at {path}");
 
-        ImageResult result = ImageResult.FromMemory(File.ReadAllBytes(path), ColorComponents.RedGreenBlueAlpha);
+        ImageResult result = ImageResult.FromMemory(File.ReadAllBytes(Path.Combine(AppContext.BaseDirectory, Program.ASSETS_FOLDER, path)), ColorComponents.RedGreenBlueAlpha);
 
         fixed(void* ptr = result.Data)
         {
