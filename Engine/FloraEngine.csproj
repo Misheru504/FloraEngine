@@ -19,5 +19,9 @@
 		<None Include="Assets\**\*" Recurse="true">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+		<None Update="Assets\Shaders\terrain_vert.glsl">
+		  <Recurse>true</Recurse>
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 	</ItemGroup>
 </Project>

@@ -57,4 +57,6 @@ internal unsafe class Texture2D : Texture, IDisposable
         _graphics.TexParameter(target, TextureParameterName.TextureWrapR, (int)TextureWrapMode.Repeat);
         Unbind();
     }
+    
+    public uint GetHandle() => handle;
 }

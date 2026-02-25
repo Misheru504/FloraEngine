@@ -8,11 +8,11 @@ namespace FloraEngine.Rendering.Shaders;
 /// <summary>
 /// Shaders are programs used in the GPU
 /// </summary>
-internal abstract class Shader : IDisposable
+public abstract class Shader : IDisposable
 {
     protected private static GL _graphics = null!;
-    protected private Dictionary<string, int> uniformLocations = new Dictionary<string, int>();
-    protected private uint handle;
+    protected private Dictionary<string, int> _uniformLocations = new Dictionary<string, int>();
+    protected private uint _handle;
 
     /// <summary>
     /// Load a shader into the GPU
@@ -46,13 +46,13 @@ internal abstract class Shader : IDisposable
     /// <exception cref="Exception"></exception>
     private int GetUniformLocation(string name)
     {
-        if(uniformLocations.TryGetValue(name, out int location)) return location; // Caching locations
+        if(_uniformLocations.TryGetValue(name, out int location)) return location; // Caching locations
 
-        location = _graphics.GetUniformLocation(handle, name);
+        location = _graphics.GetUniformLocation(_handle, name);
         if (location == -1)
-            throw new Exception($"{name} uniform was not found on shader.");
+            return -1;
 
-        uniformLocations[name] = location;
+        _uniformLocations[name] = location;
 
         return location;
     }
@@ -71,12 +71,24 @@ internal abstract class Shader : IDisposable
     /// <param name="value">Value to set the uniform to</param>
     public void SetUniform(string name, float value) => _graphics.Uniform1(GetUniformLocation(name), value);
 
+    public int GetAttribLocation(string name)
+    {
+        return _graphics.GetAttribLocation(_handle, name);
+    }
+    
     /// <summary>
     /// Changes the value of a uniform in this shader
     /// </summary>
     /// <param name="name">Name of the uniform</param>
     /// <param name="value">Value to set the uniform to</param>
     public unsafe void SetUniform(string name, Matrix4x4 value) => _graphics.UniformMatrix4(GetUniformLocation(name), 1, false, (float*)&value);
+    
+    /// <summary>
+    /// Changes the value of a uniform in this shader
+    /// </summary>
+    /// <param name="name">Name of the uniform</param>
+    /// <param name="value">Value to set the uniform to</param>
+    public unsafe void SetUniform(string name, ReadOnlySpan<float> value) => _graphics.UniformMatrix4(GetUniformLocation(name), 1, false, value);
 
     /// <summary>
     /// Changes the value of a uniform in this shader
@@ -141,10 +153,10 @@ internal abstract class Shader : IDisposable
     /// <summary>
     /// Sets this shader as active
     /// </summary>
-    public void UseProgram() => _graphics.UseProgram(handle);
+    public void UseProgram() => _graphics.UseProgram(_handle);
 
     /// <summary>
     /// Delete the shader in the GPU
     /// </summary>
-    public void Dispose() => _graphics.DeleteProgram(handle);
+    public void Dispose() => _graphics.DeleteProgram(_handle);
 }

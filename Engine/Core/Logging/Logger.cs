@@ -8,7 +8,7 @@ namespace FloraEngine.Core.Logging;
 
 public static class Logger
 {
-    public const string LOG_FOLDER = @"logs";
+    public const string LOG_FOLDER = "logs";
 
     private static readonly string LogFile = Path.Combine(AppContext.BaseDirectory, LOG_FOLDER, $"{DateTime.Now:dd-MM-yyyy_HH-mm}.log");
     private static readonly StringBuilder _logLines = new StringBuilder();
@@ -24,7 +24,7 @@ public static class Logger
         => Log("ERROR", message, filename, ConsoleColor.Red);
 
     public static void Fatal(string message, [CallerFilePath] string filename = "")
-        => Log("Fatal", message, filename, ConsoleColor.DarkRed);
+        => Log("FATAL", message, filename, ConsoleColor.DarkRed);
 
     public static void Debug(string message, [CallerFilePath] string filename = "")
         => Log("DEBUG", message, filename, ConsoleColor.Blue);
@@ -50,7 +50,7 @@ public static class Logger
 
     public static void SaveLogFile()
     {
-        Info($"Saving log file (at {LogFile})...");
+        Info($"Saving log file at {LogFile}...");
         _logLines.AppendLine();
 
         TextParser.AppendFile(LogFile, _logLines.ToString());
@@ -58,8 +58,8 @@ public static class Logger
 
     public static void ClearLogFolder()
     {
-        if (!Directory.Exists(LOG_FOLDER)) return;
-        Directory.Delete(LOG_FOLDER, true);
+        if (!Directory.Exists(Path.Combine(AppContext.BaseDirectory, LOG_FOLDER))) return;
+        Directory.Delete(Path.Combine(AppContext.BaseDirectory, LOG_FOLDER), true);
 
         Debug($"Cleared log directory (at {Path.GetFullPath(LOG_FOLDER)})");
     }

@@ -1,16 +1,13 @@
-using System;
+
 using FloraEngine.Core;
 using FloraEngine.Diagnostics;
-using FloraEngine.Physics;
 using FloraEngine.Player;
 using FloraEngine.Rendering;
-using FloraEngine.Rendering.Meshing;
 using FloraEngine.UI;
 using FloraEngine.UI.Overlays;
 using FloraEngine.World;
 using Silk.NET.Input;
 using Silk.NET.OpenGL;
-using Silk.NET.OpenGL.Extensions.ImGui;
 using Silk.NET.Windowing;
 using System.Numerics;
 
@@ -67,7 +64,7 @@ public class Game
             IsFullbright = true,
             IsFreecam = false,
             VertexCount = 0,
-            RenderMode = RenderMode.Default
+            RenderMode = RenderMode.Default,
         };
 
         SkyboxConfig skyboxConfig = new SkyboxConfig()
@@ -79,6 +76,8 @@ public class Game
         {
             RenderConfig = renderConfig,
             PlayerTransform = transform,
+            WindowSize = window.Size,
+            WindowFrameBufferSize = window.FramebufferSize,
         };
 
         _worldManager = new WorldManager(_diagnosticsData, transform);
@@ -111,11 +110,19 @@ public class Game
         _graphics.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
         _renderer.Draw(deltaTime);
-
+        
         _mainMenuBar.DrawBar(deltaTime);
         _windowManager.DrawAll(deltaTime);
         _overlayManager.DrawAll(deltaTime);
         _imGuiController.Render();
+    }
+
+    public void ChangeResolution(IWindow window)
+    {
+        _imGuiController.WindowResized(window.Size);
+        
+        _diagnosticsData.WindowSize = window.Size;
+        _diagnosticsData.WindowFrameBufferSize = window.FramebufferSize;
     }
 
     public void Closing()

@@ -31,7 +31,6 @@ internal class MainOverlay : IImGuiOverlay
             // App related
             ImGui.Text($"Version: {Program.VERSION}");
             ImGui.Text($"FPS: {_diagnosticsData.FPS:0} ({_diagnosticsData.FrameTimeMs:F2}ms/frame)");
-            ImGui.Text($"Screen res.: {Program.WindowResolution}");
             ImGui.Spacing();
 
             // Rendering related
@@ -56,6 +55,11 @@ internal class MainOverlay : IImGuiOverlay
             ImGui.Text($"Camera speed: {_diagnosticsData.MoveSpeed:F2}");
             ImGui.Text($"Chunk pos: {transform.ChunkPos:0}");
             ImGui.Text($"Voxel pos: {transform.LocalVoxelPos:0}");
+            ImGui.Spacing();
+            
+            // Window
+            ImGui.Text($"Screen res.: {_diagnosticsData.WindowSize}");
+            ImGui.Text($"Screen frame buffer res.: {_diagnosticsData.WindowFrameBufferSize}");
             ImGui.End();
         }
     }

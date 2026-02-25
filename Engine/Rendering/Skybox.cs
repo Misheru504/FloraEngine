@@ -13,128 +13,19 @@ public class Skybox : IDisposable
     private VertexArrayObject _vao = null!;
     private BufferObject<float> _vbo = null!;
     private readonly SkyboxConfig _skyboxConfig;
-    private readonly FragVertShader _shader = null!;
+    private readonly ShaderWatcher _shaderWatcher;
     private float _time = 12;
     private float _sunAngle = 0;
 
     public Vector3 SunDirection { get; private set; } = Vector3.Zero;
-
-    private const string VERTEX_SHADER = @"
-#version 330 core
-layout (location = 0) in vec3 vPos;
-
-uniform mat4 projection;
-uniform mat4 view;
-
-out vec3 fPos;
-out vec3 fViewDir;
-
-void main()
-{
-    fPos = vPos;
-    fViewDir = normalize(vPos);
-
-    vec4 pos = projection * view * vec4(vPos, 1.0);
-    gl_Position = pos.xyww;
-}
-";
-
-    private const string FRAGMENT_SHADER = @"
-#version 330 core
-
-const int DEFAULT = 0;
-const int POSITION = 1;
-const int SKY_MASK = 2;
-const int SUN_MASK = 3;
-const int HORIZON_MASK = 4;
-
-in vec3 fPos;
-in vec3 fViewDir;
-
-out vec4 fColor;
-
-uniform int fSkyboxMode;
-
-uniform float sunSize;
-uniform vec3 sunDir;
-uniform vec3 sunColor;
-uniform vec3 moonColor;
-uniform vec3 dayColor;
-uniform vec3 nightColor;
-uniform vec3 horizonColor;
-
-float getCelestialBodyMask(vec3 bodyDir, float bodySize, float edgeSoftness) {
-    vec3 viewDir = normalize(fViewDir);
-    vec3 bodyDirNorm = normalize(bodyDir);
     
-    float cosAngle = dot(viewDir, bodyDirNorm);
-    float angle = acos(clamp(cosAngle, -1.0, 1.0));
-
-    float mask = smoothstep(bodySize + edgeSoftness, bodySize - edgeSoftness, angle);
-    
-    return mask;
-}
-
-float computeHorizonActivation(vec3 dir)
-{
-    return (-smoothstep(0, 0.2, dir.y) + smoothstep(-0.2, 0, dir.y));
-}
-
-void main() {
-    vec3 viewDir = normalize(fViewDir);
-    fColor = vec4(vec3(0), 1.0);
-
-    float skyMask = smoothstep(-0.1, 0.1, sunDir.y);
-    float sunMask = smoothstep(0, 0.05, viewDir.y); // hides sun below horizon
-    float horizonActivation = computeHorizonActivation(sunDir);
-    float horizonMask = pow(smoothstep(0.3, 0.0, viewDir.y),2);
-    
-    fColor = mix(vec4(nightColor, 1), vec4(dayColor, 1), skyMask);
-    fColor = mix(fColor, vec4(horizonColor, 1), horizonMask * horizonActivation);
-    
-    float sunCelestialMask = getCelestialBodyMask(sunDir, sunSize, sunSize * 0.15);
-    fColor = mix(fColor, vec4(sunColor, 1), sunCelestialMask * sunMask);
-
-    float moonCelestialMask = getCelestialBodyMask(-sunDir, sunSize, sunSize * 0.15);
-    fColor = mix(fColor, vec4(moonColor, 1), moonCelestialMask * sunMask);
-
-    if(fSkyboxMode == DEFAULT) return;
-
-    switch(fSkyboxMode){
-        case POSITION:
-            fColor = vec4(vec3(viewDir), 1.0);
-            break;
-        case SKY_MASK:
-            skyMask = smoothstep(-0.1, 0.1, viewDir.y);
-            fColor = vec4(vec3(skyMask), 1.0);
-            break;
-        case SUN_MASK:
-            fColor = vec4(vec3(sunMask), 1.0);
-            break;
-        case HORIZON_MASK:
-            horizonActivation = computeHorizonActivation(viewDir);
-            fColor = vec4(vec3(horizonMask), 1.0);
-            break;
-    }
-    
-    if(viewDir.y < 0.001 && viewDir.y > -0.001){
-        fColor = vec4(vec3(1,0,0),1); 
-    }
-    if(viewDir.z < 0.001 && viewDir.z > -0.001){
-        fColor = vec4(vec3(0,1,0),1); 
-    }
-    if(viewDir.x < 0.001 && viewDir.x > -0.001){
-        fColor = vec4(vec3(0,0,1),1); 
-    }
-}
-";
-
-    public Skybox(GL graphics, SkyboxConfig skyboxConfig)
+    public Skybox(GL graphics, SkyboxConfig skyboxConfig, ShaderWatcher shaderWatcher)
     {
         _graphics = graphics;
         _skyboxConfig = skyboxConfig;
+        _shaderWatcher = shaderWatcher;
         InitializeBuffers();
-        _shader = new FragVertShader(_graphics, VERTEX_SHADER, FRAGMENT_SHADER);
+        shaderWatcher.RegisterFragVertShader("skybox");
     }
 
     private void InitializeBuffers()
@@ -196,7 +87,7 @@ void main() {
         Vector3 sunColor = new Vector3(255f, 255f, 179f) / 255f;
         Vector3 moonColor = new Vector3(204f) / 255f;
 
-        Vector3 dayColor = new Vector3(100f, 149f, 237f) / 255f;
+        Vector3 dayColor = new Vector3(119f, 181f, 254f) / 255f;
         Vector3 nightColor = new Vector3(17f, 24f, 38f) / 255f;
         Vector3 horizonColor = new Vector3(230f, 76f, 0) / 255f;
 
@@ -211,19 +102,21 @@ void main() {
 
         _graphics.DepthFunc(DepthFunction.Lequal);
         _vao.Bind();
-        _shader.UseProgram();
-        _shader.SetUniform("view", viewMatrix);
-        _shader.SetUniform("projection", projectionMatrix);
+        
+        FragVertShader shader = _shaderWatcher.GetShader("skybox");
+        shader.UseProgram();
+        shader.SetUniform("view", viewMatrix);
+        shader.SetUniform("projection", projectionMatrix);
 
-        _shader.SetUniform("fSkyboxMode", (int) _skyboxConfig.SkyboxMode);
+        shader.SetUniform("fSkyboxMode", (int) _skyboxConfig.SkyboxMode);
 
-        _shader.SetUniform("sunSize", SUN_SIZE);
-        _shader.SetUniform("sunDir", SunDirection);
-        _shader.SetUniform("sunColor", sunColor);
-        _shader.SetUniform("moonColor", moonColor);
-        _shader.SetUniform("dayColor", dayColor);
-        _shader.SetUniform("nightColor", nightColor);
-        _shader.SetUniform("horizonColor", horizonColor);
+        shader.SetUniform("sunSize", SUN_SIZE);
+        shader.SetUniform("sunDir", SunDirection);
+        shader.SetUniform("sunColor", sunColor);
+        shader.SetUniform("moonColor", moonColor);
+        shader.SetUniform("dayColor", dayColor);
+        shader.SetUniform("nightColor", nightColor);
+        shader.SetUniform("horizonColor", horizonColor);
 
         _graphics.DrawArrays(PrimitiveType.Triangles, 0, 36);
         _graphics.BindVertexArray(0);
@@ -234,6 +127,5 @@ void main() {
     {
         _vbo.Dispose();
         _vao.Dispose();
-        _shader.Dispose();
     }
 }

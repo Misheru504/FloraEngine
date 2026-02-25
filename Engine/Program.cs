@@ -1,5 +1,4 @@
-﻿using System;
-using FloraEngine.Core.Logging;
+﻿using FloraEngine.Core.Logging;
 using FloraEngine.Diagnostics;
 using Silk.NET.Input;
 using Silk.NET.Maths;
@@ -17,8 +16,7 @@ public static class Program
     public const string ASSETS_FOLDER = "Assets";
 
     internal static Vector2D<int> WindowResolution { get; private set; } = new Vector2D<int>(1280, 720);
-
-    public static float AspectRatio => (float)WindowResolution.X / WindowResolution.Y;
+    public static float AspectRatio => (float)_engineWindow.FramebufferSize.X / _engineWindow.FramebufferSize.Y;
 
     private static GL _graphics = null!;
     private static IWindow _engineWindow = null!;
@@ -61,6 +59,8 @@ public static class Program
 
         _engineWindow.Update += Game.Instance.Update;
         _engineWindow.Render += Game.Instance.Draw;
+
+        ApplyResolution(WindowResolution);
     }
     private static void GraphicsLoad()
     {
@@ -86,11 +86,24 @@ public static class Program
         
         Logger.Info("OpenGL loaded correctly");
     }
-
-    public static void ChangeResolution(Vector2D<int> newSize)
+    
+    public static void ApplyResolution(Vector2D<int> resolution)
     {
-        _graphics.Viewport(newSize);
-        WindowResolution = newSize;
+        // Using this wrapper so that the frame buffer res is the resolution we want
+        
+        float scale = (float)_engineWindow.FramebufferSize.X / _engineWindow.Size.X;
+        _engineWindow.Size = new Vector2D<int>(
+            (int)(resolution.X / scale),
+            (int)(resolution.Y / scale)
+        );
+    }
+
+    private static void ChangeResolution(Vector2D<int> newFramebufferSize)
+    {
+        _graphics.Viewport(0, 0, (uint)newFramebufferSize.X, (uint)newFramebufferSize.Y);
+        WindowResolution = newFramebufferSize;
+        
+        Game.Instance.ChangeResolution(_engineWindow);
     }
 
     private static void Closing()

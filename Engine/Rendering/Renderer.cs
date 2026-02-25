@@ -13,118 +13,13 @@ public unsafe class Renderer : IDisposable
 {
 
     // Vertex stride: 3 (position) + 3 (normal) + 2 (uv) + 2 (aos) = 10 floats
-    public const int VertexStride = 10;
+    public const int VERTEX_STRIDE = 10;
 
-    private readonly GL _graphics = null!;
-    private readonly FragVertShader shader;
+    private readonly GL _graphics;
     private readonly RenderConfig _renderConfig;
     private readonly Camera _camera;
     private readonly WorldManager _worldManager;
-
-    // Storing shader code for simplicity, there are methods in Shader class to read them from files
-    private const string VERTEX_SHADER = @"
-        #version 330 core
-        layout (location = 0) in vec3 vPos;
-        layout (location = 1) in vec3 vNormal;
-        layout (location = 2) in vec2 vUV;
-        layout (location = 3) in float vAO;
-        layout (location = 4) in float vTextureLayer;
-
-        uniform mat4 uModel; 
-        uniform mat4 uView;
-        uniform mat4 uProjection;
-
-        out vec2 fUV;
-        out vec3 fNormal;
-        out float fAO;
-        out float fTextureLayer;
-
-        void main()
-        {
-            //Multiplying our uniform with the vertex position, the multiplication order here does matter.
-            gl_Position = uProjection * uView * uModel * vec4(vPos, 1.0);
-            fUV = vUV;
-            fNormal = vNormal;
-            fAO = vAO;
-            fTextureLayer = vTextureLayer;
-        }
-    ";
-
-    private const string FRAGMENT_SHADER = @"
-        #version 330 core
-
-        const int DEFAULT = 0;
-        const int DEPTH = 1;
-        const int NORMAL = 2;
-        const int UV = 3;
-        const int AO = 4;
-        const int LAYER = 5;
-
-        in vec2 fUV;
-        in vec3 fNormal;
-        in float fAO;
-        in float fTextureLayer;
-
-        uniform sampler2DArray fTexture;
-        uniform int fRenderMode;
-        uniform float fAmbientLight;
-        uniform vec3 fSunDir;
-
-        out vec4 fragColor;
-
-        vec3 hashColor(float n) {
-            // Pseudo-random hash that gives consistent colors per layer
-            vec3 p = vec3(n * 0.1031, n * 0.1030, n * 0.0973);
-            p = fract(p * vec3(127.1, 311.7, 74.7));
-            p += dot(p, p.yzx + 33.33);
-            vec3 color = fract((p.xxy + p.yzz) * p.zyx);
-            return mix(color, vec3(1.0), 0.5); // Ajuste 0.5 pour contrôler la pâleur
-        }
-
-        void main()
-        {
-            vec3 normal = normalize(fNormal);
-            vec3 light = normalize(fSunDir);
-            float diff = max(dot(normal, light), 0.0);
-
-            float directional = (1.0 - fAmbientLight) * diff;
-        
-            // Apply AO to both ambient and slightly to directional lighting
-            float aoFactor = fAO;
-            float aoAmbient = fAmbientLight * (0.5 + 0.5 * aoFactor);  // AO affects ambient more
-            float aoDirectional = directional * (0.7 + 0.3 * aoFactor);  // AO affects directional less
-        
-            float lighting = aoAmbient + aoDirectional;
-
-            vec4 texColor = texture(fTexture, vec3(fUV, fTextureLayer));
-            
-            switch(fRenderMode){
-                default:
-                case DEFAULT:
-                    fragColor = vec4(texColor.xyz * lighting, texColor.w);
-                    break;
-                case DEPTH:
-                    float near = 0.1;
-                    float far = 1000.0;
-                    float ndc = gl_FragCoord.z * 2.0 - 1.0; 
-                    float linearDepth = (2.0 * near * far) / (far + near - ndc * (far - near));
-                    fragColor = vec4(vec3(linearDepth / far), texColor.w);
-                    break;
-                case NORMAL:
-                    fragColor = vec4(normalize(fNormal) * 0.5 + 0.5, 1.0);
-                    break;
-                case UV:
-                    fragColor = vec4(fUV.x, fUV.y, 0, texColor.w);
-                    break;
-                case AO:
-                    fragColor = vec4(vec3(fAO), 1.0);
-                    break;
-                case LAYER:
-                    fragColor = vec4(hashColor(fTextureLayer), 1.0);
-                    break;
-            }
-        }
-    ";
+    private readonly ShaderWatcher _shaderWatcher;
 
     private readonly TextureArray _atlas;
     private readonly Skybox _skybox;
@@ -136,42 +31,44 @@ public unsafe class Renderer : IDisposable
         _renderConfig = renderConfig;
         _camera = camera;
         _worldManager = worldManager;
+        _shaderWatcher = new ShaderWatcher(_graphics);
 
-        shader = new FragVertShader(_graphics, VERTEX_SHADER, FRAGMENT_SHADER);
+        _shaderWatcher.RegisterFragVertShader("terrain");
 
-        _atlas = new TextureArray(_graphics, "atlas.png", TextureUnit.Texture1, 16);
+        _atlas = new TextureArray(_graphics, "atlas.png", TextureUnit.Texture0, 16);
         _atlas.SetDefaultParameters();
 
         Mesh.RenderConfig = _renderConfig;
         Mesh.Graphics = _graphics;
 
-        _skybox = new Skybox(_graphics, skyboxConfig);
+        _skybox = new Skybox(_graphics, skyboxConfig, _shaderWatcher);
 
         Logger.Render("Successfully loaded!");
     }
 
     internal void Draw(double deltaTime)
     {
+        _shaderWatcher.Update();
         _graphics.PolygonMode(GLEnum.FrontAndBack, _renderConfig.IsWireframe ? GLEnum.Line : GLEnum.Fill);
-
-        shader.UseProgram();
         _atlas.Bind();
-
+        
+        FragVertShader shader = _shaderWatcher.GetShader("terrain");
+        shader.UseProgram();
         shader.SetUniform("uView", _camera.RelativeViewMatrix);
         shader.SetUniform("uProjection", _camera.ProjectionMatrix);
         shader.SetUniform("fRenderMode", (int) _renderConfig.RenderMode);
-        shader.SetUniform("fTexture", 1);
+        shader.SetUniform("fTexture", 0);
         shader.SetUniform("fAmbientLight", _renderConfig.IsFullbright ? 1f : 0.3f);
         shader.SetUniform("fSunDir", _skybox.SunDirection);
 
         _renderConfig.VertexCount = 0;
         foreach(Chunk chunk in _worldManager.RenderedChunks.Values)
-            DrawChunk(chunk);
+            DrawChunk(chunk, shader);
 
         _skybox.Render(deltaTime, _camera.RelativeViewMatrix, _camera.ProjectionMatrix);
     }
 
-    private void DrawChunk(Chunk chunk)
+    private void DrawChunk(Chunk chunk, FragVertShader shader)
     {
         if (chunk.Mesh == null || chunk.Mesh.vao == null) return;
         if (!IsInFrustum(chunk, _camera.Frustum)) return;
@@ -184,7 +81,7 @@ public unsafe class Renderer : IDisposable
 
     public void Dispose()
     {
-        shader.Dispose();
+        _shaderWatcher.Dispose();
         _skybox.Dispose();
     }
 

@@ -12,14 +12,14 @@ internal class ComputeShader : Shader, IDisposable
     {
         _graphics = graphics;
         uint computeShader = LoadShader(_graphics, ShaderType.ComputeShader, computeShaderCode);
-        handle = _graphics.CreateProgram();
-        _graphics.AttachShader(handle, computeShader);
-        _graphics.LinkProgram(handle);
+        _handle = _graphics.CreateProgram();
+        _graphics.AttachShader(_handle, computeShader);
+        _graphics.LinkProgram(_handle);
 
         // Checking for any failures
-        _graphics.GetProgram(handle, ProgramPropertyARB.LinkStatus, out int status);
+        _graphics.GetProgram(_handle, ProgramPropertyARB.LinkStatus, out int status);
         if (status != (int)GLEnum.True)
-            throw new Exception($"Shaders failed to link : {_graphics.GetProgramInfoLog(handle)}");
+            throw new Exception($"Shaders failed to link : {_graphics.GetProgramInfoLog(_handle)}");
 
         _graphics.DeleteShader(computeShader);
     }

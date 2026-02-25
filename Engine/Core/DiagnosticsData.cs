@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using Silk.NET.Maths;
+using System.Numerics;
 
 namespace FloraEngine.Core;
 
@@ -22,4 +23,8 @@ public class DiagnosticsData
     // Frame
     public float FrameTimeMs { get; set; }
     public int FPS { get; set; }
+    
+    // Window
+    public Vector2D<int> WindowSize { get; set; }
+    public Vector2D<int> WindowFrameBufferSize { get; set; }
 }

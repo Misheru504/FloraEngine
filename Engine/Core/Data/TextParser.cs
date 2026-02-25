@@ -19,7 +19,7 @@ public static class TextParser
     {
         try
         {
-            if (!File.Exists(filePath)) throw new FileNotFoundException("File not found at : {filePath}");
+            if (!File.Exists(filePath)) throw new FileNotFoundException($"File not found at : {filePath}");
             return File.ReadAllText(filePath);
         }
         catch (Exception e)

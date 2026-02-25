@@ -41,7 +41,7 @@ public class Mesh : IDisposable
         if(RenderConfig.IsUsingGreedyMeshing) GreedyMesher.CreateGreedyMesh(worldManager, currentChunk, vertices, indices, RenderConfig);
         else CulledMesher.CreateCulledMesh(worldManager, currentChunk, vertices, indices, RenderConfig);
 
-        VertexCount = vertices.Count / Renderer.VertexStride;
+        VertexCount = vertices.Count / Renderer.VERTEX_STRIDE;
         IndexCount = (uint)indices.Count;
 
         meshData = new MeshData()
