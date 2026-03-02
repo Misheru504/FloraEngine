@@ -31,6 +31,7 @@ public class ShaderWatcher : IDisposable
 
     public void RegisterFragVertShader(string name)
     {
+        Logger.Debug($"Registering shader '{name}'");
         FragVertShader shader = new FragVertShader(_graphics, TextParser.ReadFile(Path.Combine(SHADERS_FOLDER, $"{name}_vert.glsl")), TextParser.ReadFile(Path.Combine(SHADERS_FOLDER, $"{name}_frag.glsl")));
         _shaders[name] = shader;
     }
@@ -49,17 +50,18 @@ public class ShaderWatcher : IDisposable
     {
         while (_pendingReloads.TryDequeue(out string _))
         {
+            // A reload is needed, we update every shader
             foreach (string name in _shaders.Keys)
             {
                 try
                 {
                     FragVertShader newShader = new FragVertShader(_graphics, TextParser.ReadFile(Path.Combine(SHADERS_FOLDER, $"{name}_vert.glsl")), TextParser.ReadFile(Path.Combine(SHADERS_FOLDER, $"{name}_frag.glsl")));   
                     _shaders[name] = newShader;
-                    Logger.Debug("Shader successfully reloaded !");
+                    Logger.Debug($"Shader '{name}' successfully reloaded !");
                 }
                 catch (Exception e)
                 {
-                    Logger.Error($"Unable to load shaders for {name} : {e.Message}");
+                    Logger.Error($"Unable to load shaders for '{name}' : {e.Message}");
                     Logger.Debug($"Using old shader cached...");
                 }
             }
