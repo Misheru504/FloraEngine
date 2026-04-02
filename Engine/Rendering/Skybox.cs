@@ -15,7 +15,6 @@ public class Skybox : IDisposable
     private readonly SkyboxConfig _skyboxConfig;
     private readonly ShaderWatcher _shaderWatcher;
     private float _time = 12;
-    private float _sunAngle = 0;
 
     public Vector3 SunDirection { get; private set; } = Vector3.Zero;
     
@@ -91,14 +90,14 @@ public class Skybox : IDisposable
         Vector3 nightColor = new Vector3(17f, 24f, 38f) / 255f;
         Vector3 horizonColor = new Vector3(230f, 76f, 0) / 255f;
 
-        _sunAngle = (_time / 24.0f) * MathF.PI * 2.0f - MathF.PI / 2.0f;
+        float sunAngle = (_time / 24.0f) * MathF.PI * 2.0f - MathF.PI / 2.0f;
         SunDirection = new Vector3(
             0.0f,
-            MathF.Sin(_sunAngle),
-            MathF.Cos(_sunAngle)
+            MathF.Sin(sunAngle),
+            MathF.Cos(sunAngle)
         );
-        _time += (float)deltaTime;
-        _time = _time % 24;
+        // _time += (float)deltaTime;
+        // _time = _time % 24;
 
         _graphics.DepthFunc(DepthFunction.Lequal);
         _vao.Bind();

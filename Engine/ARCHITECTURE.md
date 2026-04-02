@@ -8,7 +8,7 @@ Il est utile à mon moi du futur et à quiconque s'intéresse à projet.
 
 Pour rappel, FloraEngine (ou Flora) et un moteur de rendu de monde en voxel généré procéduralement, grâce à Silk.NET et OpenGL.
 
-Dernière mise-à-jour du document : `08/02/2026 - Michel-Ange (Misheru504)`
+Dernière mise-à-jour du document : `04/2026 - Michel-Ange (Misheru504)`
 
 ---
 
@@ -26,8 +26,9 @@ Engine
 ---
 
 ## Roadmap technique
-| Version   | Nom      | Focus principal                          |
-|-----------|----------|------------------------------------------|
-| α-1       | [Pyrite](https://github.com/Misheru504/FloraEngine/releases/tag/alpha1) | Fondations (voir release) |
-| α-2       | [Euclase](https://github.com/Misheru504/FloraEngine/releases/tag/alpha2) | Refactor de la structure |
-| α-3       | [Rutile](https://github.com/Misheru504/FloraEngine/releases/tag/alpha3) | Skybox, cycle jour-nuit, lumières |
+| Version | Nom                                                                       | Focus principal                   |
+|---------|---------------------------------------------------------------------------|-----------------------------------|
+| α-1     | [Pyrite](https://github.com/Misheru504/FloraEngine/releases/tag/alpha1)   | Fondations (voir release)         |
+| α-2     | [Euclase](https://github.com/Misheru504/FloraEngine/releases/tag/alpha2)  | Refactor de la structure          |
+| α-3     | [Amétrine](https://github.com/Misheru504/FloraEngine/releases/tag/alpha3) | Refonte de la gestion des chunks  |
+| α-?     | [???](https://i.kym-cdn.com/photos/images/newsfeed/002/747/286/505)       | Skybox, cycle jour-nuit, lumières |
