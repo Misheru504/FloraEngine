@@ -96,8 +96,8 @@ public class Skybox : IDisposable
             MathF.Sin(sunAngle),
             MathF.Cos(sunAngle)
         );
-        // _time += (float)deltaTime;
-        // _time = _time % 24;
+        _time += (float)deltaTime;
+        _time = _time % 24;
 
         _graphics.DepthFunc(DepthFunction.Lequal);
         _vao.Bind();

@@ -65,7 +65,7 @@ public unsafe class Renderer : IDisposable
         foreach(Chunk chunk in _worldManager.RenderedChunks.Values)
             DrawChunk(chunk, shader);
 
-        // _skybox.Render(deltaTime, _camera.RelativeViewMatrix, _camera.ProjectionMatrix);
+        _skybox.Render(deltaTime, _camera.RelativeViewMatrix, _camera.ProjectionMatrix);
     }
 
     private void DrawChunk(Chunk chunk, FragVertShader shader)

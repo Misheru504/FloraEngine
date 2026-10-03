@@ -18,7 +18,7 @@ public class WorldManager : IDisposable
     private readonly DiagnosticsData _diagnosticsData;
     private readonly Transform _transform;
     private int MaxLOD = 0;
-    private int RenderDistance = 5;
+    private int RenderDistance = 10;
 
     private Vector3 CenterPos => _transform.ChunkPos;
     private bool IsWorldLoaded => World != null;

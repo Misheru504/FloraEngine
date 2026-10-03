@@ -30,6 +30,9 @@ internal class Voxel
     public static Voxel GRASS = new Voxel(1, "grass", true);
     public static Voxel DIRT = new Voxel(2, "dirt", true);
     public static Voxel STONE = new Voxel(3, "stone", true);
+    public static Voxel WATER = new Voxel(4, "water", true);
+    public static Voxel SAND = new Voxel(5, "sand", true);
+    public static Voxel SNOW = new Voxel(6, "snow", true);
 
     public static string GetVoxelName(ushort id)
     {
