@@ -55,11 +55,13 @@ public class Chunk : IDisposable
                 {
                     float worldY = (y * Scale) + Position.Y + 64;
 
-                    if (worldY <= 64) // SEA Level
+                    if (worldY > height && worldY <= WorldConstants.SEA_LEVEL)
                     {
                         SetVoxelAt(x, y, z, Voxel.WATER.GetDefaultData());
+                        continue;
                     }
-                    else if (worldY <= height && worldY <= 66)
+                    
+                    if (worldY <= height && worldY <= WorldConstants.SEA_LEVEL + 2)
                     {
                         SetVoxelAt(x, y, z, Voxel.SAND.GetDefaultData());
                     }
